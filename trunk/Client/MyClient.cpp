@@ -81,9 +81,9 @@ void MyClient::slotReadyRead()
         QTime   time;
         QString str;
         QString clname;
-        in >> time >> clname >> str;
+        in >> time >> str;
 
-        m_ptxtInfo->append(time.toString() + " "+clname+": " + str);
+        m_ptxtInfo->append(time.toString() + " " + str);
         m_nNextBlockSize = 0;
     }
 }
@@ -109,7 +109,7 @@ void MyClient::slotSendToServer()
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_5);
-    out << quint16(0) << QTime::currentTime()<<clname->text()<< m_ptxtInput->text();
+    out << quint16(0) << QTime::currentTime()<< m_ptxtInput->text();
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));

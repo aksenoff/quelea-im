@@ -47,9 +47,11 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 }
 
 // ----------------------------------------------------------------------
-/*virtual*/ void MyServer::slotNewConnection()
+void MyServer::slotNewConnection()
 {
+
     QTcpSocket* pClientSocket = m_ptcpServer->nextPendingConnection();
+
     connect(pClientSocket, SIGNAL(disconnected()),
             pClientSocket, SLOT(deleteLater())
            );
@@ -57,7 +59,8 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
             this,          SLOT(slotReadClient())
            );
 
-    sendToClient(pClientSocket, "Connected!","");
+    sendToClient(pClientSocket, "Connected!");
+
 }
 
 // ----------------------------------------------------------------------
@@ -79,28 +82,27 @@ void MyServer::slotReadClient()
         }
         QTime   time;
         QString str;
-        QString clname;
-        in >> time >>clname >> str;
+        in >> time >> str;
 
         QString strMessage = 
-        time.toString() + " " + clname+": " + str;
+        time.toString() + " "  + str;
         m_ptxt->append(strMessage);
 
         m_nNextBlockSize = 0;
 
         sendToClient(pClientSocket, 
                       str
-                    ,clname);
+                    );
     }
 }
 
 // ----------------------------------------------------------------------
-void MyServer::sendToClient(QTcpSocket* pSocket, const QString& str,const QString& clname)
+void MyServer::sendToClient(QTcpSocket* pSocket, const QString& str)
 {
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_5);
-    out << quint16(0) << QTime::currentTime() << clname << str;
+    out << quint16(0) << QTime::currentTime() << str;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));

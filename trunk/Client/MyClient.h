@@ -29,4 +29,15 @@ private slots:
     void slotConnected   (                            );
     void conn();
 };
+
+class Message
+{
+private:
+    unsigned char code;
+    QTime time;
+    QString text;
+public:
+    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
+    friend QDataStream& operator>>(QDataStream& in, Message& m) {return in >> m.code >> m.text;};
+};
 #endif  //_MyClient_h_
