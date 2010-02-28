@@ -3,6 +3,7 @@
 #define _MyServer_h_
 
 #include <QWidget>
+#include <QTime>
 
 class QTcpServer;
 class QTextEdit;
