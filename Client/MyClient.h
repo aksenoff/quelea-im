@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include <QTcpSocket>
+#include <QTime>
 
 class QTextEdit;
 class QLineEdit;
