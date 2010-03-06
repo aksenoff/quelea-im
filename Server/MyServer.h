@@ -12,6 +12,8 @@ class QLabel;
 class Client;
 
 // ======================================================================
+class Message;
+
 class MyServer : public QWidget {
 Q_OBJECT
 private:
@@ -21,7 +23,8 @@ private:
     quint16     m_nNextBlockSize;
     QList<Client> clients;
 private:
-    void sendToClient(QTcpSocket* pSocket, const QString& str);
+    void sendToSocket(QTcpSocket* socket, Message* message);
+    void sendToClient(Client* client, Message* message);
 
 public:
     MyServer(QWidget* pwgt = 0);
@@ -38,17 +41,19 @@ private:
     QTcpSocket* socket;
 public:
     //Client();
+    void send(QByteArray ba);
 };
 
 class Message
 {
 private:
     unsigned char code;
-    QTime time;
+    //QTime time;
     QString text;
 public:
     friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
     friend QDataStream& operator>>(QDataStream& in, Message& m) {return in >> m.code >> m.text;};
+    Message(unsigned char c, QString s=""):code(c),text(s){};
 };
 
 #endif  //_MyServer_h_
