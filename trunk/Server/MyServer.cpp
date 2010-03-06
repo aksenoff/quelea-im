@@ -4,6 +4,9 @@
 #include "MyServer.h"
 
 // ----------------------------------------------------------------------
+enum {PING, CONNECTED, AUTH_REQUEST, AUTH_RESPONSE, CONTACTS_REQUEST,
+      CONTACTS_RESPONSE, XXX, MESSAGE_TO_SERVER, MESSAGE_TO_CLIENT, DR_TO_SERVER, DR_TO_CLIENT};
+
 MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
                                                     , m_nNextBlockSize(0)
 {
@@ -59,7 +62,10 @@ void MyServer::slotNewConnection()
             this,          SLOT(slotReadClient())
            );
 
-    sendToClient(pClientSocket, "Connected!");
+
+    Message *conMess = new Message(CONNECTED);
+
+    this->sendToSocket(pClientSocket,conMess);
 
 }
 
@@ -90,22 +96,52 @@ void MyServer::slotReadClient()
 
         m_nNextBlockSize = 0;
 
-        sendToClient(pClientSocket, 
-                      str
-                    );
+       // sendToClient(pClientSocket,
+                     // str
+                   // );
     }
 }
 
-// ----------------------------------------------------------------------
-void MyServer::sendToClient(QTcpSocket* pSocket, const QString& str)
+//-------------------------------------------------------------------------
+void MyServer::sendToSocket(QTcpSocket* socket, Message* message)
 {
+
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_5);
-    out << quint16(0) << QTime::currentTime() << str;
+
+
+    out << quint16(0) << QTime::currentTime() << message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
 
-    pSocket->write(arrBlock);
+    socket->write(arrBlock);
+
+
+
+}
+
+
+
+
+// ----------------------------------------------------------------------
+void MyServer::sendToClient(Client* client, Message* message)
+{
+    QByteArray  arrBlock;
+    QDataStream out(&arrBlock, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_5);
+
+
+    out << quint16(0) << QTime::currentTime() << message;
+
+    out.device()->seek(0);
+    out << quint16(arrBlock.size() - sizeof(quint16));
+
+    client->send(arrBlock);
+}
+
+void Client::send(QByteArray ba)
+{
+    socket->write(ba);
 }
