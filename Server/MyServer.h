@@ -52,7 +52,12 @@ private:
     QString text;
 public:
     friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
-    friend QDataStream& operator>>(QDataStream& in, Message& m) {return in >> m.code >> m.text;};
+    friend QDataStream& operator>>(QDataStream& in, Message* m) {
+        unsigned char code;
+        QString text;
+        QDataStream& ds = in >> code >> text;
+        if(!m) m = new Message(code, text);
+        return ds;};
     Message(unsigned char c, QString s=""):code(c),text(s){};
 };
 
