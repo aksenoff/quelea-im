@@ -80,10 +80,12 @@ void MyClient::slotReadyRead()
         }
         QTime   time;
         QString str;
-        QString clname;
-        in >> time >> str;
+        Message *Mess = new Message;
+        in >> time >> Mess->code >> Mess->text;
+        if (Mess->code==1)
+         m_ptxtInfo->append(time.toString() + " " + "Connected");
 
-        m_ptxtInfo->append(time.toString() + " " + str);
+
         m_nNextBlockSize = 0;
     }
 }

@@ -33,7 +33,7 @@ private slots:
 
 class Message
 {
-private:
+public:
     unsigned char code;
     QTime time;
     QString text;
