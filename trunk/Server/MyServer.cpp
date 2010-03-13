@@ -66,7 +66,7 @@ void MyServer::slotNewConnection()
     Message *conMess = new Message(CONNECTED);
 
     this->sendToSocket(pClientSocket,conMess);
-
+    
 }
 
 // ----------------------------------------------------------------------
@@ -88,7 +88,7 @@ void MyServer::slotReadClient()
         }
         QTime   time;
         QString str;
-        Message *mess = new Message;
+        Message *mess=0; //!
         in >> time >> mess;
 
         QString strMessage = 
