@@ -2,8 +2,8 @@ message codes:
 
 0 - ping(c,s);
 1 - connected(s->c);
-2 - authorization_request(s->c);
-3 - authorization_response(c->s);
+2 - authorization_request(c->s);
+3 - authorization_response(s->c);
 4 - contacts_request(c->s);
 5 - contacts_response(s->c);
 6 - reserved;

@@ -2,10 +2,10 @@
 #include <QtNetwork>
 #include <QtGui>
 #include "MyServer.h"
+#include "../codes.h"
 
 // ----------------------------------------------------------------------
-enum {PING, CONNECTED, AUTH_REQUEST, AUTH_RESPONSE, CONTACTS_REQUEST,
-      CONTACTS_RESPONSE, XXX, MESSAGE_TO_SERVER, MESSAGE_TO_CLIENT, DR_TO_SERVER, DR_TO_CLIENT};
+
 
 MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
                                                     , m_nNextBlockSize(0)
@@ -88,7 +88,8 @@ void MyServer::slotReadClient()
         }
         QTime   time;
         QString str;
-        in >> time >> str;
+        Message *mess = new Message;
+        in >> time >> mess;
 
         QString strMessage = 
         time.toString() + " "  + str;

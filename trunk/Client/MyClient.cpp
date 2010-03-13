@@ -2,6 +2,7 @@
 #include <QtNetwork>
 #include <QtGui>
 #include "MyClient.h"
+#include "../codes.h"
 
 // ----------------------------------------------------------------------
 MyClient::MyClient(
@@ -23,12 +24,12 @@ MyClient::MyClient(
 
 
    connect(m_ptxtInput, SIGNAL(returnPressed()),
-            this,        SLOT(slotSendToServer())
+            this,        SLOT(SendToServer())
            );
     m_ptxtInfo->setReadOnly(true);
 
     QPushButton* pcmd = new QPushButton("&Send");
-    connect(pcmd, SIGNAL(clicked()), SLOT(slotSendToServer()));
+    connect(pcmd, SIGNAL(clicked()), SLOT(SendToServer()));
     QPushButton* connbutton = new QPushButton("&Connect");
     connect(connbutton, SIGNAL(clicked()), SLOT(conn()));
 
@@ -80,11 +81,24 @@ void MyClient::slotReadyRead()
         }
         QTime   time;
         QString str;
-        Message *Mess = new Message;
-        in >> time >> Mess->code >> Mess->text;
-        if (Mess->code==1)
-         m_ptxtInfo->append(time.toString() + " " + "Connected");
+        Message *mess=0; //!
+        in >> time >> mess;
+        switch(int(*mess))
+        {
+        case 1: str="Connected!";
+            Message *auth_requ = new Message(AUTH_REQUEST);
+            SendToServer(auth_requ);
+            break;
+        }
 
+
+        m_ptxtInfo->append(time.toString() + " " + str);
+
+
+
+
+
+        delete mess;
 
         m_nNextBlockSize = 0;
     }
@@ -106,18 +120,25 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
 }
 
 // ----------------------------------------------------------------------
-void MyClient::slotSendToServer()
+void MyClient::SendToServer(Message* message)
 {
+
+
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_5);
-    out << quint16(0) << QTime::currentTime()<< m_ptxtInput->text();
+
+
+    out << quint16(0) << QTime::currentTime() << message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
 
     m_pTcpSocket->write(arrBlock);
-    m_ptxtInput->setText("");
+       //m_ptxtInput->setText("");
+
+
+
 }
 
 // ------------------------------------------------------------------
