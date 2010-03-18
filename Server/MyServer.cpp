@@ -63,7 +63,7 @@ void MyServer::slotNewConnection()
            );
 
 
-    Message *conMess = new Message(CONNECTED);
+    Message *conMess = new Message(1);
 
     this->sendToSocket(pClientSocket,conMess);
     
@@ -90,16 +90,17 @@ void MyServer::slotReadClient()
         QString str;
         Message *mess=0; //!
         in >> time >> mess;
+        switch(int(*mess))
+        {
+        case 2: //А если здесь поставить 1, то заработает. Поэтому при передачи CONNECTED клиенту проблему не было, так как код 1.
+            m_ptxt->append("test!"); //И это не выполняется
+            break;
+        }
 
-        QString strMessage = 
-        time.toString() + " "  + str;
-        m_ptxt->append(strMessage);
+
 
         m_nNextBlockSize = 0;
 
-       // sendToClient(pClientSocket,
-                     // str
-                   // );
     }
 }
 

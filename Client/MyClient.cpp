@@ -82,11 +82,11 @@ void MyClient::slotReadyRead()
         QTime   time;
         QString str;
         Message *mess=0; //!
-        in >> time >> mess;
+        in >> time >> mess;//mess принимается, но у него отсутствут свойства
         switch(int(*mess))
         {
         case 1: str="Connected!";
-            Message *auth_requ = new Message(AUTH_REQUEST);
+            Message *auth_requ = new Message(AUTH_REQUEST,clname->text());
             SendToServer(auth_requ);
             break;
         }
