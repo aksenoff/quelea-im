@@ -37,7 +37,7 @@ class Message
 {
 private:
     unsigned char code;
-    QTime time;
+    //QTime time;
     QString text;
 public:
     Message(unsigned char c, QString s=""):code(c),text(s){};

@@ -63,7 +63,7 @@ void MyServer::slotNewConnection()
            );
 
 
-    Message *conMess = new Message(1);
+    Message *conMess = new Message(CONNECTED);
 
     this->sendToSocket(pClientSocket,conMess);
     
@@ -113,7 +113,7 @@ void MyServer::sendToSocket(QTcpSocket* socket, Message* message)
     out.setVersion(QDataStream::Qt_4_5);
 
 
-    out << quint16(0) << QTime::currentTime() << message;
+    out << quint16(0) <<QTime::currentTime()<< *message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
