@@ -47,6 +47,8 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
     pvbxLayout->addWidget(new QLabel("Server is running on "+ipAddress));
     pvbxLayout->addWidget(m_ptxt);
     setLayout(pvbxLayout);
+
+
 }
 
 // ----------------------------------------------------------------------
@@ -92,10 +94,32 @@ void MyServer::slotReadClient()
         in >> time >> mess;
         switch(int(*mess))
         {
-        case 2: //ј если здесь поставить 1, то заработает. ѕоэтому при передачи CONNECTED клиенту проблему не было, так как код 1.
-            m_ptxt->append("test!"); //» это не выполн€етс€
-            break;
+        case 2:
+        {
+            Client* newclient = new Client("");
+            newclient->socket=pClientSocket;
+            newclient->name=mess->text;
+            clients.push_back(newclient);
+            m_ptxt->append("new client!");
+            Message* contactlist = new Message(5);
+
+            for (int i=0;i<=clients.size();i++) // записываем имена клиентов в отдельный вектор дл€ контакт-листа
+            {
+            contactlist->contacts[i]=clients[i]->name;
+            }
+
+
+            for (int i=0;i<=clients.size();i++) //отправл€ем всем клиентам контакт-лист(пока не работает)
+            {
+                sendToClient(clients[i],contactlist);
+           }
+
         }
+        case 7:{}break;//а вот тут должен быть IndexOf, которы у мен€ не получилс€. я добавил в заголовочный  bool operator.
+                       //≈ще нужно в класс Message добавить свойство sender, а recip (получатель) € уже добавил.  ак раз на предмет получател€ нужно делать indexOf.
+        }
+
+
 
 
 
@@ -135,7 +159,7 @@ void MyServer::sendToClient(Client* client, Message* message)
     out.setVersion(QDataStream::Qt_4_5);
 
 
-    out << quint16(0) << QTime::currentTime() << message;
+    out << quint16(0) << QTime::currentTime() << *message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
