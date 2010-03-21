@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include <QTime>
+#include <Qtgui>
 
 class QTextEdit;
 class QLineEdit;
@@ -18,9 +19,12 @@ private:
     QTextEdit*  m_ptxtInfo;
     QLineEdit*  m_ptxtInput;
     QLineEdit*  clname;
+    QLineEdit*  recipname;
+    QListView* contlist;
     QLineEdit*  ipadr;
     quint16     m_nNextBlockSize;
     void SendToServer(Message* message);
+    QVector<QString> contacts;
 
 public:
     MyClient(QWidget* pwgt = 0) ;
@@ -35,10 +39,12 @@ private slots:
 
 class Message
 {
-private:
+public:
     unsigned char code;
     //QTime time;
     QString text;
+    QString recip;
+    QVector<QString> contacts;
 public:
     Message(unsigned char c, QString s=""):code(c),text(s){};
     operator int(){return code;};
@@ -46,7 +52,8 @@ public:
     friend QDataStream& operator>>(QDataStream& in, Message*& m) {
         unsigned char code;
         QString text;
-        QDataStream& ds = in >> code >> text;
+        QVector<QString> contacts;
+        QDataStream& ds = in >> code >> text;     
         if(!m) m = new Message(code, text);
         return ds;};
 };

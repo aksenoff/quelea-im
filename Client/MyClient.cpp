@@ -15,7 +15,9 @@ MyClient::MyClient(
     m_ptxtInfo  = new QTextEdit;
     m_ptxtInput = new QLineEdit;
     clname = new QLineEdit;
-    ipadr= new QLineEdit;
+    ipadr = new QLineEdit;
+    contlist = new QListView;
+    recipname =new QLineEdit;
 
 
     m_pTcpSocket = new QTcpSocket(this);
@@ -30,18 +32,21 @@ MyClient::MyClient(
 
     QPushButton* pcmd = new QPushButton("&Send");
     connect(pcmd, SIGNAL(clicked()), SLOT(SendToServer()));
+
     QPushButton* connbutton = new QPushButton("&Connect");
     connect(connbutton, SIGNAL(clicked()), SLOT(conn()));
 
     //Layout setup
     QGridLayout* pvbxLayout = new QGridLayout;
-    pvbxLayout->addWidget(new QLabel("<-Enter a name"),3,1);
-    pvbxLayout->addWidget(m_ptxtInfo,0,0);
-    pvbxLayout->addWidget(m_ptxtInput,1,0);
-    pvbxLayout->addWidget(pcmd,1,1);
-    pvbxLayout->addWidget(connbutton,2,1);
-    pvbxLayout->addWidget(clname,3,0);
-    pvbxLayout->addWidget(ipadr,2,0);
+    pvbxLayout->addWidget(m_ptxtInfo,2,0);
+   // pvbxLayout->addWidget(contlist,2,1);
+    pvbxLayout->addWidget(m_ptxtInput,3,0);
+    pvbxLayout->addWidget(pcmd,3,1);
+    pvbxLayout->addWidget(connbutton,1,1);
+    pvbxLayout->addWidget(clname,0,0);
+    pvbxLayout->addWidget(new QLabel("<-Enter a name"),0,1);
+    pvbxLayout->addWidget(ipadr,1,0);
+    pvbxLayout->addWidget(recipname,4,0);
     setLayout(pvbxLayout);
 }
 
@@ -82,14 +87,23 @@ void MyClient::slotReadyRead()
         QTime   time;
         QString str;
         Message *mess=0; //!
-        in >>time>> mess;//mess принимается, но у него отсутствут свойства
+        in >>time>> mess;
         switch(int(*mess))
         {
         case 1: str="Connected!";
-            Message *auth_requ = new Message(AUTH_REQUEST,clname->text());
-            SendToServer(auth_requ);
+            {
+                Message *auth_requ = new Message(AUTH_REQUEST,clname->text());
+                SendToServer(auth_requ);
+            }
+           break;
+
+        case 8:
+            {
+               str=mess->text;
+           }
             break;
         }
+
 
 
         m_ptxtInfo->append(time.toString() + " " + str);
@@ -129,7 +143,7 @@ void MyClient::SendToServer(Message* message)
     out.setVersion(QDataStream::Qt_4_5);
 
 
-    out << quint16(0) << QTime::currentTime() << message;
+    out << quint16(0) << QTime::currentTime() << *message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
