@@ -95,6 +95,7 @@ void MyClient::slotReadyRead()
                 str = "Connected!";
                 Message* auth_req = new Message(AUTH_REQUEST, clname->text());
                 SendToServer(auth_req);
+				delete auth_req;
                 break;
             }
 
@@ -103,6 +104,7 @@ void MyClient::slotReadyRead()
                str = "Authorized!";
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
+			   delete contacts_req;
                break;
            }
         case CONTACTS_RESPONSE:
