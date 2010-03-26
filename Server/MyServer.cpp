@@ -68,6 +68,7 @@ void MyServer::slotNewConnection()
     Message *conMess = new Message(CONNECTED);
 
     this->sendToSocket(pClientSocket,conMess);
+	delete conMess;
     
 }
 
@@ -101,6 +102,7 @@ void MyServer::slotReadClient()
                 m_ptxt->append("new client called " + mess->text);
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
+				delete auth_ok;
                 break;
             }
         case CONTACTS_REQUEST:
@@ -111,6 +113,7 @@ void MyServer::slotReadClient()
                 Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
                 for (int i=0;i<clients.size();i++) //отправляем всем клиентам контакт-лист
                     sendToClient(clients[i], contacts_message);
+				delete contacts_message;
                 break;
             }
         case MESSAGE_TO_SERVER:{}break;//а вот тут должен быть IndexOf, которы у меня не получился. Я добавил в заголовочный  bool operator.
