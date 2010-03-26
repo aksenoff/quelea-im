@@ -87,30 +87,38 @@ void MyClient::slotReadyRead()
         QTime   time;
         QString str;
         Message *mess=0; //!
-        in >>time>> mess;
+        in >> time >> mess; //Надо ли передавать time? Не логичнее ли писать time клиента?
         switch(int(*mess))
         {
-        case 1: str="Connected!";
+        case CONNECTED:
             {
-                Message *auth_requ = new Message(AUTH_REQUEST,clname->text());
-                SendToServer(auth_requ);
+                str = "Connected!";
+                Message* auth_req = new Message(AUTH_REQUEST, clname->text());
+                SendToServer(auth_req);
+                break;
             }
-           break;
 
-        case 8:
-            {
-               str=mess->text;
+        case AUTH_RESPONSE:
+           {
+               str = "Authorized!";
+               Message* contacts_req = new Message(CONTACTS_REQUEST);
+               SendToServer(contacts_req);
+               break;
            }
-            break;
+        case CONTACTS_RESPONSE:
+           {
+               str = "Contacts received!";
+               str = mess->text;
+               break;
+           }
+        case MESSAGE_TO_CLIENT:
+           {
+               str=mess->text;
+               break;
+           }
+
         }
-
-
-
         m_ptxtInfo->append(time.toString() + " " + str);
-
-
-
-
 
         delete mess;
 
