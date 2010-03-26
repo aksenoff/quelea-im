@@ -94,35 +94,28 @@ void MyServer::slotReadClient()
         in >> time >> mess;
         switch(int(*mess))
         {
-        case 2:
-        {
-            Client* newclient = new Client("");
-            newclient->socket=pClientSocket;
-            newclient->name=mess->text;
-            clients.push_back(newclient);
-            m_ptxt->append("new client!");
-            Message* contactlist = new Message(5);
-
-            for (int i=0;i<=clients.size();i++) // записываем имена клиентов в отдельный вектор для контакт-листа
+        case AUTH_REQUEST:
             {
-            contactlist->contacts[i]=clients[i]->name;
+                Client* newclient = new Client(mess->text, pClientSocket);
+                clients.push_back(newclient);
+                m_ptxt->append("new client called " + mess->text);
+                Message* auth_ok = new Message(AUTH_RESPONSE);
+                sendToClient(newclient, auth_ok);
+                break;
             }
-
-
-            for (int i=0;i<=clients.size();i++) //отправляем всем клиентам контакт-лист(пока не работает)
+        case CONTACTS_REQUEST:
             {
-                sendToClient(clients[i],contactlist);
-           }
-
-        }
-        case 7:{}break;//а вот тут должен быть IndexOf, которы у меня не получился. Я добавил в заголовочный  bool operator.
+                QString contacts_string = "";
+                for (int i=0; i<clients.size(); i++) // записываем имена клиентов в отдельную строку для контакт-листа (Рома, строго меньше - нумерация с нуля!)
+                    contacts_string.append(clients[i]->name+";");
+                Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
+                for (int i=0;i<clients.size();i++) //отправляем всем клиентам контакт-лист
+                    sendToClient(clients[i], contacts_message);
+                break;
+            }
+        case MESSAGE_TO_SERVER:{}break;//а вот тут должен быть IndexOf, которы у меня не получился. Я добавил в заголовочный  bool operator.
                        //Еще нужно в класс Message добавить свойство sender, а recip (получатель) я уже добавил. Как раз на предмет получателя нужно делать indexOf.
         }
-
-
-
-
-
         m_nNextBlockSize = 0;
 
     }
