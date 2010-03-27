@@ -4,4 +4,4 @@ SOURCES = main.cpp \
 QT += network
 HEADERS = MyServer.h \
     ../codes.h
-win32:TARGET = ../MyServer
+win32:TARGET = ../Quelea-Server

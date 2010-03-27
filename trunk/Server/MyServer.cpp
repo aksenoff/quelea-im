@@ -93,36 +93,43 @@ void MyServer::slotReadClient()
         QString str;
         Message *mess=0; //!
         in >> mess;
-        switch(int(*mess))
+        switch(*mess)
         {
         case AUTH_REQUEST:
             {
-                Client* newclient = new Client(mess->text, pClientSocket);
-                clients.push_back(newclient);
-                m_ptxt->append(time.toString() + " "+"new client called " + mess->text);
+                Client* newclient = new Client(mess->gettext(), pClientSocket);
+                clients.push_back(*newclient);
+                m_ptxt->append(time.toString() + " "+"new client called " + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
-				delete auth_ok;
+                delete auth_ok;
                 break;
             }
         case CONTACTS_REQUEST:
             {
+
                 QString contacts_string = "";
                 for (int i=0; i<clients.size(); i++)
-                    contacts_string.append(clients[i]->name+";");
+                    contacts_string.append(clients[i].getname()+";");
                 Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
                 for (int i=0;i<clients.size();i++)
-                    sendToClient(clients[i], contacts_message);
-				delete contacts_message;
+                    sendToClient(&clients[i], contacts_message);
+                delete contacts_message;
                 break;
             }
         case MESSAGE_TO_SERVER:
             {
-                QStringList messtoserv = mess->text.split(";");
-                m_ptxt->append(mess->text);
-                //а вот тут должен быть IndexOf
+                QVector<Client>::iterator from;
+                for(from=clients.begin();from->getsocket()!=pClientSocket;from++);
 
-               break;
+                QStringList messtoserv = mess->gettext().split(";");
+
+                int i = clients.indexOf(Client(messtoserv[0],0));
+                str=from->getname()+";"+messtoserv[1];
+
+                Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
+                sendToClient(&clients[i],newmess);
+                break;
             }
 
         }

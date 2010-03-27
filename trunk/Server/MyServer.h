@@ -21,11 +21,9 @@ private:
     QTextEdit*  m_ptxt;
     QLabel* info;
     quint16     m_nNextBlockSize;
-    QVector<Client*> clients;
-private:
+    QVector<Client> clients;
     void sendToSocket(QTcpSocket* socket, Message* message);
     void sendToClient(Client* client, Message* message);
-
 public:
     MyServer(QWidget* pwgt = 0);
 
@@ -36,27 +34,26 @@ public slots:
 
 class Client
 {
+    QString name;
+    QTcpSocket* socket;
 public:
+    QTcpSocket* getsocket(){return socket;};
+    QString getname(){return name;};
     Client(const QString& n, QTcpSocket* s):name(n),socket(s){};
     bool operator==(const Client& c)const{
     return(name==c.name);};
-public:
-    QString name;
-    QTcpSocket* socket;
-public:   // Рома, ты неподражаем. Три паблика - это на башорг.
-    //Client();
+    Client(){};
     void send(QByteArray ba);
 };
 
 class Message
 {
-public:
     unsigned char code;
     //QTime time;
     QString text;
-    QString recip;
 public:
     operator int(){return code;};
+    QString gettext(){return text;};
     friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
     friend QDataStream& operator>>(QDataStream& in, Message*& m) {
         unsigned char code;
