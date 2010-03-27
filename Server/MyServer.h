@@ -55,10 +55,9 @@ public:
     //QTime time;
     QString text;
     QString recip;
-    QVector<QString> contacts;
 public:
     operator int(){return code;};
-    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text<<m.contacts;};
+    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
     friend QDataStream& operator>>(QDataStream& in, Message*& m) {
         unsigned char code;
         QString text;

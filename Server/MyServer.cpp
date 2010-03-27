@@ -89,17 +89,17 @@ void MyServer::slotReadClient()
         if (pClientSocket->bytesAvailable() < m_nNextBlockSize) {
             break;
         }
-        QTime   time;
+        QTime   time =  QTime::currentTime();
         QString str;
         Message *mess=0; //!
-        in >> time >> mess;
+        in >> mess;
         switch(int(*mess))
         {
         case AUTH_REQUEST:
             {
                 Client* newclient = new Client(mess->text, pClientSocket);
                 clients.push_back(newclient);
-                m_ptxt->append("new client called " + mess->text);
+                m_ptxt->append(time.toString() + " "+"new client called " + mess->text);
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
 				delete auth_ok;
@@ -108,16 +108,23 @@ void MyServer::slotReadClient()
         case CONTACTS_REQUEST:
             {
                 QString contacts_string = "";
-                for (int i=0; i<clients.size(); i++) // записываем имена клиентов в отдельную строку для контакт-листа (Рома, строго меньше - нумерация с нуля!)
+                for (int i=0; i<clients.size(); i++)
                     contacts_string.append(clients[i]->name+";");
                 Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
-                for (int i=0;i<clients.size();i++) //отправляем всем клиентам контакт-лист
+                for (int i=0;i<clients.size();i++)
                     sendToClient(clients[i], contacts_message);
 				delete contacts_message;
                 break;
             }
-        case MESSAGE_TO_SERVER:{}break;//а вот тут должен быть IndexOf, которы у меня не получился. Я добавил в заголовочный  bool operator.
-                       //Еще нужно в класс Message добавить свойство sender, а recip (получатель) я уже добавил. Как раз на предмет получателя нужно делать indexOf.
+        case MESSAGE_TO_SERVER:
+            {
+                QStringList messtoserv = mess->text.split(";");
+                m_ptxt->append(mess->text);
+                //а вот тут должен быть IndexOf
+
+               break;
+            }
+
         }
         m_nNextBlockSize = 0;
 
@@ -133,7 +140,7 @@ void MyServer::sendToSocket(QTcpSocket* socket, Message* message)
     out.setVersion(QDataStream::Qt_4_5);
 
 
-    out << quint16(0) <<QTime::currentTime()<< *message;
+    out << quint16(0)<< *message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
@@ -155,7 +162,7 @@ void MyServer::sendToClient(Client* client, Message* message)
     out.setVersion(QDataStream::Qt_4_5);
 
 
-    out << quint16(0) << QTime::currentTime() << *message;
+    out << quint16(0) << *message;
 
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
