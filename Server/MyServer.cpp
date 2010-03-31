@@ -119,17 +119,60 @@ void MyServer::slotReadClient()
             }
         case MESSAGE_TO_SERVER:
             {
+
                 QVector<Client>::iterator from;
                 for(from=clients.begin();from->getsocket()!=pClientSocket;from++);
 
                 QStringList messtoserv = mess->gettext().split(";");
 
+
                 int i = clients.indexOf(Client(messtoserv[0],0));
                 str=from->getname()+";"+messtoserv[1];
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
+
+                if (messtoserv[0]==">All users")
+                    for (int u=0;u<clients.size();u++)
+                        sendToClient(&clients[u], newmess);
+                else
                 sendToClient(&clients[i],newmess);
                 break;
+            }
+
+
+        case MESSAGE_TO_CHAT:
+            {
+                QVector<Client>::iterator from;
+                for(from=clients.begin();from->getsocket()!=pClientSocket;from++);
+
+                QStringList messtoserv = mess->gettext().split(";");
+
+
+
+                if (messtoserv[0]==">All users")
+                {
+                    str=from->getname()+";"+messtoserv[1]+";"+"";
+                  Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
+
+                  for (int u=0;u<clients.size();u++)
+                        sendToClient(&clients[u], newmess);
+                 }
+
+                else
+                {
+                int i = clients.indexOf(Client(messtoserv[0],0));
+                QString nstr = " -> "+clients[i].getname();
+                str=from->getname()+";"+messtoserv[1]+";"+nstr;
+                Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
+
+                for (int u=0;u<clients.size();u++)
+                      sendToClient(&clients[u], newmess);
+                 }
+
+                break;
+
+
+
             }
 
         }
