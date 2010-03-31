@@ -18,10 +18,13 @@ private:
     QTcpSocket* m_pTcpSocket;
     QTextEdit*  m_ptxtInfo;
     QLineEdit*  m_ptxtInput;
-    QLineEdit*  clname;
+    QComboBox*  clname;
     QLineEdit*  recipname;
     QListWidget* contlist;
-    QLineEdit*  ipadr;
+    QInputDialog* ipselect;
+    QPushButton* connbutton;
+    QPushButton* pcmd;
+    QPushButton* sendtochat;
     quint16     m_nNextBlockSize;
     void SendToServer(Message* message);
 
@@ -33,8 +36,11 @@ private slots:
     void slotError       (QAbstractSocket::SocketError);
 
     void slotConnected   (                            );
-    void conn();
+    void conn(QString ipadr);
     void sendmess();
+    void sendchat();
+    void opendial();
+    void enableConnButton();
 };
 
 class Message

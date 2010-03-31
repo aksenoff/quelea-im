@@ -14,14 +14,15 @@ MyClient::MyClient(
 {
     m_ptxtInfo  = new QTextEdit;
     m_ptxtInput = new QLineEdit;
-    clname = new QLineEdit;
-    ipadr = new QLineEdit;
+    clname = new QComboBox;
     contlist = new QListWidget;
-    recipname =new QLineEdit;
+    recipname = new QLineEdit;
+
 
 
     m_pTcpSocket = new QTcpSocket(this);
 
+    clname->setEditable(true);
 
 
 
@@ -30,31 +31,43 @@ MyClient::MyClient(
            );
     m_ptxtInfo->setReadOnly(true);
 
-    QPushButton* pcmd = new QPushButton("&Send");
+    pcmd = new QPushButton("&Send");
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
+    pcmd->setEnabled(false);
 
-    QPushButton* connbutton = new QPushButton("&Connect");
-    connect(connbutton, SIGNAL(clicked()), SLOT(conn()));
+    connbutton = new QPushButton("&Connect");
+    connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
+    connbutton->setEnabled(false);
+
+    sendtochat = new QPushButton("&Send to chat");
+    connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
+    sendtochat->setEnabled(false);
+
+    connect(clname, SIGNAL(editTextChanged(QString)),
+            this, SLOT(enableConnButton()));
+
 
     //Layout setup
     QGridLayout* pvbxLayout = new QGridLayout;
-    pvbxLayout->addWidget(m_ptxtInfo,2,0);
+    pvbxLayout->addWidget(new QLabel("Your name is:"),0,0);
+    pvbxLayout->addWidget(clname,0,1);
+    pvbxLayout->addWidget(m_ptxtInfo,2,0,1,2);
+    pvbxLayout->addWidget(m_ptxtInput,3,0,1,0);
+    pvbxLayout->addWidget(connbutton,0,2);
+    pvbxLayout->addWidget(sendtochat,4,2);
+    pvbxLayout->addWidget(pcmd,3,2);
     pvbxLayout->addWidget(contlist,2,2);
-    pvbxLayout->addWidget(m_ptxtInput,3,0);
-    pvbxLayout->addWidget(pcmd,3,1);
-    pvbxLayout->addWidget(connbutton,1,1);
-    pvbxLayout->addWidget(clname,0,0);
-    pvbxLayout->addWidget(new QLabel("<-Enter a name"),0,1);
-    pvbxLayout->addWidget(ipadr,1,0);
     setLayout(pvbxLayout);
+
+
 }
 
 
 
 
-void MyClient::conn()
+void MyClient::conn(QString ipadr)
 {
-    m_pTcpSocket->connectToHost(ipadr->text(), 49212);
+    m_pTcpSocket->connectToHost(ipadr, 49212);
     connect(m_pTcpSocket, SIGNAL(connected()), SLOT(slotConnected()));
     connect(m_pTcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
     connect(m_pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
@@ -92,7 +105,7 @@ void MyClient::slotReadyRead()
         case CONNECTED:
             {
                 str = "Connected!";
-                Message* auth_req = new Message(AUTH_REQUEST, clname->text());
+                Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
 				delete auth_req;
                 break;
@@ -111,12 +124,17 @@ void MyClient::slotReadyRead()
                str = "Contacts received!";
                QStringList clist = mess->text.split(";");
                contlist->clear();
+               contlist->addItem(">All users");
                contlist->addItems(clist);
+               contlist->setCurrentRow(0);
+               pcmd->setEnabled(true);
+               sendtochat->setEnabled(true);
                break;
            }
         case MESSAGE_TO_CLIENT:
            {
-               str=mess->text;
+               QStringList clist = mess->text.split(";");
+               str=clist[0]+clist[2]+": "+clist[1];
                break;
            }
 
@@ -178,5 +196,39 @@ void MyClient::sendmess()
     QString str=contlist->currentItem()->text()+";"+m_ptxtInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
+    m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
     m_ptxtInput->setText("");
 }
+
+void MyClient::sendchat()
+{
+    QString str=contlist->currentItem()->text()+";"+m_ptxtInput->text();
+    Message* newmess = new Message( MESSAGE_TO_CHAT,str);
+    SendToServer(newmess);
+    m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
+    m_ptxtInput->setText("");
+
+
+}
+
+void MyClient::opendial()
+{
+    QStringList items;
+
+
+        bool ok;
+        QString ipadress = QInputDialog::getItem(this, tr("Select server"),
+                                                 tr("Select server:"), items, 0, true, &ok);
+        if (ok && !ipadress.isEmpty())
+                 conn(ipadress);
+
+}
+
+void MyClient::enableConnButton()
+
+{
+
+    connbutton->setEnabled(!clname->currentText().isEmpty());
+}
+
+
