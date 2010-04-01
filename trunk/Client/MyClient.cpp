@@ -196,6 +196,7 @@ void MyClient::sendmess()
     QString str=contlist->currentItem()->text()+";"+m_ptxtInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
+    if (contlist->currentItem()->text()!=">All users")
     m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
     m_ptxtInput->setText("");
 }
@@ -205,7 +206,6 @@ void MyClient::sendchat()
     QString str=contlist->currentItem()->text()+";"+m_ptxtInput->text();
     Message* newmess = new Message( MESSAGE_TO_CHAT,str);
     SendToServer(newmess);
-    m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
     m_ptxtInput->setText("");
 
 

@@ -127,7 +127,7 @@ void MyServer::slotReadClient()
 
 
                 int i = clients.indexOf(Client(messtoserv[0],0));
-                str=from->getname()+";"+messtoserv[1];
+                str=from->getname()+";"+messtoserv[1]+";"+"";
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
 
