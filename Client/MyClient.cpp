@@ -142,7 +142,7 @@ void MyClient::slotReadyRead()
         case CONTACTS_RESPONSE:
            {
                if (contlist->count()==0)
-               m_ptxtInfo->append(QString::fromLocal8Bit("Список контактов получен!"));
+               m_ptxtInfo->append(time.toString() + " "+QString::fromLocal8Bit("Список контактов получен!"));
                QStringList clist = mess->text.split(";");
                contlist->clear();
                contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
@@ -157,6 +157,7 @@ void MyClient::slotReadyRead()
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
                m_ptxtInfo->append(time.toString() + " " + str);
+               if (clist[0]!=clname->currentText())
                QSound::play("incom.wav");
                break;
            }
