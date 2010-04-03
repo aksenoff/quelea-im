@@ -1,4 +1,5 @@
 
+
 #include <QtNetwork>
 #include <QtGui>
 #include "MyClient.h"
@@ -34,17 +35,17 @@ MyClient::MyClient(
            );
     m_ptxtInfo->setReadOnly(true);
 
-    pcmd = new QPushButton("&Send");
+    pcmd = new QPushButton((QString::fromLocal8Bit(" Отправить лично ")));
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
     pcmd->setEnabled(false);
     pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-    connbutton = new QPushButton("&Connect");
+    connbutton = new QPushButton((QString::fromLocal8Bit(" Подключиться ")));
     connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
     connbutton->setEnabled(false);
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-    sendtochat = new QPushButton("&Send to chat");
+    sendtochat = new QPushButton((QString::fromLocal8Bit(" Отправить в чат ")));
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
     sendtochat->setEnabled(false);
     sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -144,7 +145,7 @@ void MyClient::slotReadyRead()
                str = "Contacts received!";
                QStringList clist = mess->text.split(";");
                contlist->clear();
-               contlist->addItem(">All users");
+               contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
                pcmd->setEnabled(true);
@@ -172,12 +173,12 @@ void MyClient::slotReadyRead()
 void MyClient::slotError(QAbstractSocket::SocketError err)
 {
     QString strError = 
-        "Error: " + (err == QAbstractSocket::HostNotFoundError ? 
-                     "The host was not found." :
+        QString::fromLocal8Bit("Ошибка: ") + (err == QAbstractSocket::HostNotFoundError ?
+                     QString::fromLocal8Bit("Сервер не найден.") :
                      err == QAbstractSocket::RemoteHostClosedError ? 
-                     "The remote host is closed." :
+                     QString::fromLocal8Bit("Удалённый хост закрыл соединение.") :
                      err == QAbstractSocket::ConnectionRefusedError ? 
-                     "The connection was refused." :
+                     QString::fromLocal8Bit("В соедиении было отказано.") :
                      QString(m_pTcpSocket->errorString())
                     );
     m_ptxtInfo->append(strError);
@@ -206,17 +207,13 @@ void MyClient::SendToServer(Message* message)
 }
 
 // ------------------------------------------------------------------
-void MyClient::slotConnected()
-{
-    m_ptxtInfo->append("Connecting to server...");
-}
 
 void MyClient::sendmess()
 {
     QString str=contlist->currentItem()->text()+";"+m_ptxtInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    if (contlist->currentItem()->text()!=">All users")
+    if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
     m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
     m_ptxtInput->setText("");
 }
@@ -237,10 +234,11 @@ void MyClient::opendial()
 
 
         bool ok;
-        QString ipadress = QInputDialog::getItem(this, tr("Select server"),
-                                                 tr("Select server:"), items, 0, true, &ok);
+        QString ipadress = QInputDialog::getItem(this, (QString::fromLocal8Bit("Выберите сервер")),
+                                                 (QString::fromLocal8Bit("Выберите сервер:")), items, 0, true, &ok);
         if (ok && !ipadress.isEmpty())
-                 conn(ipadress);
+        { conn(ipadress);
+            m_ptxtInfo->append(QString::fromLocal8Bit("Соединение с сервером..."));}
 
 }
 

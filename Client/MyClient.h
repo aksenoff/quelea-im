@@ -37,7 +37,6 @@ private slots:
     void slotReadyRead   (                            );
     void slotError       (QAbstractSocket::SocketError);
 
-    void slotConnected   (                            );
     void conn(QString ipadr);
     void sendmess();
     void sendchat();

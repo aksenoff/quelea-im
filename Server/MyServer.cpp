@@ -10,11 +10,13 @@
 MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
                                                     , m_nNextBlockSize(0)
 {
+
+
     m_ptcpServer = new QTcpServer(this); 
     if (!m_ptcpServer->listen(QHostAddress::Any, 49212)) {
         QMessageBox::critical(0, 
-                              "Server Error", 
-                              "Unable to start the server:" 
+                              QString::fromLocal8Bit("Ошибка сервера"),
+                              QString::fromLocal8Bit("Невозможно запустить сервер:")
                               + m_ptcpServer->errorString()
                              );
         m_ptcpServer->close();
@@ -44,7 +46,7 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 
     //Layout setup
     QVBoxLayout* pvbxLayout = new QVBoxLayout;    
-    pvbxLayout->addWidget(new QLabel("Server is running on "+ipAddress));
+    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Сервер запущен на ")+ipAddress));
     pvbxLayout->addWidget(m_ptxt);
     setLayout(pvbxLayout);
 
@@ -99,7 +101,7 @@ void MyServer::slotReadClient()
             {
                 Client* newclient = new Client(mess->gettext(), pClientSocket);
                 clients.push_back(*newclient);
-                m_ptxt->append(time.toString() + " "+"new client called " + mess->gettext());
+                m_ptxt->append(time.toString() + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -131,7 +133,7 @@ void MyServer::slotReadClient()
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
 
-                if (messtoserv[0]==">All users")
+                if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
                     for (int u=0;u<clients.size();u++)
                         sendToClient(&clients[u], newmess);
                 else
@@ -149,7 +151,7 @@ void MyServer::slotReadClient()
 
 
 
-                if (messtoserv[0]==">All users")
+                if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
                 {
                     str=from->getname()+";"+messtoserv[1]+";"+"";
                   Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
