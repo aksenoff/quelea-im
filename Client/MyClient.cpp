@@ -157,6 +157,7 @@ void MyClient::slotReadyRead()
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
                m_ptxtInfo->append(time.toString() + " " + str);
+               QSound::play("incom.wav");
                break;
            }
 
