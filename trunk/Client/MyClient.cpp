@@ -16,7 +16,10 @@ MyClient::MyClient(
     m_ptxtInput = new QLineEdit;
     clname = new QComboBox;
     contlist = new QListWidget;
+    contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     recipname = new QLineEdit;
+    spacer1 = new QSpacerItem(100,0);
+    spacer2 = new QSpacerItem(100,0);
 
 
 
@@ -34,30 +37,47 @@ MyClient::MyClient(
     pcmd = new QPushButton("&Send");
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
     pcmd->setEnabled(false);
+    pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     connbutton = new QPushButton("&Connect");
     connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
     connbutton->setEnabled(false);
+    connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     sendtochat = new QPushButton("&Send to chat");
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
     sendtochat->setEnabled(false);
+    sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
+    info = new QPushButton("&Info");
+    info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     connect(clname, SIGNAL(editTextChanged(QString)),
             this, SLOT(enableConnButton()));
 
 
     //Layout setup
-    QGridLayout* pvbxLayout = new QGridLayout;
-    pvbxLayout->addWidget(new QLabel("Your name is:"),0,0);
-    pvbxLayout->addWidget(clname,0,1);
-    pvbxLayout->addWidget(m_ptxtInfo,2,0,1,2);
-    pvbxLayout->addWidget(m_ptxtInput,3,0,1,0);
-    pvbxLayout->addWidget(connbutton,0,2);
-    pvbxLayout->addWidget(sendtochat,4,2);
-    pvbxLayout->addWidget(pcmd,3,2);
-    pvbxLayout->addWidget(contlist,2,2);
-    setLayout(pvbxLayout);
+    QHBoxLayout* mainLayout = new QHBoxLayout;
+    QHBoxLayout* nameLayout = new QHBoxLayout;
+    QHBoxLayout* send2chatLayout = new QHBoxLayout;
+    QVBoxLayout* leftLayout = new QVBoxLayout;
+    QVBoxLayout* rightLayout = new QVBoxLayout;
+    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Вас зовут:")),0,Qt::AlignRight);
+    nameLayout->addWidget(clname);
+    leftLayout->addLayout(nameLayout);
+    leftLayout->addWidget(m_ptxtInfo);
+    send2chatLayout->addSpacerItem(spacer1);
+    send2chatLayout->addWidget(sendtochat);
+    send2chatLayout->addSpacerItem(spacer2);
+    leftLayout->addLayout(send2chatLayout);
+    leftLayout->addWidget(m_ptxtInput);
+    rightLayout->addWidget(connbutton);
+    rightLayout->addWidget(new QLabel(QString::fromLocal8Bit("Ваши собеседники:")));
+    rightLayout->addWidget(contlist);
+    rightLayout->addWidget(pcmd);
+    mainLayout->addLayout(leftLayout);
+    mainLayout->addLayout(rightLayout);
+    setLayout(mainLayout);
 
 
 }

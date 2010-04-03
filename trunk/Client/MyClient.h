@@ -25,6 +25,8 @@ private:
     QPushButton* connbutton;
     QPushButton* pcmd;
     QPushButton* sendtochat;
+    QPushButton* info;
+    QSpacerItem* spacer1,*spacer2;
     quint16     m_nNextBlockSize;
     void SendToServer(Message* message);
 
