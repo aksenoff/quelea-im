@@ -30,9 +30,6 @@ MyClient::MyClient(
 
 
 
-   connect(m_ptxtInput, SIGNAL(returnPressed()),
-            this,        SLOT(SendToServer())
-           );
     m_ptxtInfo->setReadOnly(true);
 
     pcmd = new QPushButton((QString::fromLocal8Bit(" Отправить лично ")));
@@ -125,24 +122,27 @@ void MyClient::slotReadyRead()
         {
         case CONNECTED:
             {
-                str = "Connected!";
+                str = QString::fromLocal8Bit("Соединение установлено!");
                 Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
 				delete auth_req;
+                m_ptxtInfo->append(time.toString() + " " + str);
                 break;
             }
 
         case AUTH_RESPONSE:
            {
-               str = "Authorized!";
+               str = QString::fromLocal8Bit("Вход выполнен!");;
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
 			   delete contacts_req;
+               m_ptxtInfo->append(time.toString() + " " + str);
                break;
            }
         case CONTACTS_RESPONSE:
            {
-               str = "Contacts received!";
+               if (contlist->count()==0)
+               m_ptxtInfo->append(QString::fromLocal8Bit("Список контактов получен!"));
                QStringList clist = mess->text.split(";");
                contlist->clear();
                contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
@@ -156,12 +156,13 @@ void MyClient::slotReadyRead()
            {
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
+               m_ptxtInfo->append(time.toString() + " " + str);
                break;
            }
 
             
         }
-        m_ptxtInfo->append(time.toString() + " " + str);
+
 
         delete mess;
 
