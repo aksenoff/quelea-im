@@ -145,6 +145,9 @@ void MyClient::slotReadyRead()
                m_ptxtInfo->append(time.toString() + " "+QString::fromLocal8Bit("Список контактов получен!"));
                QStringList clist = mess->text.split(";");
                contlist->clear();
+               clist.removeOne(clname->currentText());
+               clist.removeOne("");
+               if (clist.count()!=0)
                contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
