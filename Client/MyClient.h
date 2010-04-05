@@ -42,6 +42,7 @@ private slots:
     void sendchat();
     void opendial();
     void enableConnButton();
+    void enableSendButton();
 };
 
 class Message

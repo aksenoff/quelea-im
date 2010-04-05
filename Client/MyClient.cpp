@@ -53,6 +53,12 @@ MyClient::MyClient(
     connect(clname, SIGNAL(editTextChanged(QString)),
             this, SLOT(enableConnButton()));
 
+    connect(m_ptxtInput, SIGNAL(textEdited(QString)),
+            this, SLOT(enableSendButton()));
+
+    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),
+            this, SLOT(enableSendButton()));
+
 
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
@@ -126,7 +132,8 @@ void MyClient::slotReadyRead()
                 Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
 				delete auth_req;
-                m_ptxtInfo->append(time.toString() + " " + str);
+                clname->setEnabled(false);
+                m_ptxtInfo->append("["+time.toString()+"]" + " " + str);
                 break;
             }
 
@@ -136,13 +143,13 @@ void MyClient::slotReadyRead()
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
 			   delete contacts_req;
-               m_ptxtInfo->append(time.toString() + " " + str);
+               m_ptxtInfo->append("["+time.toString()+"]" + " " + str);
                break;
            }
         case CONTACTS_RESPONSE:
            {
                if (contlist->count()==0)
-               m_ptxtInfo->append(time.toString() + " "+QString::fromLocal8Bit("Список контактов получен!"));
+               m_ptxtInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен!"));
                QStringList clist = mess->text.split(";");
                contlist->clear();
                clist.removeOne(clname->currentText());
@@ -151,15 +158,14 @@ void MyClient::slotReadyRead()
                contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
-               pcmd->setEnabled(true);
-               sendtochat->setEnabled(true);
+               enableSendButton();
                break;
            }
         case MESSAGE_TO_CLIENT:
            {
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
-               m_ptxtInfo->append(time.toString() + " " + str);
+               m_ptxtInfo->append("["+time.toString()+"]"+ " " + str);
                if (clist[0]!=clname->currentText())
                QSound::play("incom.wav");
                break;
@@ -220,7 +226,7 @@ void MyClient::sendmess()
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
     if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
-    m_ptxtInfo->append(QTime::currentTime().toString()+" "+clname->currentText()+": "+m_ptxtInput->text());
+        m_ptxtInfo->append("["+QTime::currentTime().toString()+"]"+" "+clname->currentText()+": "+m_ptxtInput->text());
     m_ptxtInput->setText("");
 }
 
@@ -256,3 +262,9 @@ void MyClient::enableConnButton()
 }
 
 
+void MyClient::enableSendButton()
+{
+
+pcmd->setEnabled(!m_ptxtInput->text().isEmpty() && contlist->count()!=0 && contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"));
+sendtochat->setEnabled(!m_ptxtInput->text().isEmpty() && contlist->count()!=0);
+}
