@@ -62,6 +62,11 @@ void MyServer::slotNewConnection()
     connect(pClientSocket, SIGNAL(disconnected()),
             pClientSocket, SLOT(deleteLater())
            );
+
+  /*  connect(pClientSocket, SIGNAL(disconnected(QTcpSocket*)),
+            this, SLOT(slotClientDisconnect(QTcpSocket*))
+           );*/
+
     connect(pClientSocket, SIGNAL(readyRead()), 
             this,          SLOT(slotReadClient())
            );
@@ -101,7 +106,7 @@ void MyServer::slotReadClient()
             {
                 Client* newclient = new Client(mess->gettext(), pClientSocket);
                 clients.push_back(*newclient);
-                m_ptxt->append(time.toString() + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
+                m_ptxt->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -225,4 +230,22 @@ void MyServer::sendToClient(Client* client, Message* message)
 void Client::send(QByteArray ba)
 {
     socket->write(ba);
+}
+
+void MyServer::slotClientDisconnect(QTcpSocket* s)
+{
+    QVector<Client>::iterator dissock;
+    for(dissock=clients.begin();dissock->getsocket()!=s;dissock++);
+    clients.erase(dissock);
+    m_ptxt->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  dissock->getname()+QString::fromLocal8Bit("  отключен"));
+
+    QString contacts_string = "";
+    for (int i=0; i<clients.size(); i++)
+        contacts_string.append(clients[i].getname()+";");
+    Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
+    for (int i=0;i<clients.size();i++)
+        sendToClient(&clients[i], contacts_message);
+    delete contacts_message;
+
+
 }
