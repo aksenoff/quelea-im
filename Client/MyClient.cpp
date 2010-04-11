@@ -92,7 +92,6 @@ MyClient::MyClient(
 void MyClient::conn(QString ipadr)
 {
     m_pTcpSocket->connectToHost(ipadr, 49212);
-    connect(m_pTcpSocket, SIGNAL(connected()), SLOT(slotConnected()));
     connect(m_pTcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
     connect(m_pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this,         SLOT(slotError(QAbstractSocket::SocketError))
