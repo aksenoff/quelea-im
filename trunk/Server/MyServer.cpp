@@ -63,10 +63,6 @@ void MyServer::slotNewConnection()
             pClientSocket, SLOT(deleteLater())
            );
 
-  /*  connect(pClientSocket, SIGNAL(disconnected(QTcpSocket*)),
-            this, SLOT(slotClientDisconnect(QTcpSocket*))
-           );*/
-
     connect(pClientSocket, SIGNAL(readyRead()), 
             this,          SLOT(slotReadClient())
            );
@@ -80,6 +76,18 @@ void MyServer::slotNewConnection()
 }
 
 // ----------------------------------------------------------------------
+
+Client::Client(const QString &n, QTcpSocket *s):name(n),socket(s){
+    connect(socket, SIGNAL(disconnected()),
+            this, SLOT(socketClosed()));
+
+}
+
+void Client::socketClosed()
+{
+    emit goodbye(socket);
+}
+
 void MyServer::slotReadClient()
 {
     QTcpSocket* pClientSocket = (QTcpSocket*)sender();
@@ -105,7 +113,9 @@ void MyServer::slotReadClient()
         case AUTH_REQUEST:
             {
                 Client* newclient = new Client(mess->gettext(), pClientSocket);
-                clients.push_back(*newclient);
+                clients.push_back(newclient);
+                connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
+                        this, SLOT(slotByeClient(QTcpSocket*)));
                 m_ptxt->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
@@ -117,40 +127,40 @@ void MyServer::slotReadClient()
 
                 QString contacts_string = "";
                 for (int i=0; i<clients.size(); i++)
-                    contacts_string.append(clients[i].getname()+";");
+                    contacts_string.append(clients[i]->getname()+";");
                 Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
                 for (int i=0;i<clients.size();i++)
-                    sendToClient(&clients[i], contacts_message);
+                    sendToClient(clients[i], contacts_message);
                 delete contacts_message;
                 break;
             }
         case MESSAGE_TO_SERVER:
             {
 
-                QVector<Client>::iterator from;
-                for(from=clients.begin();from->getsocket()!=pClientSocket;from++);
+                QVector<Client*>::iterator from;
+                for(from=clients.begin();(*from)->getsocket()!=pClientSocket;from++);
 
                 QStringList messtoserv = mess->gettext().split(";");
 
 
-                int i = clients.indexOf(Client(messtoserv[0],0));
-                str=from->getname()+";"+messtoserv[1]+";"+"";
+                int i = clients.indexOf(&Client(messtoserv[0],0)); // aksenoff: ok,'cos we deal with member, not the address
+                str=(*from)->getname()+";"+messtoserv[1]+";"+"";      // (needs refactoring)
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
 
                 if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
                     for (int u=0;u<clients.size();u++)
-                        sendToClient(&clients[u], newmess);
+                        sendToClient(clients[u], newmess);
                 else
-                sendToClient(&clients[i],newmess);
+                sendToClient(clients[i],newmess);
                 break;
             }
 
 
         case MESSAGE_TO_CHAT:
             {
-                QVector<Client>::iterator from;
-                for(from=clients.begin();from->getsocket()!=pClientSocket;from++);
+                QVector<Client*>::iterator from;
+                for(from=clients.begin();(*from)->getsocket()!=pClientSocket;from++);
 
                 QStringList messtoserv = mess->gettext().split(";");
 
@@ -158,22 +168,22 @@ void MyServer::slotReadClient()
 
                 if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
                 {
-                    str=from->getname()+";"+messtoserv[1]+";"+"";
+                    str=(*from)->getname()+";"+messtoserv[1]+";"+"";
                   Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
 
                   for (int u=0;u<clients.size();u++)
-                        sendToClient(&clients[u], newmess);
+                        sendToClient(clients[u], newmess);
                  }
 
                 else
                 {
-                int i = clients.indexOf(Client(messtoserv[0],0));
-                QString nstr = " -> "+clients[i].getname();
-                str=from->getname()+";"+messtoserv[1]+";"+nstr;
+                int i = clients.indexOf(&Client(messtoserv[0],0));
+                QString nstr = " -> "+clients[i]->getname();
+                str=(*from)->getname()+";"+messtoserv[1]+";"+nstr;
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
 
                 for (int u=0;u<clients.size();u++)
-                      sendToClient(&clients[u], newmess);
+                      sendToClient(clients[u], newmess);
                  }
 
                 break;
@@ -232,19 +242,19 @@ void Client::send(QByteArray ba)
     socket->write(ba);
 }
 
-void MyServer::slotClientDisconnect(QTcpSocket* s)
+void MyServer::slotByeClient(QTcpSocket* s)
 {
-    QVector<Client>::iterator dissock;
-    for(dissock=clients.begin();dissock->getsocket()!=s;dissock++);
+    QVector<Client*>::iterator dissock;
+    for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
     clients.erase(dissock);
-    m_ptxt->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  dissock->getname()+QString::fromLocal8Bit("  отключен"));
+    m_ptxt->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit("  отключен"));
 
     QString contacts_string = "";
     for (int i=0; i<clients.size(); i++)
-        contacts_string.append(clients[i].getname()+";");
+        contacts_string.append(clients[i]->getname()+";");
     Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
     for (int i=0;i<clients.size();i++)
-        sendToClient(&clients[i], contacts_message);
+        sendToClient(clients[i], contacts_message);
     delete contacts_message;
 
 
