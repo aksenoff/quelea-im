@@ -21,25 +21,31 @@ private:
     QTextEdit*  m_ptxt;
     QLabel* info;
     quint16     m_nNextBlockSize;
-    QVector<Client> clients;
+    QVector<Client*> clients;
     void sendToSocket(QTcpSocket* socket, Message* message);
     void sendToClient(Client* client, Message* message);
 public:
     MyServer(QWidget* pwgt = 0);
 
 public slots:
-            void slotNewConnection();
-            void slotReadClient   ();
+    void slotNewConnection();
+    void slotReadClient();
+    void slotByeClient(QTcpSocket*);
 };
 
-class Client
-{
+class Client: public QWidget {
+Q_OBJECT
+private:
     QString name;
     QTcpSocket* socket;
+signals:
+    void goodbye(QTcpSocket*);
+public slots:
+    void socketClosed();
 public:
     QTcpSocket* getsocket(){return socket;};
     QString getname(){return name;};
-    Client(const QString& n, QTcpSocket* s):name(n),socket(s){};
+    Client(const QString&, QTcpSocket*);
     bool operator==(const Client& c)const{
     return(name==c.name);};
     Client(){};
