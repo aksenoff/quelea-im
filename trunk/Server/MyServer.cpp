@@ -238,8 +238,8 @@ void MyServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
-    clients.erase(dissock);
     textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit(" отключен"));
+    clients.erase(dissock);
 
     QString contacts_string = "";
     for (int i=0; i<clients.size(); i++)
