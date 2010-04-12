@@ -142,12 +142,13 @@ void MyServer::slotReadClient()
 
                 QStringList messtoserv = mess->gettext().split(";");
 
-
-                int i = clients.indexOf(&Client(messtoserv[0],0)); // aksenoff: ok,'cos we deal with member, not the address
-                str=(*from)->getname()+";"+messtoserv[1]+";"+"";      // (needs refactoring)
+                QVector<Client*>::iterator i;
+                for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
+                str=(*from)->getname()+";"+messtoserv[1]+";"+"";
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
-                sendToClient(clients[i],newmess);
+                sendToClient(*i,newmess);
+                delete newmess;
                 break;
             }
 
@@ -164,10 +165,10 @@ void MyServer::slotReadClient()
                 if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
                 {
                     str=(*from)->getname()+";"+messtoserv[1]+";"+"";
-                  Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
-
-                  for (int u=0;u<clients.size();u++)
+                    Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
+                    for (int u=0;u<clients.size();u++)
                         sendToClient(clients[u], newmess);
+                    delete newmess;
                 }
                 else
                 {
