@@ -127,7 +127,7 @@ void MyClient::slotReadyRead()
         {
         case CONNECTED:
             {
-                str = QString::fromLocal8Bit("Соединение установлено!");
+                str = QString::fromLocal8Bit("Соединение установлено.");
                 Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
 				delete auth_req;
@@ -138,7 +138,7 @@ void MyClient::slotReadyRead()
 
         case AUTH_RESPONSE:
            {
-               str = QString::fromLocal8Bit("Вход выполнен!");;
+               str = QString::fromLocal8Bit("Вход выполнен.");;
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
 			   delete contacts_req;
@@ -148,7 +148,7 @@ void MyClient::slotReadyRead()
         case CONTACTS_RESPONSE:
            {
                if (contlist->count()==0)
-               m_ptxtInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен!"));
+               m_ptxtInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен."));
                QStringList clist = mess->text.split(";");
                contlist->clear();
                clist.removeOne(clname->currentText());
@@ -189,7 +189,7 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
                      err == QAbstractSocket::RemoteHostClosedError ? 
                      QString::fromLocal8Bit("Удалённый хост закрыл соединение.") :
                      err == QAbstractSocket::ConnectionRefusedError ? 
-                     QString::fromLocal8Bit("В соедиении было отказано.") :
+                     QString::fromLocal8Bit("В соединении было отказано.") :
                      QString(m_pTcpSocket->errorString())
                     );
     m_ptxtInfo->append(strError);
