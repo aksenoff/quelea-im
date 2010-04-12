@@ -46,8 +46,6 @@ public:
     QTcpSocket* getsocket(){return socket;};
     QString getname(){return name;};
     Client(const QString&, QTcpSocket*);
-    bool operator==(const Client& c)const{
-    return(name==c.name);};
     Client(){};
     void send(QByteArray ba);
 };
