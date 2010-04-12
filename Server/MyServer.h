@@ -17,10 +17,9 @@ class Message;
 class MyServer : public QWidget {
 Q_OBJECT
 private:
-    QTcpServer* m_ptcpServer;
-    QTextEdit*  m_ptxt;
-    QLabel* info;
-    quint16     m_nNextBlockSize;
+    QTcpServer* tcpServer;
+    QTextEdit*  textInfo;
+    quint16     NextBlockSize;
     QVector<Client*> clients;
     void sendToSocket(QTcpSocket* socket, Message* message);
     void sendToClient(Client* client, Message* message);
@@ -53,7 +52,6 @@ public:
 class Message
 {
     unsigned char code;
-    //QTime time;
     QString text;
 public:
     operator int(){return code;};
@@ -68,4 +66,4 @@ public:
     Message(unsigned char c, QString s=""):code(c),text(s){};
 };
 
-#endif  //_MyServer_h_
+#endif

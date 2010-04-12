@@ -8,18 +8,18 @@
 
 
 MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
-                                                    , m_nNextBlockSize(0)
+                                                    , NextBlockSize(0)
 {
 
 
-    m_ptcpServer = new QTcpServer(this); 
-    if (!m_ptcpServer->listen(QHostAddress::Any, 49212)) {
+    tcpServer = new QTcpServer(this);
+    if (!tcpServer->listen(QHostAddress::Any, 49212)) {
         QMessageBox::critical(0, 
                               QString::fromLocal8Bit("Ошибка сервера"),
                               QString::fromLocal8Bit("Невозможно запустить сервер:")
-                              + m_ptcpServer->errorString()
+                              + tcpServer->errorString()
                              );
-        m_ptcpServer->close();
+        tcpServer->close();
         return;
     }
     QString ipAddress;
@@ -36,18 +36,18 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 
 
 
-    connect(m_ptcpServer, SIGNAL(newConnection()), 
+    connect(tcpServer, SIGNAL(newConnection()),
             this,         SLOT(slotNewConnection())
            );
 
-    m_ptxt = new QTextEdit;
-    m_ptxt->setReadOnly(true);
+    textInfo = new QTextEdit;
+    textInfo->setReadOnly(true);
 
 
     //Layout setup
     QVBoxLayout* pvbxLayout = new QVBoxLayout;    
     pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Сервер запущен на ")+ipAddress));
-    pvbxLayout->addWidget(m_ptxt);
+    pvbxLayout->addWidget(textInfo);
     setLayout(pvbxLayout);
 
 
@@ -57,7 +57,7 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 void MyServer::slotNewConnection()
 {
 
-    QTcpSocket* pClientSocket = m_ptcpServer->nextPendingConnection();
+    QTcpSocket* pClientSocket = tcpServer->nextPendingConnection();
 
     connect(pClientSocket, SIGNAL(disconnected()),
             pClientSocket, SLOT(deleteLater())
@@ -94,14 +94,14 @@ void MyServer::slotReadClient()
     QDataStream in(pClientSocket);
     in.setVersion(QDataStream::Qt_4_5);
     for (;;) {
-        if (!m_nNextBlockSize) {
+        if (!NextBlockSize) {
             if (pClientSocket->bytesAvailable() < sizeof(quint16)) {
                 break;
             }
-            in >> m_nNextBlockSize;
+            in >> NextBlockSize;
         }
 
-        if (pClientSocket->bytesAvailable() < m_nNextBlockSize) {
+        if (pClientSocket->bytesAvailable() < NextBlockSize) {
             break;
         }
         QTime   time =  QTime::currentTime();
@@ -116,7 +116,7 @@ void MyServer::slotReadClient()
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                m_ptxt->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
+                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -146,12 +146,7 @@ void MyServer::slotReadClient()
                 int i = clients.indexOf(&Client(messtoserv[0],0)); // aksenoff: ok,'cos we deal with member, not the address
                 str=(*from)->getname()+";"+messtoserv[1]+";"+"";      // (needs refactoring)
 
-                Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
-
-                if (messtoserv[0]==QString::fromLocal8Bit(">Все собеседники"))
-                    for (int u=0;u<clients.size();u++)
-                        sendToClient(clients[u], newmess);
-                else
+                Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
                 sendToClient(clients[i],newmess);
                 break;
             }
@@ -189,7 +184,7 @@ void MyServer::slotReadClient()
             }
 
         }
-        m_nNextBlockSize = 0;
+        NextBlockSize = 0;
 
     }
 }
@@ -243,7 +238,7 @@ void MyServer::slotByeClient(QTcpSocket* s)
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
     clients.erase(dissock);
-    m_ptxt->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit("  отключен"));
+    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit(" отключен"));
 
     QString contacts_string = "";
     for (int i=0; i<clients.size(); i++)

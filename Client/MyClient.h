@@ -15,9 +15,9 @@ class Message;
 class MyClient : public QWidget {
 Q_OBJECT
 private:
-    QTcpSocket* m_pTcpSocket;
-    QTextEdit*  m_ptxtInfo;
-    QLineEdit*  m_ptxtInput;
+    QTcpSocket* TcpSocket;
+    QTextEdit*  TextInfo;
+    QLineEdit*  messInput;
     QComboBox*  clname;
     QLineEdit*  recipname;
     QListWidget* contlist;
@@ -27,17 +27,17 @@ private:
     QPushButton* sendtochat;
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
-    quint16     m_nNextBlockSize;
+    quint16     NextBlockSize;
     void SendToServer(Message* message);
 
 public:
     MyClient(QWidget* pwgt = 0) ;
 
 private slots:
-    void slotReadyRead   (                            );
-    void slotError       (QAbstractSocket::SocketError);
-
+    void slotReadyRead();
+    void slotError(QAbstractSocket::SocketError);
     void conn(QString ipadr);
+    void disconn();
     void sendmess();
     void sendchat();
     void opendial();
@@ -49,7 +49,7 @@ class Message
 {
 public:
     unsigned char code;
-    //QTime time;
+
     QString text;
     QString recip;
     QVector<QString> contacts;
@@ -64,4 +64,4 @@ public:
         if(!m) m = new Message(code, text);
         return ds;};
 };
-#endif  //_MyClient_h_
+#endif
