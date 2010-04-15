@@ -19,7 +19,6 @@ private:
     QTextEdit*  TextInfo;
     QLineEdit*  messInput;
     QComboBox*  clname;
-    QLineEdit*  recipname;
     QListWidget* contlist;
     QInputDialog* ipselect;
     QPushButton* connbutton;
