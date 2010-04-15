@@ -13,12 +13,12 @@ MyClient::MyClient(
 
 
 {
+
     TextInfo  = new QTextEdit;
     messInput = new QLineEdit;
     clname = new QComboBox;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
-    recipname = new QLineEdit;
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     TcpSocket = new QTcpSocket(this);
@@ -37,6 +37,7 @@ MyClient::MyClient(
     connbutton->setEnabled(false);
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
+
     sendtochat = new QPushButton((QString::fromLocal8Bit(" Отправить в чат ")));
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
     sendtochat->setEnabled(false);
@@ -45,8 +46,7 @@ MyClient::MyClient(
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-
-
+    
     connect(clname, SIGNAL(editTextChanged(QString)),
             this, SLOT(enableConnButton()));
 
@@ -79,6 +79,8 @@ MyClient::MyClient(
     mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
     setLayout(mainLayout);
+    setWindowTitle(tr("Quelea"));
+    setWindowIcon(QIcon::QIcon ("myapp.rc"));
 
 
 }

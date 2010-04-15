@@ -49,6 +49,8 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
     pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Сервер запущен на ")+ipAddress));
     pvbxLayout->addWidget(textInfo);
     setLayout(pvbxLayout);
+    setWindowTitle(tr("Quelea Server"));
+    setWindowIcon(QIcon::QIcon ("myapp.rc"));
 
 
 }
@@ -116,7 +118,7 @@ void MyServer::slotReadClient()
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент с именем ") + mess->gettext());
+                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE);
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
