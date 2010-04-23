@@ -33,6 +33,10 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
         }
     }
 
+    // if we did not find one, use IPv4 localhost
+         if (ipAddress.isEmpty())
+             ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+
 
 
 
