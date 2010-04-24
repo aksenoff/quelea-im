@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include <QTime>
 #include <Qtgui>
+#include <QStateMachine>
 
 class QTextEdit;
 class QLineEdit;
@@ -28,7 +29,7 @@ private:
     QSpacerItem* spacer1,*spacer2;
     quint16     NextBlockSize;
     void SendToServer(Message* message);
-
+    QStateMachine connectionStatus;
 public:
     MyClient(QWidget* pwgt = 0) ;
 
@@ -36,6 +37,8 @@ private slots:
     void slotReadyRead();
     void slotError(QAbstractSocket::SocketError);
     void conn(QString ipadr);
+    void enableConnected();
+    void enableDisconnected();
     void disconn();
     void sendmess();
     void sendchat();
