@@ -27,18 +27,17 @@ MyClient::MyClient(
     TextInfo->setReadOnly(true);
 
     //Buttons
-    pcmd = new QPushButton((QString::fromLocal8Bit(" Отправить лично ")));
+    pcmd = new QPushButton(QString::fromLocal8Bit(" Отправить лично "));
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
     pcmd->setEnabled(false);
     pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-    connbutton = new QPushButton((QString::fromLocal8Bit(" Подключиться ")));
-    connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
+    connbutton = new QPushButton(QString::fromLocal8Bit(" Подключиться "));
     connbutton->setEnabled(false);
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
 
-    sendtochat = new QPushButton((QString::fromLocal8Bit(" Отправить в чат ")));
+    sendtochat = new QPushButton(QString::fromLocal8Bit(" Отправить в чат "));
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
     sendtochat->setEnabled(false);
     sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -56,6 +55,18 @@ MyClient::MyClient(
     connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),
             this, SLOT(enableSendButton()));
 
+    QState (*connectedState) = new QState(), (*disconnectedState) = new QState;
+    connectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Отключиться "));
+    disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Подключиться "));
+    connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
+    disconnectedState->addTransition(connbutton, SIGNAL(clicked()), connectedState);
+    connect(connectedState, SIGNAL(entered()), this, SLOT(enableConnected()));
+    connect(disconnectedState, SIGNAL(entered()), this, SLOT(enableDisconnected()));
+    connectionStatus.addState(connectedState);
+    connectionStatus.addState(disconnectedState);
+    connectionStatus.setInitialState(disconnectedState);
+
+    connectionStatus.start();
 
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
@@ -84,7 +95,17 @@ MyClient::MyClient(
 
 
 }
+void MyClient::enableConnected()
+{
+    disconnect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
+    connect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
+}
 
+
+void MyClient::enableDisconnected()
+{
+    connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
+}
 // ---------------------------------------------------------------------
 void MyClient::conn(QString ipadr)
 {
@@ -96,6 +117,7 @@ void MyClient::conn(QString ipadr)
 
 
 }
+
 // ----------------------------------------------------------------------
 void MyClient::slotReadyRead()
 {
@@ -123,7 +145,7 @@ void MyClient::slotReadyRead()
                 str = QString::fromLocal8Bit("Соединение установлено.");
                 Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
-				delete auth_req;
+                delete auth_req;
                 clname->setEnabled(false);
                 TextInfo->append("["+time.toString()+"]" + " " + str);
                 break;
@@ -134,7 +156,7 @@ void MyClient::slotReadyRead()
                str = QString::fromLocal8Bit("Вход выполнен.");;
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
-			   delete contacts_req;
+               delete contacts_req;
                TextInfo->append("["+time.toString()+"]" + " " + str);
                break;
            }
@@ -260,7 +282,8 @@ void MyClient::enableSendButton()
 
 void MyClient::disconn()
 {
-TextInfo->append("disconn");
+    TcpSocket->close();
+    TextInfo->append(QString::fromLocal8Bit("Отключение..."));
 
 }
 
