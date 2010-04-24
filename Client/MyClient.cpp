@@ -6,14 +6,8 @@
 #include "../codes.h"
 
 // ----------------------------------------------------------------------
-MyClient::MyClient(
-                  QWidget*       pwgt /*=0*/
-                  ) : QWidget(pwgt)
-                    , NextBlockSize(0)
-
-
+MyClient::MyClient(QWidget* pwgt) : QWidget(pwgt), NextBlockSize(0)
 {
-
     TextInfo  = new QTextEdit;
     messInput = new QLineEdit;
     clname = new QComboBox;
@@ -22,26 +16,19 @@ MyClient::MyClient(
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     TcpSocket = new QTcpSocket(this);
-
     clname->setEditable(true);
-    TextInfo->setReadOnly(true);
-
-    //Buttons
+    TextInfo->setReadOnly(true);    
     pcmd = new QPushButton(QString::fromLocal8Bit(" Отправить лично "));
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
     pcmd->setEnabled(false);
     pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-
     connbutton = new QPushButton(QString::fromLocal8Bit(" Подключиться "));
     connbutton->setEnabled(false);
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-
-
     sendtochat = new QPushButton(QString::fromLocal8Bit(" Отправить в чат "));
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
     sendtochat->setEnabled(false);
     sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
@@ -97,14 +84,13 @@ MyClient::MyClient(
 }
 void MyClient::enableConnected()
 {
-    disconnect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
     connect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
 }
 
 
 void MyClient::enableDisconnected()
 {
-    connect(connbutton, SIGNAL(clicked()), SLOT(opendial()));
+    connect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
 }
 // ---------------------------------------------------------------------
 void MyClient::conn(QString ipadr)
@@ -114,8 +100,6 @@ void MyClient::conn(QString ipadr)
     connect(TcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this,         SLOT(slotError(QAbstractSocket::SocketError))
            );
-
-
 }
 
 // ----------------------------------------------------------------------
@@ -183,14 +167,9 @@ void MyClient::slotReadyRead()
                if (clist[0]!=clname->currentText())
                QSound::play("incom.wav");
                break;
-           }
-
-            
+           }            
         }
-
-
         delete mess;
-
         NextBlockSize = 0;
     }
 }
@@ -213,20 +192,13 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
 // ----------------------------------------------------------------------
 void MyClient::SendToServer(Message* message)
 {
-
-
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_5);
-
-
     out << quint16(0)<< *message;
-
     out.device()->seek(0);
     out << quint16(arrBlock.size() - sizeof(quint16));
-
     TcpSocket->write(arrBlock);
-
 }
 
 // ------------------------------------------------------------------
@@ -248,27 +220,26 @@ void MyClient::sendchat()
     SendToServer(newmess);
     messInput->setText("");
 
-
 }
 // ----------------------------------------------------------------------
 void MyClient::opendial()
 {
+    disconnect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
     QStringList items;
-
-
-        bool ok;
+    QTime time = QTime::currentTime();
+        bool ok=false;
         QString ipadress = QInputDialog::getItem(this, (QString::fromLocal8Bit("Выберите сервер")),
                                                  (QString::fromLocal8Bit("Выберите сервер:")), items, 0, true, &ok);
         if (ok && !ipadress.isEmpty())
-        { conn(ipadress);
-            TextInfo->append(QString::fromLocal8Bit("Соединение с сервером..."));}
-
+        {
+            conn(ipadress);
+            TextInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Соединение с сервером..."));
+        }
 }
 // ----------------------------------------------------------------------
 void MyClient::enableConnButton()
 
 {
-
     connbutton->setEnabled(!clname->currentText().isEmpty());
 }
 
@@ -282,8 +253,9 @@ void MyClient::enableSendButton()
 
 void MyClient::disconn()
 {
+    QTime time = QTime::currentTime();
+    disconnect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
     TcpSocket->close();
-    TextInfo->append(QString::fromLocal8Bit("Отключение..."));
-
+    TextInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Отключен от сервера"));
 }
 
