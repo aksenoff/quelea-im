@@ -1,12 +1,12 @@
 
 #include <QtGui>
-#include "MyServer.h"
+#include "QueleaServer.h"
 
 // ----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    MyServer server;
+    QueleaServer server;
 
     server.show();
 

@@ -1,14 +1,14 @@
 
 #include <QtNetwork>
 #include <QtGui>
-#include "MyServer.h"
+#include "QueleaServer.h"
 #include "../codes.h"
 
 // ----------------------------------------------------------------------
 
 
-MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
-                                                    , NextBlockSize(0)
+QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
+                                                    , nextBlockSize(0)
 {
 
 
@@ -54,13 +54,13 @@ MyServer::MyServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
     pvbxLayout->addWidget(textInfo);
     setLayout(pvbxLayout);
     setWindowTitle(tr("Quelea Server"));
-    setWindowIcon(QIcon::QIcon ("myapp.rc"));
+    setWindowIcon(QIcon::QIcon ("resource.rc"));
 
 
 }
 
 // ----------------------------------------------------------------------
-void MyServer::slotNewConnection()
+void QueleaServer::slotNewConnection()
 {
 
     QTcpSocket* pClientSocket = tcpServer->nextPendingConnection();
@@ -77,7 +77,7 @@ void MyServer::slotNewConnection()
     Message *conMess = new Message(CONNECTED);
 
     this->sendToSocket(pClientSocket,conMess);
-	delete conMess;
+    delete conMess;
     
 }
 
@@ -94,20 +94,20 @@ void Client::socketClosed()
     emit goodbye(socket);
 }
 
-void MyServer::slotReadClient()
+void QueleaServer::slotReadClient()
 {
     QTcpSocket* pClientSocket = (QTcpSocket*)sender();
     QDataStream in(pClientSocket);
     in.setVersion(QDataStream::Qt_4_5);
     for (;;) {
-        if (!NextBlockSize) {
+        if (!nextBlockSize) {
             if (pClientSocket->bytesAvailable() < sizeof(quint16)) {
                 break;
             }
-            in >> NextBlockSize;
+            in >> nextBlockSize;
         }
 
-        if (pClientSocket->bytesAvailable() < NextBlockSize) {
+        if (pClientSocket->bytesAvailable() < nextBlockSize) {
             break;
         }
         QTime   time =  QTime::currentTime();
@@ -191,13 +191,13 @@ void MyServer::slotReadClient()
             }
 
         }
-        NextBlockSize = 0;
+        nextBlockSize = 0;
 
     }
 }
 
 //-------------------------------------------------------------------------
-void MyServer::sendToSocket(QTcpSocket* socket, Message* message)
+void QueleaServer::sendToSocket(QTcpSocket* socket, Message* message)
 {
 
     QByteArray  arrBlock;
@@ -220,7 +220,7 @@ void MyServer::sendToSocket(QTcpSocket* socket, Message* message)
 
 
 // ----------------------------------------------------------------------
-void MyServer::sendToClient(Client* client, Message* message)
+void QueleaServer::sendToClient(Client* client, Message* message)
 {
     QByteArray  arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -240,11 +240,12 @@ void Client::send(QByteArray ba)
     socket->write(ba);
 }
 
-void MyServer::slotByeClient(QTcpSocket* s)
+void QueleaServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
     textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit(" отключен"));
+    delete (*dissock);
     clients.erase(dissock);
 
     QString contacts_string = "";

@@ -1,6 +1,6 @@
 
-#ifndef _MyServer_h_
-#define _MyServer_h_
+#ifndef _QueleaServer_h_
+#define _QueleaServer_h_
 
 #include <QWidget>
 #include <QTime>
@@ -14,17 +14,17 @@ class Client;
 // ======================================================================
 class Message;
 
-class MyServer : public QWidget {
+class QueleaServer : public QWidget {
 Q_OBJECT
 private:
     QTcpServer* tcpServer;
     QTextEdit*  textInfo;
-    quint16     NextBlockSize;
+    quint16     nextBlockSize;
     QVector<Client*> clients;
     void sendToSocket(QTcpSocket* socket, Message* message);
     void sendToClient(Client* client, Message* message);
 public:
-    MyServer(QWidget* pwgt = 0);
+    QueleaServer(QWidget* pwgt = 0);
 
 public slots:
     void slotNewConnection();
