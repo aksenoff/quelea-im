@@ -1,13 +1,13 @@
 
 
 #include <QApplication>
-#include "MyClient.h"
+#include "QueleaClient.h"
 
 // ----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    MyClient client;
+    QueleaClient client;
 
     client.show();
 

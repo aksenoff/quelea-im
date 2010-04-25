@@ -1,6 +1,6 @@
 
-#ifndef _MyClient_h_
-#define _MyClient_h_
+#ifndef _QueleaClient_h_
+#define _QueleaClient_h_
 
 #include <QWidget>
 #include <QTcpSocket>
@@ -13,11 +13,11 @@ class QLineEdit;
 class Message;
 
 // ======================================================================
-class MyClient : public QWidget {
+class QueleaClient : public QWidget {
 Q_OBJECT
 private:
-    QTcpSocket* TcpSocket;
-    QTextEdit*  TextInfo;
+    QTcpSocket* tcpSocket;
+    QTextEdit*  textInfo;
     QLineEdit*  messInput;
     QComboBox*  clname;
     QListWidget* contlist;
@@ -27,11 +27,13 @@ private:
     QPushButton* sendtochat;
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
-    quint16     NextBlockSize;
+    quint16     nextBlockSize;
     void SendToServer(Message* message);
     QStateMachine connectionStatus;
 public:
-    MyClient(QWidget* pwgt = 0) ;
+    QueleaClient(QWidget* pwgt = 0) ;
+signals:
+    void startedConnect();
 
 private slots:
     void slotReadyRead();
