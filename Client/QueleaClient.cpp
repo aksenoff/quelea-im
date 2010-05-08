@@ -212,6 +212,7 @@ void QueleaClient::sendmess()
     if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
         textInfo->append("["+QTime::currentTime().toString()+"]"+" "+clname->currentText()+" -> "+contlist->currentItem()->text()+": "+messInput->text());
     messInput->setText("");
+    enableSendButton();
 }
 
 void QueleaClient::sendchat()
@@ -220,6 +221,7 @@ void QueleaClient::sendchat()
     Message* newmess = new Message( MESSAGE_TO_CHAT,str);
     SendToServer(newmess);
     messInput->setText("");
+    enableSendButton();
 
 }
 // ----------------------------------------------------------------------
