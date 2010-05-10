@@ -41,8 +41,12 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 
     connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),
             this, SLOT(enableSendButton()));
+    connect(tcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
+    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this,         SLOT(slotError(QAbstractSocket::SocketError))
+           );
 
-    QState (*connectedState) = new QState(), (*disconnectedState) = new QState;
+    QState (*connectedState) = new QState, (*disconnectedState) = new QState;
     connectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Отключиться "));
     disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Подключиться "));
     connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
@@ -86,8 +90,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 void QueleaClient::enableConnected()
 {
     connect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
-    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(disconn()));
-
 }
 
 
@@ -101,10 +103,7 @@ void QueleaClient::conn(QString ipadr)
     emit startedConnect();
     clname->setEnabled(false);
     tcpSocket->connectToHost(ipadr, 49212);
-    connect(tcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
-    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this,         SLOT(slotError(QAbstractSocket::SocketError))
-           );
+
 }
 
 // ----------------------------------------------------------------------
