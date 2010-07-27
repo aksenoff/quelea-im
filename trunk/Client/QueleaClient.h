@@ -7,6 +7,7 @@
 #include <QTime>
 #include <Qtgui>
 #include <QStateMachine>
+ #include <QTabWidget>
 
 class QTextEdit;
 class QLineEdit;
@@ -18,6 +19,8 @@ Q_OBJECT
 private:
     QTcpSocket* tcpSocket;
     QTextEdit*  textInfo;
+    QTextEdit*  textInfo2;
+    QTextEdit*  textInfo3;
     QLineEdit*  messInput;
     QComboBox*  clname;
     QListWidget* contlist;
@@ -27,6 +30,7 @@ private:
     QPushButton* sendtochat;
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
+    QTabWidget* tab;
     quint16     nextBlockSize;
     void SendToServer(Message* message);
     QStateMachine connectionStatus;
