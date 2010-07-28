@@ -9,8 +9,6 @@
 QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 {
     textInfo  = new QTextEdit;
-    textInfo2  = new QTextEdit;
-    textInfo3  = new QTextEdit;
     messInput = new QLineEdit;
     clname = new QComboBox;
     contlist = new QListWidget;
@@ -33,11 +31,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    tab = new QTabWidget;
 
-    tab->addTab(textInfo, QString::fromLocal8Bit(" Чат "));
-    tab->addTab(textInfo2, QString::fromLocal8Bit(" Лично "));
-    tab->addTab(textInfo3, QString::fromLocal8Bit(" Лог "));
     
     connect(clname, SIGNAL(editTextChanged(QString)),
             this, SLOT(enableConnButton()));
@@ -66,8 +60,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 
     connectionStatus.start();
 
-
-
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
     QHBoxLayout* nameLayout = new QHBoxLayout;
@@ -77,7 +69,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Вас зовут:")),0,Qt::AlignRight);
     nameLayout->addWidget(clname);
     leftLayout->addLayout(nameLayout);
-    leftLayout->addWidget(tab);
+    leftLayout->addWidget(textInfo);
     send2chatLayout->addSpacerItem(spacer1);
     send2chatLayout->addWidget(sendtochat);
     send2chatLayout->addSpacerItem(spacer2);
@@ -95,7 +87,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 
 
 }
-
 void QueleaClient::enableConnected()
 {
     connect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
@@ -143,7 +134,7 @@ void QueleaClient::slotReadyRead()
                 Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
                 SendToServer(auth_req);
                 delete auth_req;
-                textInfo3->append("["+time.toString()+"]" + " " + str);
+                textInfo->append("["+time.toString()+"]" + " " + str);
                 break;
             }
 
@@ -153,12 +144,12 @@ void QueleaClient::slotReadyRead()
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
-               textInfo3->append("["+time.toString()+"]" + " " + str);
+               textInfo->append("["+time.toString()+"]" + " " + str);
                break;
            }
         case CONTACTS_RESPONSE:
            {
-               textInfo3->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен."));
+               textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен."));
                QStringList clist = mess->text.split(";");
                contlist->clear();
                clist.removeOne(clname->currentText());
@@ -174,16 +165,9 @@ void QueleaClient::slotReadyRead()
            {
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
-               textInfo2->append("["+time.toString()+"]"+ " " + str);
-               break;
-           }
-        case MESSAGE_TO_CHAT:
-           {
-               QStringList clist = mess->text.split(";");
-               str=clist[0]+clist[2]+": "+clist[1];
                textInfo->append("["+time.toString()+"]"+ " " + str);
                break;
-           }
+           }            
         }
         delete mess;
         nextBlockSize = 0;
@@ -202,7 +186,7 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      QString::fromLocal8Bit("В соединении было отказано.") :
                      QString(tcpSocket->errorString())
                     );
-    textInfo3->append(strError);
+    textInfo->append(strError);
 }
 
 // ----------------------------------------------------------------------
@@ -225,7 +209,7 @@ void QueleaClient::sendmess()
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
     if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
-        textInfo2->append("["+QTime::currentTime().toString()+"]"+" "+clname->currentText()+" -> "+contlist->currentItem()->text()+": "+messInput->text());
+        textInfo->append("["+QTime::currentTime().toString()+"]"+" "+clname->currentText()+" -> "+contlist->currentItem()->text()+": "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -252,7 +236,7 @@ void QueleaClient::opendial()
         {
             conn(ipadress);
             disconnect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
-            textInfo3->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Соединение с сервером..."));
+            textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Соединение с сервером..."));
 
         }
 }
@@ -279,6 +263,6 @@ void QueleaClient::disconn()
     tcpSocket->abort();
     contlist->clear();
     clname->setEnabled(true);
-    textInfo3->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Отключен от сервера"));
+    textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Отключен от сервера"));
 }
 

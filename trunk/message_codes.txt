@@ -6,7 +6,7 @@ message codes:
 3 - authorization_response(s->c);
 4 - contacts_request(c->s);
 5 - contacts_response(s->c);
-6 - message_to_chat(c->s, s->c);
+6 - message_to_chat(c->s);
 7 - message_to_server(c->s);
 8 - message_to_client(s->c);
 9 - delivery_report_to_server(c->s);
