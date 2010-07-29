@@ -19,14 +19,17 @@ private:
     QTcpSocket* tcpSocket;
     QTextEdit*  textInfo;
     QLineEdit*  messInput;
-    QComboBox*  clname;
     QListWidget* contlist;
     QInputDialog* ipselect;
     QPushButton* connbutton;
     QPushButton* pcmd;
+    QPushButton* settingsButton;
     QPushButton* sendtochat;
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
+    QLabel* stateLabel;
+    QString serverAdr;
+    QString clientName;
     quint16     nextBlockSize;
     void SendToServer(Message* message);
     QStateMachine connectionStatus;
@@ -38,14 +41,13 @@ signals:
 private slots:
     void slotReadyRead();
     void slotError(QAbstractSocket::SocketError);
-    void conn(QString ipadr);
+    void conn();
     void enableConnected();
     void enableDisconnected();
     void disconn();
     void sendmess();
     void sendchat();
-    void opendial();
-    void enableConnButton();
+    void openSettingDialog();
     void enableSendButton();
 };
 
@@ -55,7 +57,6 @@ public:
     unsigned char code;
 
     QString text;
-    QString recip;
     QVector<QString> contacts;
 public:
     Message(unsigned char c, QString s=""):code(c),text(s){};
@@ -64,7 +65,7 @@ public:
     friend QDataStream& operator>>(QDataStream& in, Message*& m) {
         unsigned char code;
         QString text;
-        QDataStream& ds = in >> code >> text;     
+        QDataStream& ds = in >> code >> text;
         if(!m) m = new Message(code, text);
         return ds;};
 };
