@@ -3,6 +3,7 @@
 #include <QtNetwork>
 #include <QtGui>
 #include "QueleaClient.h"
+#include "settingsDialog.h"
 #include "../codes.h"
 
 // ----------------------------------------------------------------------
@@ -10,20 +11,18 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 {
     textInfo  = new QTextEdit;
     messInput = new QLineEdit;
-    clname = new QComboBox;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
+    stateLabel = new QLabel("Offline");
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     tcpSocket = new QTcpSocket(this);
-    clname->setEditable(true);
     textInfo->setReadOnly(true);
     pcmd = new QPushButton(QString::fromLocal8Bit(" Отправить лично "));
     connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
     pcmd->setEnabled(false);
     pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connbutton = new QPushButton(QString::fromLocal8Bit(" Подключиться "));
-    connbutton->setEnabled(false);
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     sendtochat = new QPushButton(QString::fromLocal8Bit(" Отправить в чат "));
     connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
@@ -31,10 +30,11 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    settingsButton = new QPushButton("&Settings");
+    settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
 
-    
-    connect(clname, SIGNAL(editTextChanged(QString)),
-            this, SLOT(enableConnButton()));
+
 
     connect(messInput, SIGNAL(textEdited(QString)),
             this, SLOT(enableSendButton()));
@@ -66,8 +66,9 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     QHBoxLayout* send2chatLayout = new QHBoxLayout;
     QVBoxLayout* leftLayout = new QVBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
-    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Вас зовут:")),0,Qt::AlignRight);
-    nameLayout->addWidget(clname);
+    nameLayout->addWidget(settingsButton);
+    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Статус:")),0,Qt::AlignRight);
+    nameLayout->addWidget(stateLabel);
     leftLayout->addLayout(nameLayout);
     leftLayout->addWidget(textInfo);
     send2chatLayout->addSpacerItem(spacer1);
@@ -86,6 +87,28 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     setWindowIcon(QIcon::QIcon ("resource.rc"));
 
 
+
+    QFile file("set.dat");
+
+    if (file.open(QIODevice::ReadOnly)){
+        QTextStream stream (&file);
+        QString readname;
+        QString readserver;
+        bool autoconnect;
+        clientName=stream.readLine();
+        serverAdr=stream.readLine();
+        autoconnect= stream.readLine().toInt();
+        if (autoconnect)
+            conn();
+        file.close();
+    }
+    else {
+
+
+        openSettingDialog();
+
+    }
+
 }
 void QueleaClient::enableConnected()
 {
@@ -95,14 +118,17 @@ void QueleaClient::enableConnected()
 
 void QueleaClient::enableDisconnected()
 {
-    connect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
+    connect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
 }
 // ---------------------------------------------------------------------
-void QueleaClient::conn(QString ipadr)
+void QueleaClient::conn()
 {
+
     emit startedConnect();
-    clname->setEnabled(false);
-    tcpSocket->connectToHost(ipadr, 49212);
+    disconnect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
+    stateLabel->setText("Connection to server...");
+    tcpSocket->connectToHost(serverAdr, 49212);
+
 
 }
 
@@ -131,28 +157,27 @@ void QueleaClient::slotReadyRead()
         case CONNECTED:
             {
                 str = QString::fromLocal8Bit("Соединение установлено.");
-                Message* auth_req = new Message(AUTH_REQUEST, clname->currentText());
+                Message* auth_req = new Message(AUTH_REQUEST, clientName);
                 SendToServer(auth_req);
                 delete auth_req;
-                textInfo->append("["+time.toString()+"]" + " " + str);
+                stateLabel->setText(str);
                 break;
             }
 
         case AUTH_RESPONSE:
            {
-               str = QString::fromLocal8Bit("Вход выполнен.");;
+               str = QString::fromLocal8Bit("Вход выполнен.");
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
-               textInfo->append("["+time.toString()+"]" + " " + str);
+               stateLabel->setText("Online");
                break;
            }
         case CONTACTS_RESPONSE:
            {
-               textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Список контактов получен."));
                QStringList clist = mess->text.split(";");
                contlist->clear();
-               clist.removeOne(clname->currentText());
+               clist.removeOne(clientName);
                clist.removeOne("");
                if (clist.count()!=0)
                contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
@@ -167,7 +192,7 @@ void QueleaClient::slotReadyRead()
                str=clist[0]+clist[2]+": "+clist[1];
                textInfo->append("["+time.toString()+"]"+ " " + str);
                break;
-           }            
+           }
         }
         delete mess;
         nextBlockSize = 0;
@@ -177,16 +202,17 @@ void QueleaClient::slotReadyRead()
 // ----------------------------------------------------------------------
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
-    QString strError = 
+    QString strError =
         "["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Ошибка: ") + (err == QAbstractSocket::HostNotFoundError ?
                      QString::fromLocal8Bit("Сервер не найден.") :
-                     err == QAbstractSocket::RemoteHostClosedError ? 
+                     err == QAbstractSocket::RemoteHostClosedError ?
                      QString::fromLocal8Bit("Удалённый хост закрыл соединение.") :
-                     err == QAbstractSocket::ConnectionRefusedError ? 
+                     err == QAbstractSocket::ConnectionRefusedError ?
                      QString::fromLocal8Bit("В соединении было отказано.") :
                      QString(tcpSocket->errorString())
                     );
     textInfo->append(strError);
+    stateLabel->setText("Offline");
 }
 
 // ----------------------------------------------------------------------
@@ -209,7 +235,7 @@ void QueleaClient::sendmess()
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
     if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
-        textInfo->append("["+QTime::currentTime().toString()+"]"+" "+clname->currentText()+" -> "+contlist->currentItem()->text()+": "+messInput->text());
+        textInfo->append("["+QTime::currentTime().toString()+"]"+" "+clientName+" -> "+contlist->currentItem()->text()+": "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -224,29 +250,6 @@ void QueleaClient::sendchat()
 
 }
 // ----------------------------------------------------------------------
-void QueleaClient::opendial()
-{
-
-    QStringList items;
-    QTime time = QTime::currentTime();
-        bool ok=false;
-        QString ipadress = QInputDialog::getItem(this, (QString::fromLocal8Bit("Выберите сервер")),
-                                                 (QString::fromLocal8Bit("Выберите сервер:")), items, 0, true, &ok);
-        if (ok && !ipadress.isEmpty())
-        {
-            conn(ipadress);
-            disconnect(connbutton, SIGNAL(clicked()), this, SLOT(opendial()));
-            textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Соединение с сервером..."));
-
-        }
-}
-// ----------------------------------------------------------------------
-void QueleaClient::enableConnButton()
-
-{
-    connbutton->setEnabled(!clname->currentText().isEmpty());
-}
-
 
 void QueleaClient::enableSendButton()
 {
@@ -262,7 +265,26 @@ void QueleaClient::disconn()
     tcpSocket->close();
     tcpSocket->abort();
     contlist->clear();
-    clname->setEnabled(true);
-    textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Отключен от сервера"));
+    stateLabel->setText("Offline");
 }
 
+void QueleaClient::openSettingDialog()
+{
+   SettingsDialog* setdial = new SettingsDialog;
+    if (setdial->exec() == QDialog::Accepted) {
+
+        serverAdr=setdial->serverAdr();
+        clientName=setdial->clientName();
+
+        QFile file("set.dat");
+        if (file.open(QIODevice::WriteOnly)){
+            QTextStream stream (&file);
+            QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
+            stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect();
+            file.close();
+
+        }
+
+    }
+    delete setdial;
+}
