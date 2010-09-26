@@ -13,7 +13,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     messInput = new QLineEdit;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
-    stateLabel = new QLabel("Offline");
+    stateLabel = new QLabel("<FONT COLOR=RED>Offline</FONT>");
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     tcpSocket = new QTcpSocket(this);
@@ -170,7 +170,7 @@ void QueleaClient::slotReadyRead()
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
-               stateLabel->setText("Online");
+               stateLabel->setText("<FONT COLOR=GREEN>Online</FONT>");
                break;
            }
         case CONTACTS_RESPONSE:
@@ -190,7 +190,7 @@ void QueleaClient::slotReadyRead()
            {
                QStringList clist = mess->text.split(";");
                str=clist[0]+clist[2]+": "+clist[1];
-               textInfo->append("["+time.toString()+"]"+ " " + str);
+               textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+clist[0]+"</FONT> <FONT COLOR=ORANGERED>"+clist[2]+"</FONT>: "+clist[1]);
                break;
            }
         }
@@ -212,7 +212,7 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      QString(tcpSocket->errorString())
                     );
     textInfo->append(strError);
-    stateLabel->setText("Offline");
+    stateLabel->setText("<FONT COLOR=RED>Offline</FONT>");
 }
 
 // ----------------------------------------------------------------------
@@ -235,7 +235,7 @@ void QueleaClient::sendmess()
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
     if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
-        textInfo->append("["+QTime::currentTime().toString()+"]"+" "+clientName+" -> "+contlist->currentItem()->text()+": "+messInput->text());
+        textInfo->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=ORANGERED>"+contlist->currentItem()->text()+"</FONT>: "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -265,7 +265,7 @@ void QueleaClient::disconn()
     tcpSocket->close();
     tcpSocket->abort();
     contlist->clear();
-    stateLabel->setText("Offline");
+    stateLabel->setText("<FONT COLOR=RED>Offline</FONT>");
 }
 
 void QueleaClient::openSettingDialog()
