@@ -180,7 +180,7 @@ void QueleaServer::slotReadClient()
                 {
                     QVector<Client*>::iterator i;
                     for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
-                    QString nstr = " -> "+(*i)->getname();
+                    QString nstr = (*i)->getname();
                     str=(*from)->getname()+";"+messtoserv[1]+";"+nstr;
                     Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
                     for (int u=0;u<clients.size();u++)
