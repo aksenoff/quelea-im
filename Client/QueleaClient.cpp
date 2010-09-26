@@ -193,14 +193,13 @@ void QueleaClient::slotReadyRead()
                if (mlist[1]=="all")
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+mlist[2]);
                else
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>"+mlist[1]+"</FONT> "+mlist[2]);
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>["+mlist[1]+"]</FONT> "+mlist[2]);
                 break;
             }
-        case MESSAGE_TO_CLIENT:
+        case MESSAGE_TO_CLIENT: // incoming private message
            {
-               QStringList clist = mess->text.split(";");
-               str=clist[0]+clist[2]+": "+clist[1];
-               textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+clist[0]+"</FONT> <FONT COLOR=ORANGERED>"+clist[2]+"</FONT>: "+clist[1]);
+               QStringList mlist = mess->text.split(";"); //mlist[0]=from who, mlist[1]=text
+               textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
                break;
            }
         }
@@ -239,13 +238,12 @@ void QueleaClient::SendToServer(Message* message)
 
 // ------------------------------------------------------------------
 
-void QueleaClient::sendmess()
+void QueleaClient::sendmess() //outcoming private message
 {
     QString str=contlist->currentItem()->text()+";"+messInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    if (contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"))
-        textInfo->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=ORANGERED>"+contlist->currentItem()->text()+"</FONT>: "+messInput->text());
+    textInfo->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+contlist->currentItem()->text()+"]</FONT>: "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }

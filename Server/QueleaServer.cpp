@@ -150,7 +150,7 @@ void QueleaServer::slotReadClient()
 
                 QVector<Client*>::iterator i;
                 for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
-                str=(*from)->getname()+";"+messtoserv[1]+";"+"";
+                str=(*from)->getname()+";"+messtoserv[1]+";"+""; // (*from)->getname()=от кого, messtoserv[1]=текст
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
                 sendToClient(*i,newmess);
