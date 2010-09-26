@@ -186,6 +186,16 @@ void QueleaClient::slotReadyRead()
                enableSendButton();
                break;
            }
+
+        case MESSAGE_TO_CHAT:
+            {
+               QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
+               if (mlist[1]=="all")
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+mlist[2]);
+               else
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>"+mlist[1]+"</FONT> "+mlist[2]);
+                break;
+            }
         case MESSAGE_TO_CLIENT:
            {
                QStringList clist = mess->text.split(";");
@@ -242,7 +252,13 @@ void QueleaClient::sendmess()
 
 void QueleaClient::sendchat()
 {
-    QString str=contlist->currentItem()->text()+";"+messInput->text();
+    QString receiver;
+    if (contlist->currentRow()==0)
+        receiver = "all";
+    else
+        receiver = contlist->currentItem()->text();
+
+    QString str=receiver+";"+messInput->text();
     Message* newmess = new Message( MESSAGE_TO_CHAT,str);
     SendToServer(newmess);
     messInput->setText("");

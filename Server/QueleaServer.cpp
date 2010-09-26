@@ -166,27 +166,12 @@ void QueleaServer::slotReadClient()
 
                 QStringList messtoserv = mess->gettext().split(";");
 
+                str=(*from)->getname()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=от кого, messtoserv[0]=кому, messtoserv[1]=текст сообщени€
+                Message* newmess = new Message(MESSAGE_TO_CHAT,str);
+                for (int u=0;u<clients.size();u++)
+                     sendToClient(clients[u], newmess);
+                delete newmess;
 
-
-                if (messtoserv[0]==QString::fromLocal8Bit(">¬се собеседники"))
-                {
-                    str=(*from)->getname()+";"+messtoserv[1]+";"+"";
-                    Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
-                    for (int u=0;u<clients.size();u++)
-                        sendToClient(clients[u], newmess);
-                    delete newmess;
-                }
-                else
-                {
-                    QVector<Client*>::iterator i;
-                    for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
-                    QString nstr = (*i)->getname();
-                    str=(*from)->getname()+";"+messtoserv[1]+";"+nstr;
-                    Message* newmess = new Message(MESSAGE_TO_CLIENT,str);
-                    for (int u=0;u<clients.size();u++)
-                        sendToClient(clients[u], newmess);
-                    delete newmess;
-                }
                 break;
             }
 
