@@ -28,6 +28,7 @@ private:
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
     QLabel* stateLabel;
+    QTabWidget* tabWidget;
     QString serverAdr;
     QString clientName;
     quint16     nextBlockSize;
@@ -49,6 +50,7 @@ private slots:
     void sendchat();
     void openSettingDialog();
     void enableSendButton();
+    void addTab(QListWidgetItem*);
 };
 
 class Message
