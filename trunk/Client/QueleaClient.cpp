@@ -13,6 +13,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     messInput = new QLineEdit;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
+    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
     stateLabel = new QLabel("<FONT COLOR=RED>Offline</FONT>");
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
@@ -33,6 +34,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     settingsButton = new QPushButton("&Settings");
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
+    tabWidget = new QTabWidget;
+    tabWidget->addTab(textInfo,"All");
 
 
 
@@ -70,7 +73,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Статус:")),0,Qt::AlignRight);
     nameLayout->addWidget(stateLabel);
     leftLayout->addLayout(nameLayout);
-    leftLayout->addWidget(textInfo);
+    leftLayout->addWidget(tabWidget);
     send2chatLayout->addSpacerItem(spacer1);
     send2chatLayout->addWidget(sendtochat);
     send2chatLayout->addSpacerItem(spacer2);
@@ -293,7 +296,7 @@ void QueleaClient::openSettingDialog()
         QFile file("set.dat");
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream (&file);
-            QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
+           // QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
             stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect();
             file.close();
 
@@ -301,4 +304,10 @@ void QueleaClient::openSettingDialog()
 
     }
     delete setdial;
+}
+
+void QueleaClient::addTab(QListWidgetItem * item)
+{
+QTextEdit* privateTextInfo = new QTextEdit;
+tabWidget->addTab(privateTextInfo,item->text());
 }
