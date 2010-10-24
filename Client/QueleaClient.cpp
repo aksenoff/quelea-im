@@ -201,8 +201,29 @@ void QueleaClient::slotReadyRead()
             }
         case MESSAGE_TO_CLIENT: // incoming private message
            {
+               bool tabState=false;
                QStringList mlist = mess->text.split(";"); //mlist[0]=from who, mlist[1]=text
-               textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
+
+               for (int i=0; i<=tabWidget->count(); i++)
+
+                  if (mlist[0]==tabWidget->tabText(i))
+                   {
+                      tabState=true;
+                      QWidget *widget = tabWidget->currentWidget();
+                      QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
+                      privateTextInfo->setReadOnly(true);
+                      privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
+                      break;
+                  }
+
+                   if (tabState==false)
+                      {
+                      QTextEdit* privateTextInfo = new QTextEdit;
+                      privateTextInfo->setReadOnly(true);
+                      tabWidget->addTab(privateTextInfo,mlist[0]);
+                      privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
+                      }
+
                break;
            }
         }
@@ -243,10 +264,14 @@ void QueleaClient::SendToServer(Message* message)
 
 void QueleaClient::sendmess() //outcoming private message
 {
+    QWidget *widget = tabWidget->currentWidget();
+    QTextEdit *edit = static_cast<QTextEdit *>(widget);
+    edit->setReadOnly(true);
+
     QString str=contlist->currentItem()->text()+";"+messInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    textInfo->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+contlist->currentItem()->text()+"]</FONT>: "+messInput->text());
+    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+contlist->currentItem()->text()+"]</FONT>: "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -309,5 +334,5 @@ void QueleaClient::openSettingDialog()
 void QueleaClient::addTab(QListWidgetItem * item)
 {
 QTextEdit* privateTextInfo = new QTextEdit;
-tabWidget->addTab(privateTextInfo,item->text());
+tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
 }
