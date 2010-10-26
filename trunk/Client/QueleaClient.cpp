@@ -34,7 +34,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     settingsButton = new QPushButton("&Settings");
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
-    tabWidget = new QTabWidget;
+    tabWidget = new TabWt;
+    connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(normalizeTabColor(int)));
     tabWidget->addTab(textInfo,"All");
 
 
@@ -209,18 +210,22 @@ void QueleaClient::slotReadyRead()
                   if (mlist[0]==tabWidget->tabText(i))
                    {
                       tabState=true;
+
+                      if (tabWidget->currentIndex() != i)
+                      tabWidget->gettabbar()->setTabTextColor (i,"Blue");
+
                       QWidget *widget = tabWidget->currentWidget();
                       QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
                       privateTextInfo->setReadOnly(true);
                       privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
                       break;
-                  }
+                   }
 
                    if (tabState==false)
                       {
                       QTextEdit* privateTextInfo = new QTextEdit;
                       privateTextInfo->setReadOnly(true);
-                      tabWidget->addTab(privateTextInfo,mlist[0]);
+                      tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
                       privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
                       }
 
@@ -333,6 +338,22 @@ void QueleaClient::openSettingDialog()
 
 void QueleaClient::addTab(QListWidgetItem * item)
 {
-QTextEdit* privateTextInfo = new QTextEdit;
-tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
+    bool tabState = true;
+for (int i=0; i<=tabWidget->count();i++)
+    if (item->text()==tabWidget->tabText(i))
+    {
+        tabWidget->setCurrentIndex(i);
+        tabState=false;
+        break;
+    }
+if (tabState==true)
+    {
+    QTextEdit* privateTextInfo = new QTextEdit;
+    tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
+    }
+}
+
+void QueleaClient::normalizeTabColor(int tab)
+{
+    tabWidget->gettabbar()->setTabTextColor(tab,"black");
 }

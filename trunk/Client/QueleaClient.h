@@ -5,12 +5,13 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include <QTime>
-#include <Qtgui>
+#include <QtGui>
 #include <QStateMachine>
 
 class QTextEdit;
 class QLineEdit;
 class Message;
+class TabWt;
 
 // ======================================================================
 class QueleaClient : public QWidget {
@@ -28,7 +29,7 @@ private:
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
     QLabel* stateLabel;
-    QTabWidget* tabWidget;
+    TabWt* tabWidget;
     QString serverAdr;
     QString clientName;
     quint16     nextBlockSize;
@@ -51,6 +52,7 @@ private slots:
     void openSettingDialog();
     void enableSendButton();
     void addTab(QListWidgetItem*);
+    void normalizeTabColor(int tab);
 };
 
 class Message
@@ -70,5 +72,14 @@ public:
         QDataStream& ds = in >> code >> text;
         if(!m) m = new Message(code, text);
         return ds;};
+};
+
+class TabWt : public QTabWidget
+{
+public:
+    QTabBar * gettabbar()  const
+    {
+    return tabBar();
+    }
 };
 #endif
