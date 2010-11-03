@@ -35,9 +35,10 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
     tabWidget = new TabWt;
+    tabWidget->setTabsClosable(true);
     connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(normalizeTabColor(int)));
+    connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
     tabWidget->addTab(textInfo,"All");
-
 
 
     connect(messInput, SIGNAL(textEdited(QString)),
@@ -108,9 +109,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     }
     else {
 
-
         openSettingDialog();
-
     }
 
 }
@@ -329,7 +328,6 @@ void QueleaClient::openSettingDialog()
            // QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
             stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect();
             file.close();
-
         }
 
     }
@@ -339,21 +337,26 @@ void QueleaClient::openSettingDialog()
 void QueleaClient::addTab(QListWidgetItem * item)
 {
     bool tabState = true;
-for (int i=0; i<=tabWidget->count();i++)
-    if (item->text()==tabWidget->tabText(i))
+    for (int i=0; i<=tabWidget->count();i++)
+        if (item->text()==tabWidget->tabText(i))
+        {
+            tabWidget->setCurrentIndex(i);
+            tabState=false;
+            break;
+        }
+    if (tabState==true)
     {
-        tabWidget->setCurrentIndex(i);
-        tabState=false;
-        break;
-    }
-if (tabState==true)
-    {
-    QTextEdit* privateTextInfo = new QTextEdit;
-    tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
+        QTextEdit* privateTextInfo = new QTextEdit;
+        tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
     }
 }
 
 void QueleaClient::normalizeTabColor(int tab)
 {
     tabWidget->gettabbar()->setTabTextColor(tab,"black");
+}
+
+void QueleaClient::closeTab(int index)
+{
+    tabWidget->removeTab(index);
 }

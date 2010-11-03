@@ -53,6 +53,7 @@ private slots:
     void enableSendButton();
     void addTab(QListWidgetItem*);
     void normalizeTabColor(int tab);
+    void closeTab(int index);
 };
 
 class Message
