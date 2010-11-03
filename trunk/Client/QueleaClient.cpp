@@ -39,6 +39,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(normalizeTabColor(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
     tabWidget->addTab(textInfo,"All");
+    tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
 
 
     connect(messInput, SIGNAL(textEdited(QString)),
