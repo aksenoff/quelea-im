@@ -15,20 +15,19 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
     stateLabel = new QLabel("<FONT COLOR=RED>Offline</FONT>");
+    yourCompanionsLabel = new QLabel(QString::fromLocal8Bit("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
+    spacer3 = new QWidget();
+    spacer4 = new QWidget();
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
-    pcmd = new QPushButton(QString::fromLocal8Bit(" Отправить лично "));
-    connect(pcmd, SIGNAL(clicked()), SLOT(sendmess()));
-    pcmd->setEnabled(false);
-    pcmd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    sendButton = new QPushButton(QString::fromLocal8Bit(" Отправить "));
+  //  connect(sendButton, SIGNAL(clicked()), SLOT(sendchat()));
+    sendButton->setEnabled(false);
+    sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connbutton = new QPushButton(QString::fromLocal8Bit(" Подключиться "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    sendtochat = new QPushButton(QString::fromLocal8Bit(" Отправить в чат "));
-    connect(sendtochat, SIGNAL(clicked()), SLOT(sendchat()));
-    sendtochat->setEnabled(false);
-    sendtochat->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     settingsButton = new QPushButton("&Settings");
@@ -39,6 +38,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(normalizeTabColor(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
     tabWidget->addTab(textInfo,"All");
+    connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
     tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
 
 
@@ -66,6 +66,19 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 
     connectionStatus.start();
 
+
+    QState (*sendChatState) = new QState, (*sendPrivateState) = new QState;
+    sendChatState->addTransition(this,SIGNAL(sendButtonChangeToPrivate()), sendPrivateState);
+    sendPrivateState->addTransition(this,SIGNAL(sendButtonChangeToChat()), sendChatState);
+    connect(sendChatState,SIGNAL(entered()),this,SLOT(enableSendChat()));
+    connect(sendPrivateState,SIGNAL(entered()),this,SLOT(enableSendPrivate()));
+    sendButtonStatus.addState(sendChatState);
+    sendButtonStatus.addState(sendPrivateState);
+    sendButtonStatus.setInitialState(sendChatState);
+
+    sendButtonStatus.start();
+
+
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
     QHBoxLayout* nameLayout = new QHBoxLayout;
@@ -78,14 +91,16 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     leftLayout->addLayout(nameLayout);
     leftLayout->addWidget(tabWidget);
     send2chatLayout->addSpacerItem(spacer1);
-    send2chatLayout->addWidget(sendtochat);
+   // send2chatLayout->addWidget(sendtochat);
     send2chatLayout->addSpacerItem(spacer2);
     leftLayout->addLayout(send2chatLayout);
     leftLayout->addWidget(messInput);
     rightLayout->addWidget(connbutton);
-    rightLayout->addWidget(new QLabel(QString::fromLocal8Bit("Ваши собеседники:")));
-    rightLayout->addWidget(contlist);
-    rightLayout->addWidget(pcmd);
+    rightLayout->addWidget(yourCompanionsLabel);//may be hidden
+    rightLayout->addWidget(contlist); //may be hidden
+    //rightLayout->addWidget(spacer3);
+   // rightLayout->addWidget(spacer4);
+    rightLayout->addWidget(sendButton);
     mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
     setLayout(mainLayout);
@@ -122,6 +137,7 @@ void QueleaClient::enableConnected()
 
 void QueleaClient::enableDisconnected()
 {
+    contlist->clear();
     connect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
 }
 // ---------------------------------------------------------------------
@@ -193,6 +209,9 @@ void QueleaClient::slotReadyRead()
 
         case MESSAGE_TO_CHAT:
             {
+               if (tabWidget->currentIndex() != 0)
+               tabWidget->gettabbar()->setTabTextColor (0,"Blue");
+
                QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
                if (mlist[1]=="all")
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+mlist[2]);
@@ -273,10 +292,10 @@ void QueleaClient::sendmess() //outcoming private message
     QTextEdit *edit = static_cast<QTextEdit *>(widget);
     edit->setReadOnly(true);
 
-    QString str=contlist->currentItem()->text()+";"+messInput->text();
+    QString str=tabWidget->tabText(tabWidget->currentIndex())+";"+messInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+contlist->currentItem()->text()+"]</FONT>: "+messInput->text());
+    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+tabWidget->tabText(tabWidget->currentIndex())+"]</FONT>: "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -301,8 +320,7 @@ void QueleaClient::sendchat()
 void QueleaClient::enableSendButton()
 {
 
-    pcmd->setEnabled(!messInput->text().isEmpty() && contlist->count()!=0 && contlist->currentItem()->text()!=QString::fromLocal8Bit(">Все собеседники"));
-    sendtochat->setEnabled(!messInput->text().isEmpty() && contlist->count()!=0);
+    sendButton->setEnabled(!messInput->text().isEmpty() && contlist->count()!=0);
 }
 
 void QueleaClient::disconn()
@@ -312,6 +330,7 @@ void QueleaClient::disconn()
     tcpSocket->close();
     tcpSocket->abort();
     contlist->clear();
+    enableSendButton();
     stateLabel->setText("<FONT COLOR=RED>Offline</FONT>");
 }
 
@@ -337,6 +356,10 @@ void QueleaClient::openSettingDialog()
 
 void QueleaClient::addTab(QListWidgetItem * item)
 {
+    if (item->listWidget()->currentRow()==0)
+        tabWidget->setCurrentIndex(0);
+    else {
+
     bool tabState = true;
     for (int i=0; i<=tabWidget->count();i++)
         if (item->text()==tabWidget->tabText(i))
@@ -348,8 +371,10 @@ void QueleaClient::addTab(QListWidgetItem * item)
     if (tabState==true)
     {
         QTextEdit* privateTextInfo = new QTextEdit;
+        privateTextInfo->setReadOnly(true);
         tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
     }
+        }
 }
 
 void QueleaClient::normalizeTabColor(int tab)
@@ -360,4 +385,33 @@ void QueleaClient::normalizeTabColor(int tab)
 void QueleaClient::closeTab(int index)
 {
     tabWidget->removeTab(index);
+}
+
+void QueleaClient::enableSendChat()
+{
+    connect(sendButton,SIGNAL(clicked()),this,SLOT(sendchat()));
+}
+
+void QueleaClient::enableSendPrivate()
+{
+    connect(sendButton,SIGNAL(clicked()),this,SLOT(sendmess()));
+}
+
+void QueleaClient::sendButtonFunc(int index)
+{
+    if (index==0)
+        {
+         contlist->setHidden(false);
+         yourCompanionsLabel->setHidden(false);
+         contlist->setCurrentRow(0);
+         emit sendButtonChangeToChat();
+         disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendmess()));
+        }
+    else
+      {
+         contlist->setHidden(true);
+         yourCompanionsLabel->setHidden(true);
+         emit sendButtonChangeToPrivate();
+         disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendchat()));
+      }
 }
