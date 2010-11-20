@@ -23,22 +23,27 @@ private:
     QListWidget* contlist;
     QInputDialog* ipselect;
     QPushButton* connbutton;
-    QPushButton* pcmd;
+    QPushButton* sendButton;
     QPushButton* settingsButton;
     QPushButton* sendtochat;
     QPushButton* info;
     QSpacerItem* spacer1,*spacer2;
+    QWidget *spacer3, *spacer4;
     QLabel* stateLabel;
+    QLabel*  yourCompanionsLabel;
     TabWt* tabWidget;
     QString serverAdr;
     QString clientName;
     quint16     nextBlockSize;
     void SendToServer(Message* message);
     QStateMachine connectionStatus;
+    QStateMachine sendButtonStatus;
 public:
     QueleaClient(QWidget* pwgt = 0) ;
 signals:
     void startedConnect();
+    void sendButtonChangeToChat();
+    void sendButtonChangeToPrivate();
 
 private slots:
     void slotReadyRead();
@@ -54,6 +59,9 @@ private slots:
     void addTab(QListWidgetItem*);
     void normalizeTabColor(int tab);
     void closeTab(int index);
+    void enableSendChat();
+    void enableSendPrivate();
+    void sendButtonFunc(int index);
 };
 
 class Message
