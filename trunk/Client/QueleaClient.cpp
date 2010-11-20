@@ -41,6 +41,9 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
     tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
 
+    sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
+    connect(sendShortcut, SIGNAL(activated()), sendButton, SLOT(click()));
+
 
     connect(messInput, SIGNAL(textEdited(QString)),
             this, SLOT(enableSendButton()));

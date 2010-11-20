@@ -38,6 +38,7 @@ private:
     void SendToServer(Message* message);
     QStateMachine connectionStatus;
     QStateMachine sendButtonStatus;
+    QShortcut* sendShortcut;
 public:
     QueleaClient(QWidget* pwgt = 0) ;
 signals:
