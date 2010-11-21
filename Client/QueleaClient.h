@@ -45,6 +45,7 @@ signals:
     void startedConnect();
     void sendButtonChangeToChat();
     void sendButtonChangeToPrivate();
+    void toDisconnStateBydisconn();
 
 private slots:
     void slotReadyRead();
