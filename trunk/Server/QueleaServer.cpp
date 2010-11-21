@@ -119,14 +119,30 @@ void QueleaServer::slotReadClient()
         case AUTH_REQUEST:
             {
                 Client* newclient = new Client(mess->gettext(), pClientSocket);
+                bool contCollState=false;
+                for(int i=0; i<clients.size(); i++)
+                   if(clients[i]->getname()==mess->gettext())
+                    {
+                        contCollState=true;
+                        Message* auth_error = new Message(AUTH_RESPONSE,"auth_error");
+                        sendToClient(newclient, auth_error);
+                        delete auth_error;
+                        break;
+                    }
+
+                if(contCollState==false) {
+
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
                 textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент ") + mess->gettext());
-                Message* auth_ok = new Message(AUTH_RESPONSE);
+                Message* auth_ok = new Message(AUTH_RESPONSE,"auth_ok");
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
+            }
                 break;
+
+
             }
         case CONTACTS_REQUEST:
             {

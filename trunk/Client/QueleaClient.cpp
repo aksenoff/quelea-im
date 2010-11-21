@@ -19,6 +19,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     spacer3 = new QWidget();
+    spacer3->setHidden(true);
     spacer4 = new QWidget();
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
@@ -60,6 +61,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Подключиться "));
     connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
     connectedState->addTransition(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),disconnectedState);
+    connectedState->addTransition(this, SIGNAL(toDisconnStateBydisconn()), disconnectedState);
     disconnectedState->addTransition(this, SIGNAL(startedConnect()), connectedState);
     connect(connectedState, SIGNAL(entered()), this, SLOT(enableConnected()));
     connect(disconnectedState, SIGNAL(entered()), this, SLOT(enableDisconnected()));
@@ -101,15 +103,16 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     rightLayout->addWidget(connbutton);
     rightLayout->addWidget(yourCompanionsLabel);//may be hidden
     rightLayout->addWidget(contlist); //may be hidden
-    //rightLayout->addWidget(spacer3);
+    rightLayout->addWidget(spacer3);
    // rightLayout->addWidget(spacer4);
     rightLayout->addWidget(sendButton);
     mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
+    
     setLayout(mainLayout);
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
-
+    setFocusProxy(textInfo);
 
 
     QFile file("set.dat");
@@ -141,6 +144,7 @@ void QueleaClient::enableConnected()
 void QueleaClient::enableDisconnected()
 {
     contlist->clear();
+    disconn();
     connect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
 }
 // ---------------------------------------------------------------------
@@ -189,11 +193,19 @@ void QueleaClient::slotReadyRead()
 
         case AUTH_RESPONSE:
            {
+               if(mess->text=="auth_ok")
+                {
                str = QString::fromLocal8Bit("Вход выполнен.");
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
                stateLabel->setText("<FONT COLOR=GREEN>Online</FONT>");
+           }
+              if(mess->text=="auth_error")
+               {
+                  textInfo->append("Error: Sush name is already used");
+                    emit toDisconnStateBydisconn();
+              }
                break;
            }
         case CONTACTS_RESPONSE:
@@ -406,6 +418,7 @@ void QueleaClient::sendButtonFunc(int index)
         {
          contlist->setHidden(false);
          yourCompanionsLabel->setHidden(false);
+         spacer3->setHidden(true);
          contlist->setCurrentRow(0);
          emit sendButtonChangeToChat();
          disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendmess()));
@@ -414,6 +427,7 @@ void QueleaClient::sendButtonFunc(int index)
       {
          contlist->setHidden(true);
          yourCompanionsLabel->setHidden(true);
+         spacer3->setHidden(false);
          emit sendButtonChangeToPrivate();
          disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendchat()));
       }
