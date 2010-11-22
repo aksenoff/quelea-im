@@ -125,8 +125,10 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
         clientName=stream.readLine();
         serverAdr=stream.readLine();
         autoconnect= stream.readLine().toInt();
-        if (autoconnect)
+        if (autoconnect){
             conn();
+            connectionStatus.setInitialState(connectedState);
+        }
         file.close();
     }
     else {
@@ -143,7 +145,6 @@ void QueleaClient::enableConnected()
 
 void QueleaClient::enableDisconnected()
 {
-    contlist->clear();
     disconn();
     connect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
 }
