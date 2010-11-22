@@ -1,4 +1,4 @@
-TEMPLATE = app
+﻿TEMPLATE = app
 QT += network
 SOURCES = main.cpp \
     QueleaClient.cpp \

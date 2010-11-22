@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _QueleaClient_h_
 #define _QueleaClient_h_
 
