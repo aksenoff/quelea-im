@@ -1,4 +1,4 @@
-
+Ôªø
 #include <QtNetwork>
 #include <QtGui>
 #include "QueleaServer.h"
@@ -15,8 +15,8 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
     tcpServer = new QTcpServer(this);
     if (!tcpServer->listen(QHostAddress::Any, 49212)) {
         QMessageBox::critical(0, 
-                              QString::fromLocal8Bit("Œ¯Ë·Í‡ ÒÂ‚Â‡"),
-                              QString::fromLocal8Bit("ÕÂ‚ÓÁÏÓÊÌÓ Á‡ÔÛÒÚËÚ¸ ÒÂ‚Â:")
+                              QString::fromLocal8Bit("–û—à–∏–±–∫–∞ —Å–µ—Ä–≤–µ—Ä–∞"),
+                              QString::fromLocal8Bit("–ù–µ–≤–æ–∑–º–æ–∂–Ω–æ –∑–∞–ø—É—Å—Ç–∏—Ç—å —Å–µ—Ä–≤–µ—Ä:")
                               + tcpServer->errorString()
                              );
         tcpServer->close();
@@ -50,7 +50,7 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 
     //Layout setup
     QVBoxLayout* pvbxLayout = new QVBoxLayout;    
-    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("—Â‚Â Á‡ÔÛ˘ÂÌ Ì‡ ")+ipAddress));
+    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("–°–µ—Ä–≤–µ—Ä –∑–∞–ø—É—â–µ–Ω –Ω–∞ ")+ipAddress));
     pvbxLayout->addWidget(textInfo);
     setLayout(pvbxLayout);
     setWindowTitle(tr("Quelea Server"));
@@ -135,7 +135,7 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("œÓ‰ÍÎ˛˜ÂÌ ÌÓ‚˚È ÍÎËÂÌÚ ") + mess->gettext());
+                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("–ü–æ–¥–∫–ª—é—á–µ–Ω –Ω–æ–≤—ã–π –∫–ª–∏–µ–Ω—Ç ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE,"auth_ok");
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -166,7 +166,7 @@ void QueleaServer::slotReadClient()
 
                 QVector<Client*>::iterator i;
                 for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
-                str=(*from)->getname()+";"+messtoserv[1]+";"+""; // (*from)->getname()=ÓÚ ÍÓ„Ó, messtoserv[1]=ÚÂÍÒÚ
+                str=(*from)->getname()+";"+messtoserv[1]+";"+""; // (*from)->getname()=–æ—Ç –∫–æ–≥–æ, messtoserv[1]=—Ç–µ–∫—Å—Ç
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
                 sendToClient(*i,newmess);
@@ -182,7 +182,7 @@ void QueleaServer::slotReadClient()
 
                 QStringList messtoserv = mess->gettext().split(";");
 
-                str=(*from)->getname()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=ÓÚ ÍÓ„Ó, messtoserv[0]=ÍÓÏÛ, messtoserv[1]=ÚÂÍÒÚ ÒÓÓ·˘ÂÌËˇ
+                str=(*from)->getname()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=–æ—Ç –∫–æ–≥–æ, messtoserv[0]=–∫–æ–º—É, messtoserv[1]=—Ç–µ–∫—Å—Ç —Å–æ–æ–±—â–µ–Ω–∏—è
                 Message* newmess = new Message(MESSAGE_TO_CHAT,str);
                 for (int u=0;u<clients.size();u++)
                      sendToClient(clients[u], newmess);
@@ -245,7 +245,7 @@ void QueleaServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
-    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit(" ÎËÂÌÚ ") +  (*dissock)->getname()+QString::fromLocal8Bit(" ÓÚÍÎ˛˜ÂÌ"));
+    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("–ö–ª–∏–µ–Ω—Ç ") +  (*dissock)->getname()+QString::fromLocal8Bit(" –æ—Ç–∫–ª—é—á–µ–Ω"));
     delete (*dissock);
     clients.erase(dissock);
 
