@@ -1,4 +1,4 @@
-﻿#include <QtGui>
+#include <QtGui>
 #include "settingsDialog.h"
 
 // ----------------------------------------------------------------------
@@ -9,16 +9,16 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     serverAdrLe  = new QLineEdit;
     autoconnectCheckBox = new QCheckBox;
 
-    QLabel* lblclientName    = new QLabel("&Name");
-    QLabel* lblserverAdr     = new QLabel("&Server");
-    QLabel* lblautoconnect    = new QLabel("&Autoconnect");
+    QLabel* lblclientName    = new QLabel(tr("&Name"));
+    QLabel* lblserverAdr     = new QLabel(tr("&Server"));
+    QLabel* lblautoconnect    = new QLabel(tr("&Autoconnect"));
 
     lblclientName->setBuddy(clientNameLe);
     lblserverAdr ->setBuddy(serverAdrLe);
     lblautoconnect->setBuddy(autoconnectCheckBox);
 
-    QPushButton* pcmdOk     = new QPushButton("&Ok");
-    QPushButton* pcmdCancel = new QPushButton("&Cancel");
+    QPushButton* pcmdOk     = new QPushButton(tr("&Ok"));
+    QPushButton* pcmdCancel = new QPushButton(tr("&Cancel"));
 
     connect(pcmdOk, SIGNAL(clicked()), SLOT(accept()));
     connect(pcmdCancel, SIGNAL(clicked()), SLOT(reject()));

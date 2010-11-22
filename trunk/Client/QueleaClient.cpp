@@ -1,4 +1,4 @@
-﻿
+
 
 #include <QtNetwork>
 #include <QtGui>
@@ -14,8 +14,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
-    stateLabel = new QLabel("<FONT COLOR=RED>Offline</FONT>");
-    yourCompanionsLabel = new QLabel(QString::fromLocal8Bit("Ваши собеседники:"));
+    stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
+    yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     spacer3 = new QWidget();
@@ -23,11 +23,11 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     spacer4 = new QWidget();
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
-    sendButton = new QPushButton(QString::fromLocal8Bit(" Отправить "));
+    sendButton = new QPushButton(tr(" Отправить "));
   //  connect(sendButton, SIGNAL(clicked()), SLOT(sendchat()));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connbutton = new QPushButton(QString::fromLocal8Bit(" Подключиться "));
+    connbutton = new QPushButton(tr(" Подключиться "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -57,8 +57,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
            );
 
     QState (*connectedState) = new QState, (*disconnectedState) = new QState;
-    connectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Отключиться "));
-    disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Подключиться "));
+    connectedState->assignProperty(connbutton, "text", tr(" Отключиться "));
+    disconnectedState->assignProperty(connbutton, "text", tr(" Подключиться "));
     connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
     connectedState->addTransition(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),disconnectedState);
     connectedState->addTransition(this, SIGNAL(toDisconnStateBydisconn()), disconnectedState);
@@ -91,7 +91,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     QVBoxLayout* leftLayout = new QVBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
     nameLayout->addWidget(settingsButton);
-    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Статус:")),0,Qt::AlignRight);
+    nameLayout->addWidget(new QLabel(tr("Статус:")),0,Qt::AlignRight);
     nameLayout->addWidget(stateLabel);
     leftLayout->addLayout(nameLayout);
     leftLayout->addWidget(tabWidget);
@@ -153,7 +153,7 @@ void QueleaClient::conn()
 
     emit startedConnect();
     disconnect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
-    stateLabel->setText("Connection to server...");
+    stateLabel->setText(tr("Connection to server..."));
     tcpSocket->connectToHost(serverAdr, 49212);
 
 
@@ -183,7 +183,7 @@ void QueleaClient::slotReadyRead()
         {
         case CONNECTED:
             {
-                str = QString::fromLocal8Bit("Соединение установлено.");
+                str = tr("Соединение установлено.");
                 Message* auth_req = new Message(AUTH_REQUEST, clientName);
                 SendToServer(auth_req);
                 delete auth_req;
@@ -195,15 +195,15 @@ void QueleaClient::slotReadyRead()
            {
                if(mess->text=="auth_ok")
                 {
-               str = QString::fromLocal8Bit("Вход выполнен.");
+               str = tr("Вход выполнен.");
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
-               stateLabel->setText("<FONT COLOR=GREEN>Online</FONT>");
+               stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
            }
               if(mess->text=="auth_error")
                {
-                  textInfo->append("Error: Sush name is already used");
+                  textInfo->append(tr("Error: Sush name is already used"));
                     emit toDisconnStateBydisconn();
               }
                break;
@@ -215,7 +215,7 @@ void QueleaClient::slotReadyRead()
                clist.removeOne(clientName);
                clist.removeOne("");
                if (clist.count()!=0)
-               contlist->addItem(QString::fromLocal8Bit(">Все собеседники"));
+               contlist->addItem(tr(">Все собеседники"));
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
                enableSendButton();
@@ -275,16 +275,17 @@ void QueleaClient::slotReadyRead()
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
     QString strError =
-        "["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Ошибка: ") + (err == QAbstractSocket::HostNotFoundError ?
-                     QString::fromLocal8Bit("Сервер не найден.") :
+        "["+QTime::currentTime().toString()+"]"+" "+tr("Ошибка: ") +
+                    (err == QAbstractSocket::HostNotFoundError ?
+                     tr("Сервер не найден.") :
                      err == QAbstractSocket::RemoteHostClosedError ?
-                     QString::fromLocal8Bit("Удалённый хост закрыл соединение.") :
+                     tr("Удалённый хост закрыл соединение.") :
                      err == QAbstractSocket::ConnectionRefusedError ?
-                     QString::fromLocal8Bit("В соединении было отказано.") :
+                     tr("В соединении было отказано.") :
                      QString(tcpSocket->errorString())
                     );
     textInfo->append(strError);
-    stateLabel->setText("<FONT COLOR=RED>Offline</FONT>");
+    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
 }
 
 // ----------------------------------------------------------------------
@@ -346,7 +347,7 @@ void QueleaClient::disconn()
     tcpSocket->abort();
     contlist->clear();
     enableSendButton();
-    stateLabel->setText("<FONT COLOR=RED>Offline</FONT>");
+    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
 }
 
 void QueleaClient::openSettingDialog()
