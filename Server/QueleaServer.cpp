@@ -1,4 +1,4 @@
-﻿
+
 #include <QtNetwork>
 #include <QtGui>
 #include "QueleaServer.h"
@@ -15,8 +15,8 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
     tcpServer = new QTcpServer(this);
     if (!tcpServer->listen(QHostAddress::Any, 49212)) {
         QMessageBox::critical(0, 
-                              QString::fromLocal8Bit("Ошибка сервера"),
-                              QString::fromLocal8Bit("Невозможно запустить сервер:")
+                              tr("Ошибка сервера"),
+                              tr("Невозможно запустить сервер:")
                               + tcpServer->errorString()
                              );
         tcpServer->close();
@@ -50,7 +50,7 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 
     //Layout setup
     QVBoxLayout* pvbxLayout = new QVBoxLayout;    
-    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Сервер запущен на ")+ipAddress));
+    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+tr("Сервер запущен на ")+ipAddress));
     pvbxLayout->addWidget(textInfo);
     setLayout(pvbxLayout);
     setWindowTitle(tr("Quelea Server"));
@@ -135,7 +135,7 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                textInfo->append("["+time.toString()+"]" + " "+QString::fromLocal8Bit("Подключен новый клиент ") + mess->gettext());
+                textInfo->append("["+time.toString()+"]" + " "+tr("Подключен новый клиент ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE,"auth_ok");
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -245,7 +245,7 @@ void QueleaServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
-    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+QString::fromLocal8Bit("Клиент ") +  (*dissock)->getname()+QString::fromLocal8Bit(" отключен"));
+    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getname()+tr(" отключен"));
     delete (*dissock);
     clients.erase(dissock);
 
