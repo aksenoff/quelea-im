@@ -1,4 +1,4 @@
-message codes:
+﻿message codes:
 
 0 - ping(c,s);
 1 - connected(s->c);

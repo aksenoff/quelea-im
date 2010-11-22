@@ -1,4 +1,4 @@
-
+ï»¿
 
 #include <QtNetwork>
 #include <QtGui>
@@ -15,7 +15,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
     stateLabel = new QLabel("<FONT COLOR=RED>Offline</FONT>");
-    yourCompanionsLabel = new QLabel(QString::fromLocal8Bit("Âàøè ñîáåñåäíèêè:"));
+    yourCompanionsLabel = new QLabel(QString::fromLocal8Bit("Ð’Ð°ÑˆÐ¸ ÑÐ¾Ð±ÐµÑÐµÐ´Ð½Ð¸ÐºÐ¸:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
     spacer3 = new QWidget();
@@ -23,11 +23,11 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     spacer4 = new QWidget();
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
-    sendButton = new QPushButton(QString::fromLocal8Bit(" Îòïðàâèòü "));
+    sendButton = new QPushButton(QString::fromLocal8Bit(" ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ "));
   //  connect(sendButton, SIGNAL(clicked()), SLOT(sendchat()));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connbutton = new QPushButton(QString::fromLocal8Bit(" Ïîäêëþ÷èòüñÿ "));
+    connbutton = new QPushButton(QString::fromLocal8Bit(" ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     info = new QPushButton("&Info");
     info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -57,8 +57,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
            );
 
     QState (*connectedState) = new QState, (*disconnectedState) = new QState;
-    connectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Îòêëþ÷èòüñÿ "));
-    disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" Ïîäêëþ÷èòüñÿ "));
+    connectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ "));
+    disconnectedState->assignProperty(connbutton, "text", QString::fromLocal8Bit(" ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ "));
     connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
     connectedState->addTransition(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),disconnectedState);
     connectedState->addTransition(this, SIGNAL(toDisconnStateBydisconn()), disconnectedState);
@@ -91,7 +91,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     QVBoxLayout* leftLayout = new QVBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
     nameLayout->addWidget(settingsButton);
-    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Ñòàòóñ:")),0,Qt::AlignRight);
+    nameLayout->addWidget(new QLabel(QString::fromLocal8Bit("Ð¡Ñ‚Ð°Ñ‚ÑƒÑ:")),0,Qt::AlignRight);
     nameLayout->addWidget(stateLabel);
     leftLayout->addLayout(nameLayout);
     leftLayout->addWidget(tabWidget);
@@ -183,7 +183,7 @@ void QueleaClient::slotReadyRead()
         {
         case CONNECTED:
             {
-                str = QString::fromLocal8Bit("Ñîåäèíåíèå óñòàíîâëåíî.");
+                str = QString::fromLocal8Bit("Ð¡Ð¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¾.");
                 Message* auth_req = new Message(AUTH_REQUEST, clientName);
                 SendToServer(auth_req);
                 delete auth_req;
@@ -195,7 +195,7 @@ void QueleaClient::slotReadyRead()
            {
                if(mess->text=="auth_ok")
                 {
-               str = QString::fromLocal8Bit("Âõîä âûïîëíåí.");
+               str = QString::fromLocal8Bit("Ð’Ñ…Ð¾Ð´ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½.");
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
@@ -215,7 +215,7 @@ void QueleaClient::slotReadyRead()
                clist.removeOne(clientName);
                clist.removeOne("");
                if (clist.count()!=0)
-               contlist->addItem(QString::fromLocal8Bit(">Âñå ñîáåñåäíèêè"));
+               contlist->addItem(QString::fromLocal8Bit(">Ð’ÑÐµ ÑÐ¾Ð±ÐµÑÐµÐ´Ð½Ð¸ÐºÐ¸"));
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
                enableSendButton();
@@ -227,7 +227,7 @@ void QueleaClient::slotReadyRead()
                if (tabWidget->currentIndex() != 0)
                tabWidget->gettabbar()->setTabTextColor (0,"Blue");
 
-               QStringList mlist = mess->text.split(";"); // mlist[0]=îò êîãî, mlist[1]=êîìó, mlist[2]=òåêñò ñîîáùåíèÿ
+               QStringList mlist = mess->text.split(";"); // mlist[0]=Ð¾Ñ‚ ÐºÐ¾Ð³Ð¾, mlist[1]=ÐºÐ¾Ð¼Ñƒ, mlist[2]=Ñ‚ÐµÐºÑÑ‚ ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
                if (mlist[1]=="all")
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+mlist[2]);
                else
@@ -275,12 +275,12 @@ void QueleaClient::slotReadyRead()
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
     QString strError =
-        "["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("Îøèáêà: ") + (err == QAbstractSocket::HostNotFoundError ?
-                     QString::fromLocal8Bit("Ñåðâåð íå íàéäåí.") :
+        "["+QTime::currentTime().toString()+"]"+" "+QString::fromLocal8Bit("ÐžÑˆÐ¸Ð±ÐºÐ°: ") + (err == QAbstractSocket::HostNotFoundError ?
+                     QString::fromLocal8Bit("Ð¡ÐµÑ€Ð²ÐµÑ€ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½.") :
                      err == QAbstractSocket::RemoteHostClosedError ?
-                     QString::fromLocal8Bit("Óäàë¸ííûé õîñò çàêðûë ñîåäèíåíèå.") :
+                     QString::fromLocal8Bit("Ð£Ð´Ð°Ð»Ñ‘Ð½Ð½Ñ‹Ð¹ Ñ…Ð¾ÑÑ‚ Ð·Ð°ÐºÑ€Ñ‹Ð» ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ðµ.") :
                      err == QAbstractSocket::ConnectionRefusedError ?
-                     QString::fromLocal8Bit("Â ñîåäèíåíèè áûëî îòêàçàíî.") :
+                     QString::fromLocal8Bit("Ð’ ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ð¸ Ð±Ñ‹Ð»Ð¾ Ð¾Ñ‚ÐºÐ°Ð·Ð°Ð½Ð¾.") :
                      QString(tcpSocket->errorString())
                     );
     textInfo->append(strError);
