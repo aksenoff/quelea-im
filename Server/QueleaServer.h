@@ -1,4 +1,4 @@
-﻿
+
 #ifndef _QueleaServer_h_
 #define _QueleaServer_h_
 
@@ -42,10 +42,10 @@ signals:
 public slots:
     void socketClosed();
 public:
-    QTcpSocket* getsocket(){return socket;};
-    QString getname(){return name;};
+    QTcpSocket* getsocket(){return socket;}
+    QString getname(){return name;}
     Client(const QString&, QTcpSocket*);
-    Client(){};
+    Client(){}
     void send(QByteArray ba);
 };
 
@@ -54,16 +54,16 @@ class Message
     unsigned char code;
     QString text;
 public:
-    operator int(){return code;};
-    QString gettext(){return text;};
-    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;};
+    operator int(){return code;}
+    QString gettext(){return text;}
+    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;}
     friend QDataStream& operator>>(QDataStream& in, Message*& m) {
         unsigned char code;
         QString text;
         QDataStream& ds = in >> code >> text;
         if(!m) m = new Message(code, text);
-        return ds;};
-    Message(unsigned char c, QString s=""):code(c),text(s){};
+        return ds;}
+    Message(unsigned char c, QString s=""):code(c),text(s){}
 };
 
 #endif
