@@ -3,14 +3,12 @@
 #include<QMenu>
 #include<QApplication>
 #include "systemTray.h"
-#include "QueleaClient.h"
 
-SystemTray::SystemTray(QWidget *pwgt /*=0*/)
-    : QWidget(pwgt),iconSwitcher(false)
+SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* client /*= 0*/)
+    : QWidget(pwgt),iconSwitcher(false),qc(client)
 {
 QAction* actShowHide = new QAction("Show/Hide",this);
 connect(actShowHide,SIGNAL(triggered()),this,SLOT(slotShowHide()));
-
 QAction* actShowMessage = new QAction("Show message",this);
 connect(actShowMessage,SIGNAL(triggered()),this,SLOT(slotShowMessage()));
 
@@ -41,20 +39,21 @@ trayIcon->show();
      }
 }
 
+
  void SystemTray::slotShowHide()
  {
- setVisible(!isVisible());
+ qc->setVisible(!(qc->isVisible()));
  }
 
  void SystemTray::slotShowMessage()
  {
-     trayIcon->showMessage("Inforamtion","This is information",QSystemTrayIcon::Information,3000);
+     trayIcon->showMessage("Information","This is information",QSystemTrayIcon::Information,3000);
  }
 
 
  void SystemTray::slotChangeIcon()
  {
  iconSwitcher = !iconSwitcher;
- QString pixmapName = iconSwitcher ? ":/img1.bmp":"/:img2.bmp";
+ QString pixmapName = iconSwitcher ? "img1.bmp":"img2.bmp";
  trayIcon->setIcon(QPixmap(pixmapName));
  }

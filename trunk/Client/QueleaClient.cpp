@@ -115,7 +115,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     setFocusProxy(textInfo);
 
-    SystemTray* st = new SystemTray;
+
 
 
     QFile file("set.dat");
@@ -154,7 +154,6 @@ void QueleaClient::enableDisconnected()
 // ---------------------------------------------------------------------
 void QueleaClient::conn()
 {
-
     emit startedConnect();
     disconnect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
     stateLabel->setText(tr("Connection to server..."));
