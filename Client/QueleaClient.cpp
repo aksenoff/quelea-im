@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "QueleaClient.h"
 #include "settingsDialog.h"
+#include "systemTray.h"
 #include "../codes.h"
 
 // ----------------------------------------------------------------------
@@ -113,6 +114,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     setFocusProxy(textInfo);
+
+    SystemTray* st = new SystemTray;
 
 
     QFile file("set.dat");
