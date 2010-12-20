@@ -41,22 +41,22 @@ private:
     QShortcut* sendShortcut;
 public:
     QueleaClient(QWidget* pwgt = 0) ;
+    QString clientStatus;
 signals:
     void startedConnect();
     void sendButtonChangeToChat();
     void sendButtonChangeToPrivate();
     void toDisconnStateBydisconn();
+    void statusChanged(QString status);
+
 
 private slots:
     void slotReadyRead();
     void slotError(QAbstractSocket::SocketError);
-    void conn();
     void enableConnected();
     void enableDisconnected();
-    void disconn();
     void sendmess();
     void sendchat();
-    void openSettingDialog();
     void enableSendButton();
     void addTab(QListWidgetItem*);
     void normalizeTabColor(int tab);
@@ -64,6 +64,12 @@ private slots:
     void enableSendChat();
     void enableSendPrivate();
     void sendButtonFunc(int index);
+    void changeStatus(QString status);
+
+public slots:
+     void openSettingDialog();
+     void conn();
+     void disconn();
 };
 
 class Message

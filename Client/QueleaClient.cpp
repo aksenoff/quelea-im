@@ -16,6 +16,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
+    clientStatus="offline";
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
@@ -202,12 +203,12 @@ void QueleaClient::slotReadyRead()
                Message* contacts_req = new Message(CONTACTS_REQUEST);
                SendToServer(contacts_req);
                delete contacts_req;
-               stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
+               changeStatus("online");
            }
               if(mess->text=="auth_error")
                {
                   textInfo->append(tr("Error: Sush name is already used"));
-                    emit toDisconnStateBydisconn();
+                  emit toDisconnStateBydisconn();
               }
                break;
            }
@@ -288,7 +289,8 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      QString(tcpSocket->errorString())
                     );
     textInfo->append(strError);
-    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+    changeStatus("offline");
+
 }
 
 // ----------------------------------------------------------------------
@@ -344,13 +346,14 @@ void QueleaClient::enableSendButton()
 
 void QueleaClient::disconn()
 {
+    toDisconnStateBydisconn();
     QTime time = QTime::currentTime();
     disconnect(connbutton, SIGNAL(clicked()), this, SLOT(disconn()));
     tcpSocket->close();
     tcpSocket->abort();
     contlist->clear();
     enableSendButton();
-    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+    changeStatus("offline");
 }
 
 void QueleaClient::openSettingDialog()
@@ -435,4 +438,15 @@ void QueleaClient::sendButtonFunc(int index)
          emit sendButtonChangeToPrivate();
          disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendchat()));
       }
+}
+
+void QueleaClient::changeStatus(QString status)
+{
+clientStatus=status;
+emit statusChanged(status);
+if(status=="online")
+    stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
+else
+    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+
 }
