@@ -35,6 +35,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     ptopLayout->addWidget(pcmdCancel, 3, 1);
     setLayout(ptopLayout);
 
+    setWindowTitle(tr("Quelea - Settings"));
+
     QFile file("set.dat");
 
     if (file.open(QIODevice::ReadOnly)){
