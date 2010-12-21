@@ -9,22 +9,25 @@ SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* client /*= 0*/)
 {
 
 connect(qc,SIGNAL(statusChanged(QString)),this,SLOT(slotChangeIcon(QString)));
-QAction* actShowHide = new QAction("Show/Hide Quelea",this);
-connect(actShowHide,SIGNAL(triggered()),this,SLOT(slotShowHide()));
-QAction* actShowMessage = new QAction("Show message",this);
-connect(actShowMessage,SIGNAL(triggered()),this,SLOT(slotShowMessage()));
 
-QAction* actChangeStatus = new QAction("Change status",this);
+actShowHide = new QAction(tr("Hide"),this);
+connect(actShowHide,SIGNAL(triggered()),this,SLOT(slotShowHide()));
+
+//actShowMessage = new QAction("Show message",this);
+//connect(actShowMessage,SIGNAL(triggered()),this,SLOT(slotShowMessage()));
+
+actChangeStatus = new QAction(tr("Connect"),this);
 connect(actChangeStatus,SIGNAL(triggered()),this,SLOT(slotChangeStatus()));
 
-QAction* actSettings = new QAction("Settings...",this);
+actSettings = new QAction(tr("Settings..."),this);
 connect(actSettings,SIGNAL(triggered()),qc,SLOT(openSettingDialog()));
 
-QAction* actQuit = new QAction("Quit",this);
+actQuit = new QAction(tr("Quit"),this);
 connect(actQuit,SIGNAL(triggered()),qApp,SLOT(quit()));
 
 trayIconMenu = new QMenu(this);
 trayIconMenu->addAction(actShowHide);
+trayIconMenu->setDefaultAction(actShowHide);
 trayIconMenu->addAction(actChangeStatus);
 trayIconMenu->addAction(actSettings);
 trayIconMenu->addSeparator();
@@ -65,6 +68,14 @@ switch (reason)
  void SystemTray::slotShowHide()
  {
  qc->setVisible(!(qc->isVisible()));
+
+ if (qc->isVisible())
+ {
+   actShowHide->setText(tr("Hide"));
+   qc->activateWindow();
+ }
+ else
+    actShowHide->setText(tr("Show"));
  }
 
  void SystemTray::slotShowMessage()
@@ -77,19 +88,26 @@ switch (reason)
  {
  QString pixmapName;
  if (status=="offline")
- pixmapName ="/icon-offline.png";
+ {
+    pixmapName ="/icon-offline.png";
+    actChangeStatus->setText(tr("Connect"));
+ }
  else
- pixmapName ="/icon.png";
+ {
+    pixmapName ="/icon.png";
+    actChangeStatus->setText(tr("Disconnect"));
+ }
  trayIcon->setIcon(QPixmap(pixmapName));
  }
 
  void SystemTray::slotChangeStatus()
  {
-    if(qc->clientStatus=="offline")
-     {
-        qc->conn();
 
-     }
+
+    if(qc->clientStatus=="offline")
+        qc->conn();
     else
         qc->disconn();
+
  }
+
