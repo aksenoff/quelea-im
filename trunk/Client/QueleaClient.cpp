@@ -114,7 +114,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     setLayout(mainLayout);
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
-    setFocusProxy(textInfo);
+    messInput->setFocus();
 
 
 
@@ -252,7 +252,7 @@ void QueleaClient::slotReadyRead()
                       if (tabWidget->currentIndex() != i)
                       tabWidget->gettabbar()->setTabTextColor (i,"Blue");
 
-                      QWidget *widget = tabWidget->currentWidget();
+                      QWidget *widget = tabWidget->widget(i);
                       QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
                       privateTextInfo->setReadOnly(true);
                       privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
@@ -261,12 +261,14 @@ void QueleaClient::slotReadyRead()
 
                    if (tabState==false)
                       {
-                      QTextEdit* privateTextInfo = new QTextEdit;
-                      privateTextInfo->setReadOnly(true);
-                      tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
-                      privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
+                         QTextEdit* privateTextInfo = new QTextEdit;
+                          privateTextInfo->setReadOnly(true);
+                          tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
+                          privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
                       }
-
+                   
+                   messageReceived(mlist[0]);
+                   
                break;
            }
         }
@@ -316,7 +318,7 @@ void QueleaClient::sendmess() //outcoming private message
     QString str=tabWidget->tabText(tabWidget->currentIndex())+";"+messInput->text();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT><FONT COLOR=DARKVIOLET>["+tabWidget->tabText(tabWidget->currentIndex())+"]</FONT>: "+messInput->text());
+    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->text());
     messInput->setText("");
     enableSendButton();
 }
@@ -442,11 +444,17 @@ void QueleaClient::sendButtonFunc(int index)
 
 void QueleaClient::changeStatus(QString status)
 {
-clientStatus=status;
-emit statusChanged(status);
-if(status=="online")
-    stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
-else
-    stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+    clientStatus=status;
+    emit statusChanged(status);
+    if(status=="online")
+        stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
+    else
+        stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+
+}
+
+void QueleaClient::messageReceived(QString receiver)
+{
+    emit newMessage(receiver);
 
 }

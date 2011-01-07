@@ -17,6 +17,8 @@ private:
     QAction* actChangeStatus;
     QAction* actSettings;
     QAction* actQuit;
+    QString receiverName;
+    bool nMess;
     QueleaClient* qc;
 
 protected:
@@ -28,9 +30,10 @@ public:
 public slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void slotShowHide();
-    void slotShowMessage();
+    void slotShowMessage(QString receiver);
     void slotChangeIcon(QString status="offline");
     void slotChangeStatus();
+    void slotNewMessage(QString receiver);
 };
 
 #endif // SYSTEMTRAY_H

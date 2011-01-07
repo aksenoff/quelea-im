@@ -5,10 +5,11 @@
 #include "systemTray.h"
 
 SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* client /*= 0*/)
-    : QWidget(pwgt),iconSwitcher(false),qc(client)
+    : QWidget(pwgt),iconSwitcher(false), nMess(false),qc(client)
 {
 
 connect(qc,SIGNAL(statusChanged(QString)),this,SLOT(slotChangeIcon(QString)));
+connect(qc,SIGNAL(newMessage(QString)),this,SLOT(slotNewMessage(QString)));
 
 actShowHide = new QAction(tr("Hide"),this);
 connect(actShowHide,SIGNAL(triggered()),this,SLOT(slotShowHide()));
@@ -73,27 +74,37 @@ switch (reason)
  {
    actShowHide->setText(tr("Hide"));
    qc->activateWindow();
+   if (nMess){
+       for (int i=0; i<=qc->tabWidget->count();i++)
+           if (receiverName==qc->tabWidget->tabText(i)){
+                qc->tabWidget->setCurrentIndex(i);
+                break;
+            }
+      slotChangeIcon(qc->clientStatus);
+      nMess = false;
+      receiverName="";
+   }
  }
  else
     actShowHide->setText(tr("Show"));
  }
 
- void SystemTray::slotShowMessage()
+ void SystemTray::slotShowMessage(QString receiver)
  {
-     trayIcon->showMessage("Information","This is information",QSystemTrayIcon::Information,3000);
+     trayIcon->showMessage("New message","New message from "+receiver,QSystemTrayIcon::Information,3000);
  }
 
 
  void SystemTray::slotChangeIcon(QString status)
  {
  QString pixmapName;
- if (status=="offline")
- {
+ if (status=="offline"){
     pixmapName ="/icon-offline.png";
     actChangeStatus->setText(tr("Connect"));
  }
- else
- {
+ else if(status=="message")
+     pixmapName="/message.png";
+ else {
     pixmapName ="/icon.png";
     actChangeStatus->setText(tr("Disconnect"));
  }
@@ -103,11 +114,22 @@ switch (reason)
  void SystemTray::slotChangeStatus()
  {
 
-
     if(qc->clientStatus=="offline")
         qc->conn();
     else
         qc->disconn();
-
  }
 
+ void SystemTray::slotNewMessage(QString receiver)
+ {
+     if (!qc->isVisible()){
+        slotChangeIcon("message");
+        slotShowMessage(receiver);
+    }
+     else
+         if (!qc->isActiveWindow())
+             QApplication::alert(qc);
+    nMess = true;
+    receiverName = receiver;
+
+ }
