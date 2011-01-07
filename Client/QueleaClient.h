@@ -31,7 +31,6 @@ private:
     QWidget *spacer3, *spacer4;
     QLabel* stateLabel;
     QLabel*  yourCompanionsLabel;
-    TabWt* tabWidget;
     QString serverAdr;
     QString clientName;
     quint16     nextBlockSize;
@@ -42,12 +41,14 @@ private:
 public:
     QueleaClient(QWidget* pwgt = 0) ;
     QString clientStatus;
+    TabWt* tabWidget;
 signals:
     void startedConnect();
     void sendButtonChangeToChat();
     void sendButtonChangeToPrivate();
     void toDisconnStateBydisconn();
     void statusChanged(QString status);
+    void newMessage(QString receiver);
 
 
 private slots:
@@ -65,6 +66,7 @@ private slots:
     void enableSendPrivate();
     void sendButtonFunc(int index);
     void changeStatus(QString status);
+    void messageReceived(QString receiver);
 
 public slots:
      void openSettingDialog();
