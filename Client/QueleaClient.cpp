@@ -232,10 +232,16 @@ void QueleaClient::slotReadyRead()
                tabWidget->gettabbar()->setTabTextColor (0,"Blue");
 
                QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
-               if (mlist[1]=="all")
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+mlist[2]);
+               QString fromWhoColor;
+               if (mlist[0]==clientName)
+                   fromWhoColor = "DARKVIOLET";
                else
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=GREEN>"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>["+mlist[1]+"]</FONT> "+mlist[2]);
+                   fromWhoColor = "GREEN";
+
+               if (mlist[1]=="all")
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
+               else
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>["+mlist[1]+"]</FONT> "+mlist[2]);
                 break;
             }
         case MESSAGE_TO_CLIENT: // incoming private message
