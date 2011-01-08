@@ -19,7 +19,7 @@ Q_OBJECT
 private:
     QTcpSocket* tcpSocket;
     QTextEdit*  textInfo;
-    QLineEdit*  messInput;
+    QTextEdit*  messInput;
     QListWidget* contlist;
     QInputDialog* ipselect;
     QPushButton* connbutton;

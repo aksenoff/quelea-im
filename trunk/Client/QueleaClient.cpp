@@ -10,7 +10,7 @@
 // ----------------------------------------------------------------------
 QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 {
-    messInput = new QLineEdit;
+    messInput = new QTextEdit;
     textInfo  = new QTextEdit;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
@@ -57,7 +57,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(sendShortcut, SIGNAL(activated()), sendButton, SLOT(click()));
 
 
-    connect(messInput, SIGNAL(textEdited(QString)),
+    connect(messInput, SIGNAL(textChanged()),
             this, SLOT(enableSendButton()));
 
     connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),
@@ -330,12 +330,11 @@ void QueleaClient::sendmess() //outcoming private message
     QWidget *widget = tabWidget->currentWidget();
     QTextEdit *edit = static_cast<QTextEdit *>(widget);
     edit->setReadOnly(true);
-
-    QString str=tabWidget->tabText(tabWidget->currentIndex())+";"+messInput->text();
+    QString str=tabWidget->tabText(tabWidget->currentIndex())+";"+messInput->toPlainText();
     Message* newmess = new Message(MESSAGE_TO_SERVER,str);
     SendToServer(newmess);
-    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->text());
-    messInput->setText("");
+    edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->toPlainText());
+    messInput->clear();
     enableSendButton();
 }
 
@@ -347,10 +346,10 @@ void QueleaClient::sendchat()
     else
         receiver = contlist->currentItem()->text();
 
-    QString str=receiver+";"+messInput->text();
+    QString str=receiver+";"+messInput->toPlainText();
     Message* newmess = new Message( MESSAGE_TO_CHAT,str);
     SendToServer(newmess);
-    messInput->setText("");
+    messInput->clear();
     enableSendButton();
 
 }
@@ -359,7 +358,7 @@ void QueleaClient::sendchat()
 void QueleaClient::enableSendButton()
 {
 
-    sendButton->setEnabled(!messInput->text().isEmpty() && contlist->count()!=0);
+    sendButton->setEnabled(!messInput->toPlainText().isEmpty() && contlist->count()!=0);
 }
 
 void QueleaClient::disconn()
