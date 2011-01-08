@@ -230,17 +230,21 @@ void QueleaClient::slotReadyRead()
                tabWidget->gettabbar()->setTabTextColor (0,"Blue");
 
                QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
-               QString fromWhoColor;
+               QString fromWhoColor = "GREEN";
                if (mlist[0]==clientName)
                    fromWhoColor = "DARKVIOLET";
-               else
-                   fromWhoColor = "GREEN";
 
                if (mlist[1]=="all")
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
-               else
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR=ORANGERED>["+mlist[1]+"]</FONT> "+mlist[2]);
-                break;
+               else{
+                   QString toWhoColor = "ORANGERED";
+                   if (mlist[1]==clientName){
+                       toWhoColor = "DARKVIOLET";
+                       playSound("chat");
+                   }
+                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
+               }
+               break;
             }
         case MESSAGE_TO_CLIENT: // incoming private message
            {
@@ -465,6 +469,7 @@ void QueleaClient::messageReceived(QString receiver)
 
 void QueleaClient::playSound(QString reason)
 {
-    if (enableSound)
-        QSound::play("/"+reason+".wav");
+    if (QSound::isAvailable())
+        if (enableSound)
+            QSound::play("/"+reason+".wav");
 }
