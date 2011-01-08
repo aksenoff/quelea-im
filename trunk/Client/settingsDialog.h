@@ -12,12 +12,13 @@ private:
     QLineEdit* clientNameLe;
     QLineEdit* serverAdrLe;
     QCheckBox* autoconnectCheckBox;
+    QCheckBox* enableSoundCheckBox;
 
 public:
     SettingsDialog(QWidget* pwgt = 0);
-
     QString clientName() const;
-    QString serverAdr () const;
+    QString serverAdr() const;
     bool autoconnect() const;
+    bool enableSound() const;
 };
 #endif  //_settingsDialog_h_
