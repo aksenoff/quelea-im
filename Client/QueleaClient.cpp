@@ -123,22 +123,20 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 
     if (file.open(QIODevice::ReadOnly)){
         QTextStream stream (&file);
-        QString readname;
-        QString readserver;
         bool autoconnect;
-        clientName=stream.readLine();
-        serverAdr=stream.readLine();
-        autoconnect= stream.readLine().toInt();
+        clientName = stream.readLine();
+        serverAdr = stream.readLine();
+        autoconnect = stream.readLine().toInt();
+        enableSound = stream.readLine().toInt();
         if (autoconnect){
             conn();
             connectionStatus.setInitialState(connectedState);
         }
         file.close();
     }
-    else {
-
+    else
         openSettingDialog();
-    }
+
 
 }
 void QueleaClient::enableConnected()
@@ -371,12 +369,13 @@ void QueleaClient::openSettingDialog()
 
         serverAdr=setdial->serverAdr();
         clientName=setdial->clientName();
+        enableSound=setdial->enableSound();
 
         QFile file("set.dat");
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream (&file);
            // QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
-            stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect();
+            stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect()<<'\n'<< flush<<setdial->enableSound();
             file.close();
         }
 
@@ -456,11 +455,16 @@ void QueleaClient::changeStatus(QString status)
         stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
     else
         stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
-
 }
 
 void QueleaClient::messageReceived(QString receiver)
 {
     emit newMessage(receiver);
+    playSound("message");
+}
 
+void QueleaClient::playSound(QString reason)
+{
+    if (enableSound)
+        QSound::play("/"+reason+".wav");
 }

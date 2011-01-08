@@ -38,6 +38,7 @@ private:
     QStateMachine connectionStatus;
     QStateMachine sendButtonStatus;
     QShortcut* sendShortcut;
+    bool enableSound;
 public:
     QueleaClient(QWidget* pwgt = 0) ;
     QString clientStatus;
@@ -67,6 +68,7 @@ private slots:
     void sendButtonFunc(int index);
     void changeStatus(QString status);
     void messageReceived(QString receiver);
+    void playSound(QString reason);
 
 public slots:
      void openSettingDialog();
