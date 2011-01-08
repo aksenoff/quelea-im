@@ -10,11 +10,12 @@
 // ----------------------------------------------------------------------
 QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
 {
-    textInfo  = new QTextEdit;
     messInput = new QLineEdit;
+    textInfo  = new QTextEdit;
     contlist = new QListWidget;
     contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
-    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
+    contlist->setFocusProxy(messInput);
+    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));   
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
     clientStatus="offline";
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
@@ -26,7 +27,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
     sendButton = new QPushButton(tr(" Отправить "));
-  //  connect(sendButton, SIGNAL(clicked()), SLOT(sendchat()));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connbutton = new QPushButton(tr(" Подключиться "));
@@ -43,6 +43,15 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     tabWidget->addTab(textInfo,"All");
     connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
     tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
+
+    //returning focus on messInput:
+    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),messInput,SLOT(setFocus()));
+    connect(contlist,SIGNAL(itemClicked(QListWidgetItem*)),messInput,SLOT(setFocus()));
+    connect(contlist,SIGNAL(clicked(QModelIndex)),messInput,SLOT(setFocus()));
+    connect(connbutton,SIGNAL(clicked()),messInput,SLOT(setFocus()));
+    connect(sendButton,SIGNAL(clicked()),messInput,SLOT(setFocus()));
+
+
 
     sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
     connect(sendShortcut, SIGNAL(activated()), sendButton, SLOT(click()));
@@ -115,7 +124,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     messInput->setFocus();
-
 
 
 
@@ -369,6 +377,7 @@ void QueleaClient::disconn()
 void QueleaClient::openSettingDialog()
 {
    SettingsDialog* setdial = new SettingsDialog;
+   connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
     if (setdial->exec() == QDialog::Accepted) {
 
         serverAdr=setdial->serverAdr();
@@ -378,8 +387,7 @@ void QueleaClient::openSettingDialog()
         QFile file("set.dat");
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream (&file);
-           // QString str = setdial->clientName()+"\n"+setdial->serverAdr();//+"\n"+setdial->autoconnect();
-            stream<<setdial->clientName()<<'\n'<< flush<<setdial->serverAdr()<<'\n'<< flush<<setdial->autoconnect()<<'\n'<< flush<<setdial->enableSound();
+            stream<<setdial->clientName()<<'\n'<<setdial->serverAdr()<<'\n'<<setdial->autoconnect()<<'\n'<<setdial->enableSound()<<flush;
             file.close();
         }
 
@@ -392,7 +400,6 @@ void QueleaClient::addTab(QListWidgetItem * item)
     if (item->listWidget()->currentRow()==0)
         tabWidget->setCurrentIndex(0);
     else {
-
     bool tabState = true;
     for (int i=0; i<=tabWidget->count();i++)
         if (item->text()==tabWidget->tabText(i))
