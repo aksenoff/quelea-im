@@ -60,7 +60,7 @@ private slots:
     void sendchat();
     void enableSendButton();
     void addTab(QListWidgetItem*);
-    void normalizeTabColor(int tab);
+    void tabChanged(int tab);
     void closeTab(int index);
     void enableSendChat();
     void enableSendPrivate();

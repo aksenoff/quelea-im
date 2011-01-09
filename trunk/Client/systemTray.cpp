@@ -75,11 +75,15 @@ switch (reason)
    actShowHide->setText(tr("Hide"));
    qc->activateWindow();
    if (nMess){
-       for (int i=0; i<=qc->tabWidget->count();i++)
-           if (receiverName==qc->tabWidget->tabText(i)){
-                qc->tabWidget->setCurrentIndex(i);
-                break;
-            }
+       if (receiverName=="all")
+           qc->tabWidget->setCurrentIndex(0);
+       else{
+         for (int i=0; i<=qc->tabWidget->count();i++)
+               if (receiverName==qc->tabWidget->tabText(i)){
+                   qc->tabWidget->setCurrentIndex(i);
+                   break;
+               }
+       }
       slotChangeIcon(qc->clientStatus);
       nMess = false;
       receiverName="";
@@ -91,7 +95,10 @@ switch (reason)
 
  void SystemTray::slotShowMessage(QString receiver)
  {
-     trayIcon->showMessage("New message","New message from "+receiver,QSystemTrayIcon::Information,3000);
+     if (receiver=="all")
+         trayIcon->showMessage("New chat message","Message from chat for you",QSystemTrayIcon::Information,3000);
+     else
+         trayIcon->showMessage("New message","New message from "+receiver,QSystemTrayIcon::Information,3000);
  }
 
 

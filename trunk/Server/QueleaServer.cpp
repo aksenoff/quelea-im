@@ -105,12 +105,16 @@ void QueleaServer::slotReadClient()
                 for(int i=0; i<clients.size(); i++)
                    if(clients[i]->getname()==mess->gettext())
                     {
-                        contCollState=true;
-                        Message* auth_error = new Message(AUTH_RESPONSE,"auth_error");
-                        sendToClient(newclient, auth_error);
-                        delete auth_error;
+                        contCollState=true;                   
                         break;
                     }
+
+                if (contCollState==true || mess->gettext()=="all"){
+                    Message* auth_error = new Message(AUTH_RESPONSE,"auth_error");
+                    sendToClient(newclient, auth_error);
+                    delete auth_error;
+                }
+
 
                 if(contCollState==false) {
 
