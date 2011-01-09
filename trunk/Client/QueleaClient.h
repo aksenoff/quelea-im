@@ -26,9 +26,8 @@ private:
     QPushButton* sendButton;
     QPushButton* settingsButton;
     QPushButton* sendtochat;
-    QPushButton* info;
-    QSpacerItem* spacer1,*spacer2;
-    QWidget *spacer3, *spacer4;
+    QPushButton* aboutButton;
+    QSpacerItem* spacer1,*spacer2,*spacer3, *spacer4, *spacer5;
     QLabel* stateLabel;
     QLabel*  yourCompanionsLabel;
     QString serverAdr;

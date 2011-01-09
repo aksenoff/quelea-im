@@ -13,7 +13,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     messInput = new QTextEdit;
     textInfo  = new QTextEdit;
     contlist = new QListWidget;
-    contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
+   // contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
+    contlist->resize(50,100);
     contlist->setFocusProxy(messInput);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));   
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
@@ -21,9 +22,9 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
-    spacer3 = new QWidget();
-    spacer3->setHidden(true);
-    spacer4 = new QWidget();
+    spacer3 = new QSpacerItem(100,0);
+    spacer4 = new QSpacerItem(0,29);
+    spacer5 = new QSpacerItem(0,30);
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
     sendButton = new QPushButton(tr(" Отправить "));
@@ -31,8 +32,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connbutton = new QPushButton(tr(" Подключиться "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    info = new QPushButton("&Info");
-    info->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    aboutButton = new QPushButton("&About");
+    aboutButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     settingsButton = new QPushButton("&Settings");
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
@@ -57,15 +58,11 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(sendShortcut, SIGNAL(activated()), sendButton, SLOT(click()));
 
 
-    connect(messInput, SIGNAL(textChanged()),
-            this, SLOT(enableSendButton()));
+    connect(messInput, SIGNAL(textChanged()),this, SLOT(enableSendButton()));
 
-    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),
-            this, SLOT(enableSendButton()));
+    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),this, SLOT(enableSendButton()));
     connect(tcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
-    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this,         SLOT(slotError(QAbstractSocket::SocketError))
-           );
+    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(slotError(QAbstractSocket::SocketError)));
 
     QState (*connectedState) = new QState, (*disconnectedState) = new QState;
     connectedState->assignProperty(connbutton, "text", tr(" Отключиться "));
@@ -79,9 +76,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connectionStatus.addState(connectedState);
     connectionStatus.addState(disconnectedState);
     connectionStatus.setInitialState(disconnectedState);
-
     connectionStatus.start();
-
 
     QState (*sendChatState) = new QState, (*sendPrivateState) = new QState;
     sendChatState->addTransition(this,SIGNAL(sendButtonChangeToPrivate()), sendPrivateState);
@@ -91,32 +86,33 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     sendButtonStatus.addState(sendChatState);
     sendButtonStatus.addState(sendPrivateState);
     sendButtonStatus.setInitialState(sendChatState);
-
     sendButtonStatus.start();
 
 
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
-    QHBoxLayout* nameLayout = new QHBoxLayout;
-    QHBoxLayout* send2chatLayout = new QHBoxLayout;
     QVBoxLayout* leftLayout = new QVBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
-    nameLayout->addWidget(settingsButton);
-    nameLayout->addWidget(new QLabel(tr("Статус:")),0,Qt::AlignRight);
-    nameLayout->addWidget(stateLabel);
-    leftLayout->addLayout(nameLayout);
+    QHBoxLayout* buttonLayout = new QHBoxLayout;
+    QHBoxLayout* sendLayout = new QHBoxLayout;
+    buttonLayout->addWidget(aboutButton);
+    buttonLayout->addWidget(settingsButton);
+    buttonLayout->addWidget(new QLabel(tr("Статус:")),0,Qt::AlignRight);
+    buttonLayout->addWidget(stateLabel);
+    buttonLayout->addWidget(connbutton);
+    leftLayout->addLayout(buttonLayout);
     leftLayout->addWidget(tabWidget);
-    send2chatLayout->addSpacerItem(spacer1);
-   // send2chatLayout->addWidget(sendtochat);
-    send2chatLayout->addSpacerItem(spacer2);
-    leftLayout->addLayout(send2chatLayout);
     leftLayout->addWidget(messInput);
-    rightLayout->addWidget(connbutton);
+    sendLayout->addSpacerItem(spacer1);
+    sendLayout->addSpacerItem(spacer2);
+    sendLayout->addSpacerItem(spacer3);
+    sendLayout->addWidget(sendButton);
+    leftLayout->addLayout(sendLayout);
+    rightLayout->addSpacerItem(spacer5);
     rightLayout->addWidget(yourCompanionsLabel);//may be hidden
     rightLayout->addWidget(contlist); //may be hidden
-    rightLayout->addWidget(spacer3);
-   // rightLayout->addWidget(spacer4);
-    rightLayout->addWidget(sendButton);
+    rightLayout->addSpacerItem(spacer4);
+
     mainLayout->addLayout(leftLayout);
     mainLayout->addLayout(rightLayout);
     
@@ -442,7 +438,6 @@ void QueleaClient::sendButtonFunc(int index)
         {
          contlist->setHidden(false);
          yourCompanionsLabel->setHidden(false);
-         spacer3->setHidden(true);
          contlist->setCurrentRow(0);
          emit sendButtonChangeToChat();
          disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendmess()));
@@ -451,7 +446,6 @@ void QueleaClient::sendButtonFunc(int index)
       {
          contlist->setHidden(true);
          yourCompanionsLabel->setHidden(true);
-         spacer3->setHidden(false);
          emit sendButtonChangeToPrivate();
          disconnect(sendButton,SIGNAL(clicked()),this,SLOT(sendchat()));
       }
