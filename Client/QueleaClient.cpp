@@ -39,7 +39,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
     tabWidget = new TabWt;
     tabWidget->setTabsClosable(true);
-    connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(normalizeTabColor(int)));
+    connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
     tabWidget->addTab(textInfo,"All");
     connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
@@ -224,6 +224,7 @@ void QueleaClient::slotReadyRead()
                contlist->addItems(clist);
                contlist->setCurrentRow(0);
                enableSendButton();
+               tabChanged(tabWidget->currentIndex());
                break;
            }
 
@@ -235,14 +236,14 @@ void QueleaClient::slotReadyRead()
                QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
                QString fromWhoColor = "GREEN";
                if (mlist[0]==clientName)
-                   fromWhoColor = "DARKVIOLET";
-
+                     fromWhoColor = "DARKVIOLET";
                if (mlist[1]=="all")
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
                else{
                    QString toWhoColor = "ORANGERED";
                    if (mlist[1]==clientName){
                        toWhoColor = "DARKVIOLET";
+                       emit newMessage("all");
                        playSound("chat");
                    }
                    textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
@@ -411,9 +412,13 @@ void QueleaClient::addTab(QListWidgetItem * item)
         }
 }
 
-void QueleaClient::normalizeTabColor(int tab)
+void QueleaClient::tabChanged(int tab)
 {
     tabWidget->gettabbar()->setTabTextColor(tab,"black");
+    if (tab!=0)
+        setWindowTitle(tr("Разговор: ")+tabWidget->tabText(tabWidget->currentIndex())+tr(" - Quelea"));
+    else
+        setWindowTitle(tr("Чат - Quelea "));
 }
 
 void QueleaClient::closeTab(int index)
