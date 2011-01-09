@@ -1,8 +1,12 @@
-﻿TEMPLATE = app
+TEMPLATE = app
 SOURCES = main.cpp \
-    QueleaServer.cpp
+    QueleaServerUI.cpp \
+    QueleaServer.cpp \
+    ../message.cpp
 QT += network
 HEADERS = QueleaServer.h \
-    ../codes.h
+    QueleaServerUI.h \
+    ../codes.h \
+    ../message.h
 win32:TARGET = ../QueleaServer
 RC_FILE = resource.rc

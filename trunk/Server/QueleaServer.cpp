@@ -1,30 +1,15 @@
-
-#include <QtNetwork>
-#include <QtGui>
 #include "QueleaServer.h"
+#include <QMessageBox>
 #include "../codes.h"
 
 // ----------------------------------------------------------------------
 
 
-QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
-                                                    , nextBlockSize(0)
+QueleaServer::QueleaServer(QueleaServerUI* userInterface)
+    : nextBlockSize(0), ipAddress(""), port(49212), ui(userInterface)
 {
-
-
-    tcpServer = new QTcpServer(this);
-    if (!tcpServer->listen(QHostAddress::Any, 49212)) {
-        QMessageBox::critical(0, 
-                              tr("Ошибка сервера"),
-                              tr("Невозможно запустить сервер:")
-                              + tcpServer->errorString()
-                             );
-        tcpServer->close();
-        return;
-    }
-    QString ipAddress;
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-    // use the first non-localhost IPv4 address
+    // ищем IP-адрес интерфейса, не являющегося localhost
     for (int i = 0; i < ipAddressesList.size(); ++i) {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
             ipAddressesList.at(i).toIPv4Address()) {
@@ -33,28 +18,25 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
         }
     }
 
-    // if we did not find one, use IPv4 localhost
-         if (ipAddress.isEmpty())
-             ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+    // если не нашли, используем localhost
+    if (ipAddress == "")
+        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
 
-
-
-
-    connect(tcpServer, SIGNAL(newConnection()),
+    // стартуем
+    if (!listen(static_cast<QHostAddress>(ipAddress), port)) {
+        QMessageBox::critical(0, 
+                              tr("Ошибка сервера"),
+                              tr("Невозможно запустить сервер:")
+                              + errorString()
+                             );
+        close();
+        return;
+    }
+    ui->log("<b>["+QTime::currentTime().toString()+"]"+" "+tr("Сервер запущен на ")+ipAddress+":"+QString::number(port)+"</b>");
+    connect(this, SIGNAL(newConnection()),
             this,         SLOT(slotNewConnection())
            );
 
-    textInfo = new QTextEdit;
-    textInfo->setReadOnly(true);
-
-
-    //Layout setup
-    QVBoxLayout* pvbxLayout = new QVBoxLayout;    
-    pvbxLayout->addWidget(new QLabel("["+QTime::currentTime().toString()+"]"+" "+tr("Сервер запущен на ")+ipAddress));
-    pvbxLayout->addWidget(textInfo);
-    setLayout(pvbxLayout);
-    setWindowTitle(tr("Quelea Server"));
-    setWindowIcon(QIcon::QIcon ("resource.rc"));
 
 
 }
@@ -63,7 +45,7 @@ QueleaServer::QueleaServer(QWidget* pwgt /*=0*/) : QWidget(pwgt)
 void QueleaServer::slotNewConnection()
 {
 
-    QTcpSocket* pClientSocket = tcpServer->nextPendingConnection();
+    QTcpSocket* pClientSocket = nextPendingConnection();
 
     connect(pClientSocket, SIGNAL(disconnected()),
             pClientSocket, SLOT(deleteLater())
@@ -135,7 +117,7 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newclient);
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                textInfo->append("["+time.toString()+"]" + " "+tr("Подключен новый клиент ") + mess->gettext());
+                ui->log("["+time.toString()+"]" + " "+tr("Подключен новый клиент ") + mess->gettext());
                 Message* auth_ok = new Message(AUTH_RESPONSE,"auth_ok");
                 sendToClient(newclient, auth_ok);
                 delete auth_ok;
@@ -245,7 +227,7 @@ void QueleaServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
     for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
-    textInfo->append("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getname()+tr(" отключен"));
+    ui->log("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getname()+tr(" отключен"));
     delete (*dissock);
     clients.erase(dissock);
 

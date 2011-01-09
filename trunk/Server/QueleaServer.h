@@ -1,32 +1,32 @@
 
-#ifndef _QueleaServer_h_
-#define _QueleaServer_h_
+#ifndef QUELEASERVER_H
+#define QUELEASERVER_H
 
-#include <QWidget>
-#include <QTime>
+#include "../message.h"
+#include <QtNetwork>
+#include "QueleaServerUI.h"
 
-class QTcpServer;
-class QTextEdit;
-class QTcpSocket;
-class QLabel;
+class QueleaServerUI;
 class Client;
 
 // ======================================================================
-class Message;
 
-class QueleaServer : public QWidget {
+class QueleaServer : public QTcpServer {
 Q_OBJECT
 private:
-    QTcpServer* tcpServer;
-    QTextEdit*  textInfo;
-    quint16     nextBlockSize;
+    quint16 nextBlockSize;
+    QString ipAddress;
+    quint16 port;
     QVector<Client*> clients;
+    QueleaServerUI* ui;
     void sendToSocket(QTcpSocket* socket, Message* message);
     void sendToClient(Client* client, Message* message);
 public:
-    QueleaServer(QWidget* pwgt = 0);
+    QueleaServer(QueleaServerUI* userInterface = 0);
 
 public slots:
+    //void slotStartServer();
+    //void slotStopServer();
     void slotNewConnection();
     void slotReadClient();
     void slotByeClient(QTcpSocket*);
@@ -47,23 +47,6 @@ public:
     Client(const QString&, QTcpSocket*);
     Client(){}
     void send(QByteArray ba);
-};
-
-class Message
-{
-    unsigned char code;
-    QString text;
-public:
-    operator int(){return code;}
-    QString gettext(){return text;}
-    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;}
-    friend QDataStream& operator>>(QDataStream& in, Message*& m) {
-        unsigned char code;
-        QString text;
-        QDataStream& ds = in >> code >> text;
-        if(!m) m = new Message(code, text);
-        return ds;}
-    Message(unsigned char c, QString s=""):code(c),text(s){}
 };
 
 #endif
