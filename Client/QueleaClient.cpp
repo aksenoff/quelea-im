@@ -13,16 +13,16 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     messInput = new QTextEdit;
     textInfo  = new QTextEdit;
     contlist = new QListWidget;
-   // contlist->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
     contlist->resize(50,100);
     contlist->setFocusProxy(messInput);
+    contlist->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::MinimumExpanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));   
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
     clientStatus="offline";
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
     spacer2 = new QSpacerItem(100,0);
-    spacer3 = new QSpacerItem(100,0);
+    spacer3 = new QSpacerItem(300,0,QSizePolicy::MinimumExpanding);
     spacer4 = new QSpacerItem(0,29);
     spacer5 = new QSpacerItem(0,30);
     tcpSocket = new QTcpSocket(this);
@@ -103,8 +103,6 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     leftLayout->addLayout(buttonLayout);
     leftLayout->addWidget(tabWidget);
     leftLayout->addWidget(messInput);
-    sendLayout->addSpacerItem(spacer1);
-    sendLayout->addSpacerItem(spacer2);
     sendLayout->addSpacerItem(spacer3);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
@@ -117,6 +115,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     mainLayout->addLayout(rightLayout);
     
     setLayout(mainLayout);
+    resize(560,370);
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     messInput->setFocus();
@@ -159,7 +158,7 @@ void QueleaClient::conn()
 {
     emit startedConnect();
     disconnect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
-    stateLabel->setText(tr("Connection to server..."));
+    stateLabel->setText(tr("Connection..."));
     tcpSocket->connectToHost(serverAdr, 49212);
 
 
@@ -189,7 +188,7 @@ void QueleaClient::slotReadyRead()
         {
         case CONNECTED:
             {
-                str = tr("Соединение установлено.");
+                str = tr("Соединено.");
                 Message* auth_req = new Message(AUTH_REQUEST, clientName);
                 SendToServer(auth_req);
                 delete auth_req;

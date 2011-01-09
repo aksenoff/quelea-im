@@ -23,22 +23,33 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     QPushButton* pcmdOk     = new QPushButton(tr("&Ok"));
     QPushButton* pcmdCancel = new QPushButton(tr("&Cancel"));
 
+    pcmdOk->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    pcmdCancel->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
     connect(pcmdOk, SIGNAL(clicked()), SLOT(accept()));
     connect(pcmdCancel, SIGNAL(clicked()), SLOT(reject()));
 
     //Layout setup
-    QGridLayout* ptopLayout = new QGridLayout;
-    ptopLayout->addWidget(lblclientName, 0, 0);
-    ptopLayout->addWidget(lblserverAdr, 1, 0);
-    ptopLayout->addWidget(lblautoconnect, 2, 0);
-    ptopLayout->addWidget(lblenableSound, 3, 0);
-    ptopLayout->addWidget(clientNameLe, 0, 1);
-    ptopLayout->addWidget(serverAdrLe, 1, 1);
-    ptopLayout->addWidget(autoconnectCheckBox, 2, 1);
-    ptopLayout->addWidget(enableSoundCheckBox,3,1);
-    ptopLayout->addWidget(pcmdOk, 4,0);
-    ptopLayout->addWidget(pcmdCancel, 4, 1);
-    setLayout(ptopLayout);
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    QHBoxLayout* topLayout = new QHBoxLayout;
+    QVBoxLayout* rightLayout = new QVBoxLayout;
+    QVBoxLayout* leftLayout = new QVBoxLayout;
+    QHBoxLayout* buttonLayout = new QHBoxLayout;
+    leftLayout->addWidget(lblclientName);
+    leftLayout->addWidget(lblserverAdr);
+    leftLayout->addWidget(autoconnectCheckBox);
+    leftLayout->addWidget(enableSoundCheckBox);
+    rightLayout->addWidget(clientNameLe);
+    rightLayout->addWidget(serverAdrLe);
+    rightLayout->addWidget(lblautoconnect);
+    rightLayout->addWidget(lblenableSound);
+    buttonLayout->addWidget(pcmdOk);
+    buttonLayout->addWidget(pcmdCancel);
+    topLayout->addLayout(leftLayout);
+    topLayout->addLayout(rightLayout);
+    mainLayout->addLayout(topLayout);
+    mainLayout->addLayout(buttonLayout);
+    setLayout(mainLayout);
 
     setWindowTitle(tr("Quelea - Settings"));
 
