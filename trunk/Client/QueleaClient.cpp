@@ -17,7 +17,7 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     contlist->setFocusProxy(messInput);
     contlist->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::MinimumExpanding);
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));   
-    stateLabel = new QLabel(tr("<FONT COLOR=RED>Offline</FONT>"));
+    stateLabel = new QLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
     clientStatus="offline";
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     spacer1 = new QSpacerItem(100,0);
@@ -27,21 +27,21 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     spacer5 = new QSpacerItem(0,30);
     tcpSocket = new QTcpSocket(this);
     textInfo->setReadOnly(true);
-    sendButton = new QPushButton(tr(" Отправить "));
+    sendButton = new QPushButton(tr("&Отправить"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connbutton = new QPushButton(tr(" Подключиться "));
+    connbutton = new QPushButton(tr(" &Подключиться "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    aboutButton = new QPushButton("&About");
+    aboutButton = new QPushButton(tr(" О п&рограмме "));
     aboutButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    settingsButton = new QPushButton("&Settings");
+    settingsButton = new QPushButton(tr("&Настройки"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
     tabWidget = new TabWt;
     tabWidget->setTabsClosable(true);
     connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
-    tabWidget->addTab(textInfo,"All");
+    tabWidget->addTab(textInfo,tr("Общий разговор"));
     connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
     tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
 
@@ -65,8 +65,8 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(slotError(QAbstractSocket::SocketError)));
 
     QState (*connectedState) = new QState, (*disconnectedState) = new QState;
-    connectedState->assignProperty(connbutton, "text", tr(" Отключиться "));
-    disconnectedState->assignProperty(connbutton, "text", tr(" Подключиться "));
+    connectedState->assignProperty(connbutton, "text", tr(" О&тключиться "));
+    disconnectedState->assignProperty(connbutton, "text", tr(" &Подключиться "));
     connectedState->addTransition(connbutton, SIGNAL(clicked()), disconnectedState);
     connectedState->addTransition(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),disconnectedState);
     connectedState->addTransition(this, SIGNAL(toDisconnStateBydisconn()), disconnectedState);
@@ -158,7 +158,7 @@ void QueleaClient::conn()
 {
     emit startedConnect();
     disconnect(connbutton, SIGNAL(clicked()), this, SLOT(conn()));
-    stateLabel->setText(tr("Connection..."));
+    stateLabel->setText(tr("Соединение..."));
     tcpSocket->connectToHost(serverAdr, 49212);
 
 
@@ -208,7 +208,7 @@ void QueleaClient::slotReadyRead()
            }
               if(mess->text=="auth_error")
                {
-                  textInfo->append(tr("Error: Sush name is already used"));
+                  textInfo->append(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
                   emit toDisconnStateBydisconn();
               }
                break;
@@ -293,7 +293,7 @@ void QueleaClient::slotReadyRead()
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
     QString strError =
-        "["+QTime::currentTime().toString()+"]"+" "+tr("Ошибка: ") +
+        "<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]<FONT>"+" <FONT COLOR=RED>"+tr("Ошибка: ") +
                     (err == QAbstractSocket::HostNotFoundError ?
                      tr("Сервер не найден.") :
                      err == QAbstractSocket::RemoteHostClosedError ?
@@ -301,7 +301,7 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      err == QAbstractSocket::ConnectionRefusedError ?
                      tr("В соединении было отказано.") :
                      QString(tcpSocket->errorString())
-                    );
+                    )+"<FONT>";
     textInfo->append(strError);
     changeStatus("offline");
 
@@ -460,9 +460,9 @@ void QueleaClient::changeStatus(QString status)
     clientStatus=status;
     emit statusChanged(status);
     if(status=="online")
-        stateLabel->setText(tr("<FONT COLOR=GREEN>Online</FONT>"));
+        stateLabel->setText(tr("<FONT COLOR=GREEN>В сети</FONT>"));
     else
-        stateLabel->setText(tr("<FONT COLOR=RED>Offline</FONT>"));
+        stateLabel->setText(tr("<FONT COLOR=RED>Отключен</FONT>"));
 }
 
 void QueleaClient::messageReceived(QString receiver)

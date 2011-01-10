@@ -10,18 +10,18 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     autoconnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
 
-    QLabel* lblclientName    = new QLabel(tr("&Name"));
-    QLabel* lblserverAdr     = new QLabel(tr("&Server"));
-    QLabel* lblautoconnect    = new QLabel(tr("&Autoconnect"));
-    QLabel* lblenableSound    = new QLabel(tr("&Enable sound"));
+    QLabel* lblclientName    = new QLabel(tr("&Имя:"));
+    QLabel* lblserverAdr     = new QLabel(tr("&Сервер:"));
+    QLabel* lblautoconnect    = new QLabel(tr("&Подключаться при запуске"));
+    QLabel* lblenableSound    = new QLabel(tr("&Включить звуки"));
 
     lblclientName->setBuddy(clientNameLe);
     lblserverAdr ->setBuddy(serverAdrLe);
     lblautoconnect->setBuddy(autoconnectCheckBox);
     lblenableSound->setBuddy(enableSoundCheckBox);
 
-    QPushButton* pcmdOk     = new QPushButton(tr("&Ok"));
-    QPushButton* pcmdCancel = new QPushButton(tr("&Cancel"));
+    QPushButton* pcmdOk     = new QPushButton(tr("&OK"));
+    QPushButton* pcmdCancel = new QPushButton(tr("&Отмена"));
 
     pcmdOk->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     pcmdCancel->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -51,7 +51,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Quelea - Settings"));
+    setWindowTitle(tr("Настройки - Quelea"));
 
     QFile file("set.dat");
 
