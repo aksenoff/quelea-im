@@ -11,19 +11,16 @@ SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* client /*= 0*/)
 connect(qc,SIGNAL(statusChanged(QString)),this,SLOT(slotChangeIcon(QString)));
 connect(qc,SIGNAL(newMessage(QString)),this,SLOT(slotNewMessage(QString)));
 
-actShowHide = new QAction(tr("Hide"),this);
+actShowHide = new QAction(tr("Скрыть"),this);
 connect(actShowHide,SIGNAL(triggered()),this,SLOT(slotShowHide()));
 
-//actShowMessage = new QAction("Show message",this);
-//connect(actShowMessage,SIGNAL(triggered()),this,SLOT(slotShowMessage()));
-
-actChangeStatus = new QAction(tr("Connect"),this);
+actChangeStatus = new QAction(tr("Подключиться"),this);
 connect(actChangeStatus,SIGNAL(triggered()),this,SLOT(slotChangeStatus()));
 
-actSettings = new QAction(tr("Settings..."),this);
+actSettings = new QAction(tr("Настройки..."),this);
 connect(actSettings,SIGNAL(triggered()),qc,SLOT(openSettingDialog()));
 
-actQuit = new QAction(tr("Quit"),this);
+actQuit = new QAction(tr("Выход"),this);
 connect(actQuit,SIGNAL(triggered()),qApp,SLOT(quit()));
 
 trayIconMenu = new QMenu(this);
@@ -36,7 +33,7 @@ trayIconMenu->addAction(actQuit);
 
 trayIcon = new QSystemTrayIcon(this);
 trayIcon->setContextMenu(trayIconMenu);
-trayIcon->setToolTip("Quelea");
+trayIcon->setToolTip(tr("Quelea"));
 
 connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
         this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
@@ -72,7 +69,7 @@ switch (reason)
 
  if (qc->isVisible())
  {
-   actShowHide->setText(tr("Hide"));
+   actShowHide->setText(tr("Скрыть"));
    qc->activateWindow();
    if (nMess){
        if (receiverName=="all")
@@ -90,15 +87,15 @@ switch (reason)
    }
  }
  else
-    actShowHide->setText(tr("Show"));
+    actShowHide->setText(tr("Показать"));
  }
 
  void SystemTray::slotShowMessage(QString receiver)
  {
      if (receiver=="all")
-         trayIcon->showMessage("New chat message","Message from chat for you",QSystemTrayIcon::Information,3000);
+         trayIcon->showMessage(tr("Сообщение из чата"),tr("Сообщение из чата для вас"),QSystemTrayIcon::Information,3000);
      else
-         trayIcon->showMessage("New message","New message from "+receiver,QSystemTrayIcon::Information,3000);
+         trayIcon->showMessage(tr("Новое сообщение"),tr("Новое сообщение от ")+receiver,QSystemTrayIcon::Information,3000);
  }
 
 
@@ -107,13 +104,13 @@ switch (reason)
  QString pixmapName;
  if (status=="offline"){
     pixmapName ="/icon-offline.png";
-    actChangeStatus->setText(tr("Connect"));
+    actChangeStatus->setText(tr("Подключиться"));
  }
  else if(status=="message")
      pixmapName="/message.png";
  else {
     pixmapName ="/icon.png";
-    actChangeStatus->setText(tr("Disconnect"));
+    actChangeStatus->setText(tr("Отключиться"));
  }
  trayIcon->setIcon(QPixmap(pixmapName));
  }
