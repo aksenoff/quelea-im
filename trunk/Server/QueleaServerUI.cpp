@@ -6,13 +6,12 @@
 
 // ----------------------------------------------------------------------
 
-
 QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     : QWidget(pwgt)
 {
     serverLog = new QTextEdit;
     serverLog->setReadOnly(true);
-    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout = new QVBoxLayout;
     mainLayout->addWidget(serverLog);
     setLayout(mainLayout);
     setWindowTitle(tr("Quelea Server"));
@@ -25,4 +24,13 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
 void QueleaServerUI::log(const QString &string)
 {
     serverLog->append(string);
+}
+
+//-----------------------------------------------------------------------
+
+QueleaServerUI::~QueleaServerUI()
+{
+    delete serverLog;
+    delete mainLayout;
+    delete server;
 }

@@ -13,9 +13,11 @@ private:
     QTextEdit* serverLog;
     QComboBox* ipAddressesCombo;
     QueleaServer* server;
+    QVBoxLayout* mainLayout;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
     void log(const QString& string); // протоколирование
+    ~QueleaServerUI();
 };
 
 #endif
