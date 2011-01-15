@@ -5,11 +5,9 @@
 #include "../message.h"
 #include <QtNetwork>
 #include "QueleaServerUI.h"
+#include "client.h"
 
 class QueleaServerUI;
-class Client;
-
-// ======================================================================
 
 class QueleaServer : public QTcpServer {
 Q_OBJECT
@@ -30,23 +28,6 @@ public slots:
     void slotNewConnection();
     void slotReadClient();
     void slotByeClient(QTcpSocket*);
-};
-
-class Client: public QWidget {
-Q_OBJECT
-private:
-    QString name;
-    QTcpSocket* socket;
-signals:
-    void goodbye(QTcpSocket*);
-public slots:
-    void socketClosed();
-public:
-    QTcpSocket* getsocket(){return socket;}
-    QString getname(){return name;}
-    Client(const QString&, QTcpSocket*);
-    Client(){}
-    void send(QByteArray ba);
 };
 
 #endif
