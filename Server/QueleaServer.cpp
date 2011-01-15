@@ -65,16 +65,7 @@ void QueleaServer::slotNewConnection()
 
 // ----------------------------------------------------------------------
 
-Client::Client(const QString &n, QTcpSocket *s):name(n),socket(s){
-    connect(socket, SIGNAL(disconnected()),
-            this, SLOT(socketClosed()));
 
-}
-
-void Client::socketClosed()
-{
-    emit goodbye(socket);
-}
 
 void QueleaServer::slotReadClient()
 {
@@ -103,7 +94,7 @@ void QueleaServer::slotReadClient()
                 Client* newclient = new Client(mess->gettext(), pClientSocket);
                 bool contCollState=false;
                 for(int i=0; i<clients.size(); i++)
-                   if(clients[i]->getname()==mess->gettext())
+                   if(clients[i]->getName()==mess->gettext())
                     {
                         contCollState=true;                   
                         break;
@@ -135,7 +126,7 @@ void QueleaServer::slotReadClient()
 
                 QString contacts_string = "";
                 for (int i=0; i<clients.size(); i++)
-                    contacts_string.append(clients[i]->getname()+";");
+                    contacts_string.append(clients[i]->getName()+";");
                 Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
                 for (int i=0;i<clients.size();i++)
                     sendToClient(clients[i], contacts_message);
@@ -146,13 +137,13 @@ void QueleaServer::slotReadClient()
             {
 
                 QVector<Client*>::iterator from;
-                for(from=clients.begin();(*from)->getsocket()!=pClientSocket;from++);
+                for(from=clients.begin();(*from)->getSocket()!=pClientSocket;from++);
 
                 QStringList messtoserv = mess->gettext().split(";");
 
                 QVector<Client*>::iterator i;
-                for(i=clients.begin();(*i)->getname()!=messtoserv[0];++i);
-                str=(*from)->getname()+";"+messtoserv[1]+";"+""; // (*from)->getname()=от кого, messtoserv[1]=текст
+                for(i=clients.begin();(*i)->getName()!=messtoserv[0];++i);
+                str=(*from)->getName()+";"+messtoserv[1]+";"+""; // (*from)->getname()=от кого, messtoserv[1]=текст
 
                 Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
                 sendToClient(*i,newmess);
@@ -164,11 +155,11 @@ void QueleaServer::slotReadClient()
         case MESSAGE_TO_CHAT:
             {
                 QVector<Client*>::iterator from;
-                for(from=clients.begin();(*from)->getsocket()!=pClientSocket;from++);
+                for(from=clients.begin();(*from)->getSocket()!=pClientSocket;from++);
 
                 QStringList messtoserv = mess->gettext().split(";");
 
-                str=(*from)->getname()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=от кого, messtoserv[0]=кому, messtoserv[1]=текст сообщения
+                str=(*from)->getName()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=от кого, messtoserv[0]=кому, messtoserv[1]=текст сообщения
                 Message* newmess = new Message(MESSAGE_TO_CHAT,str);
                 for (int u=0;u<clients.size();u++)
                      sendToClient(clients[u], newmess);
@@ -222,22 +213,19 @@ void QueleaServer::sendToClient(Client* client, Message* message)
     client->send(arrBlock);
 }
 
-void Client::send(QByteArray ba)
-{
-    socket->write(ba);
-}
+
 
 void QueleaServer::slotByeClient(QTcpSocket* s)
 {
     QVector<Client*>::iterator dissock;
-    for(dissock=clients.begin();(*dissock)->getsocket()!=s;dissock++);
-    ui->log("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getname()+tr(" отключен"));
+    for(dissock=clients.begin();(*dissock)->getSocket()!=s;dissock++);
+    ui->log("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getName()+tr(" отключен"));
     delete (*dissock);
     clients.erase(dissock);
 
     QString contacts_string = "";
     for (int i=0; i<clients.size(); i++)
-        contacts_string.append(clients[i]->getname()+";");
+        contacts_string.append(clients[i]->getName()+";");
     Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
     for (int i=0;i<clients.size();i++)
         sendToClient(clients[i], contacts_message);
