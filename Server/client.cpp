@@ -1,11 +1,11 @@
 #include "client.h"
 
-QTcpSocket* Client::getSocket()
+QTcpSocket* Client::getSocket() const
 {
     return socket;
 }
 
-QString Client::getName()
+QString Client::getName() const
 {
     return name;
 }
@@ -22,7 +22,3 @@ void Client::socketClosed()
     emit goodbye(socket);
 }
 
-void Client::send(QByteArray ba)
-{
-    socket->write(ba);
-}
