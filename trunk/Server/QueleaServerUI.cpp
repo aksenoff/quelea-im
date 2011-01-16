@@ -21,7 +21,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
 
 // ----------------------------------------------------------------------
 
-void QueleaServerUI::log(const QString &string)
+void QueleaServerUI::log(const QString &string) const
 {
     serverLog->append(string);
 }

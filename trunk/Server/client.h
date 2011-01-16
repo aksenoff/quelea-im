@@ -14,10 +14,9 @@ signals:
 public slots:
     void socketClosed();
 public:
-    QTcpSocket* getSocket();
-    QString getName();
+    QTcpSocket* getSocket() const;
+    QString getName() const;
     Client(const QString&, QTcpSocket*);
-    void send(QByteArray);
 };
 
 #endif

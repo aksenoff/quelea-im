@@ -4,12 +4,11 @@
 
 // ----------------------------------------------------------------------
 
-
 QueleaServer::QueleaServer(QueleaServerUI* userInterface)
     : nextBlockSize(0), ipAddress(""), port(49212), ui(userInterface)
 {
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-    // ищем IP-адрес интерфейса, не являющегося localhost
+    // searching for first non-localhost ip
     for (int i = 0; i < ipAddressesList.size(); ++i) {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
             ipAddressesList.at(i).toIPv4Address()) {
@@ -18,17 +17,14 @@ QueleaServer::QueleaServer(QueleaServerUI* userInterface)
         }
     }
 
-    // если не нашли, используем localhost
+    // not found? using localhost
     if (ipAddress == "")
         ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
 
-    // стартуем
-    if (!listen(static_cast<QHostAddress>(ipAddress), port)) {
-        QMessageBox::critical(0, 
-                              tr("Ошибка сервера"),
-                              tr("Невозможно запустить сервер:")
-                              + errorString()
-                             );
+    // starting server
+    if (!listen(static_cast<QHostAddress>(ipAddress), port))
+    {
+        QMessageBox::critical(0, tr("Ошибка сервера"), tr("Невозможно запустить сервер:") + errorString());
         close();
         return;
     }
@@ -36,36 +32,24 @@ QueleaServer::QueleaServer(QueleaServerUI* userInterface)
     connect(this, SIGNAL(newConnection()),
             this,         SLOT(slotNewConnection())
            );
-
-
-
 }
 
 // ----------------------------------------------------------------------
+
 void QueleaServer::slotNewConnection()
 {
-
-    QTcpSocket* pClientSocket = nextPendingConnection();
-
-    connect(pClientSocket, SIGNAL(disconnected()),
-            pClientSocket, SLOT(deleteLater())
+    QTcpSocket* clientSocket = nextPendingConnection();
+    connect(clientSocket, SIGNAL(disconnected()),
+            clientSocket, SLOT(deleteLater())
            );
-
-    connect(pClientSocket, SIGNAL(readyRead()), 
+    connect(clientSocket, SIGNAL(readyRead()),
             this,          SLOT(slotReadClient())
            );
-
-
-    Message *conMess = new Message(CONNECTED);
-
-    this->sendToSocket(pClientSocket,conMess);
-    delete conMess;
-    
+    Message connected(CONNECTED);
+    sendToSocket(clientSocket, &connected);
 }
 
 // ----------------------------------------------------------------------
-
-
 
 void QueleaServer::slotReadClient()
 {
@@ -101,9 +85,8 @@ void QueleaServer::slotReadClient()
                     }
 
                 if (contCollState==true || mess->gettext()=="all"){
-                    Message* auth_error = new Message(AUTH_RESPONSE,"auth_error");
-                    sendToClient(newclient, auth_error);
-                    delete auth_error;
+                    Message auth_error(AUTH_RESPONSE,"auth_error");
+                    sendToSocket(newclient->getSocket(), &auth_error);
                 }
 
 
@@ -113,9 +96,8 @@ void QueleaServer::slotReadClient()
                 connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
                 ui->log("["+time.toString()+"]" + " "+tr("Подключен новый клиент ") + mess->gettext());
-                Message* auth_ok = new Message(AUTH_RESPONSE,"auth_ok");
-                sendToClient(newclient, auth_ok);
-                delete auth_ok;
+                Message auth_ok(AUTH_RESPONSE,"auth_ok");
+                sendToSocket(newclient->getSocket(), &auth_ok);
             }
                 break;
 
@@ -124,13 +106,12 @@ void QueleaServer::slotReadClient()
         case CONTACTS_REQUEST:
             {
 
-                QString contacts_string = "";
+                QString contacts_string("");
                 for (int i=0; i<clients.size(); i++)
                     contacts_string.append(clients[i]->getName()+";");
-                Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
+                Message contacts_list(CONTACTS_RESPONSE, contacts_string);
                 for (int i=0;i<clients.size();i++)
-                    sendToClient(clients[i], contacts_message);
-                delete contacts_message;
+                    sendToSocket(clients[i]->getSocket(), &contacts_list);
                 break;
             }
         case MESSAGE_TO_SERVER:
@@ -145,9 +126,8 @@ void QueleaServer::slotReadClient()
                 for(i=clients.begin();(*i)->getName()!=messtoserv[0];++i);
                 str=(*from)->getName()+";"+messtoserv[1]+";"+""; // (*from)->getname()=от кого, messtoserv[1]=текст
 
-                Message* newmess = new Message(MESSAGE_TO_CLIENT,str); 
-                sendToClient(*i,newmess);
-                delete newmess;
+                Message newmess(MESSAGE_TO_CLIENT, str);
+                sendToSocket((*i)->getSocket(), &newmess);
                 break;
             }
 
@@ -160,11 +140,9 @@ void QueleaServer::slotReadClient()
                 QStringList messtoserv = mess->gettext().split(";");
 
                 str=(*from)->getName()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=от кого, messtoserv[0]=кому, messtoserv[1]=текст сообщения
-                Message* newmess = new Message(MESSAGE_TO_CHAT,str);
+                Message newmess(MESSAGE_TO_CHAT, str);
                 for (int u=0;u<clients.size();u++)
-                     sendToClient(clients[u], newmess);
-                delete newmess;
-
+                     sendToSocket(clients[u]->getSocket(), &newmess);
                 break;
             }
 
@@ -175,7 +153,7 @@ void QueleaServer::slotReadClient()
 }
 
 //-------------------------------------------------------------------------
-void QueleaServer::sendToSocket(QTcpSocket* socket, Message* message)
+void QueleaServer::sendToSocket(QTcpSocket* const socket, const Message* const message) const
 {
 
     QByteArray  arrBlock;
@@ -190,30 +168,7 @@ void QueleaServer::sendToSocket(QTcpSocket* socket, Message* message)
 
     socket->write(arrBlock);
 
-
-
 }
-
-
-
-
-// ----------------------------------------------------------------------
-void QueleaServer::sendToClient(Client* client, Message* message)
-{
-    QByteArray  arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_5);
-
-
-    out << quint16(0) << *message;
-
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-
-    client->send(arrBlock);
-}
-
-
 
 void QueleaServer::slotByeClient(QTcpSocket* s)
 {
@@ -226,10 +181,7 @@ void QueleaServer::slotByeClient(QTcpSocket* s)
     QString contacts_string = "";
     for (int i=0; i<clients.size(); i++)
         contacts_string.append(clients[i]->getName()+";");
-    Message* contacts_message = new Message(CONTACTS_RESPONSE, contacts_string);
+    Message contacts_list(CONTACTS_RESPONSE, contacts_string);
     for (int i=0;i<clients.size();i++)
-        sendToClient(clients[i], contacts_message);
-    delete contacts_message;
-
-
+        sendToSocket(clients[i]->getSocket(), &contacts_list);
 }
