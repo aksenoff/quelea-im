@@ -1,88 +1,113 @@
 #include <QtGui>
 #include "settingsDialog.h"
 
-// ----------------------------------------------------------------------
 SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
-     : QDialog(pwgt, Qt::WindowTitleHint | Qt::WindowSystemMenuHint)
+     : QDialog(pwgt, Qt::WindowTitleHint | Qt::MSWindowsFixedSizeDialogHint)
 {
-    clientNameLe = new QLineEdit;
-    serverAdrLe  = new QLineEdit;
+    clientNameEdit = new QLineEdit;
+    serverAddressEdit  = new QLineEdit;
     autoconnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
 
-    QLabel* lblclientName    = new QLabel(tr("&Имя:"));
-    QLabel* lblserverAdr     = new QLabel(tr("&Сервер:"));
-    QLabel* lblautoconnect    = new QLabel(tr("&Подключаться при запуске"));
-    QLabel* lblenableSound    = new QLabel(tr("&Включить звуки"));
+    clientNameLabel = new QLabel(tr("&Имя:"));
+    serverAddressLabel = new QLabel(tr("&Сервер:"));
+    autoConnectLabel = new QLabel(tr("&Подключаться при запуске"));
+    enableSoundLabel = new QLabel(tr("&Включить звуки"));
 
-    lblclientName->setBuddy(clientNameLe);
-    lblserverAdr ->setBuddy(serverAdrLe);
-    lblautoconnect->setBuddy(autoconnectCheckBox);
-    lblenableSound->setBuddy(enableSoundCheckBox);
+    clientNameLabel->setBuddy(clientNameEdit);
+    serverAddressLabel ->setBuddy(serverAddressEdit);
+    autoConnectLabel->setBuddy(autoconnectCheckBox);
+    enableSoundLabel->setBuddy(enableSoundCheckBox);
 
-    QPushButton* pcmdOk     = new QPushButton(tr("&OK"));
-    QPushButton* pcmdCancel = new QPushButton(tr("&Отмена"));
+    okButton = new QPushButton(tr("&OK"));
+    cancelButton = new QPushButton(tr("&Отмена"));
 
-    pcmdOk->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    pcmdCancel->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    okButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    cancelButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-    connect(pcmdOk, SIGNAL(clicked()), SLOT(accept()));
-    connect(pcmdCancel, SIGNAL(clicked()), SLOT(reject()));
+    connect(okButton, SIGNAL(clicked()),
+            this, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()),
+            this, SLOT(reject()));
 
     //Layout setup
-    QVBoxLayout* mainLayout = new QVBoxLayout;
-    QHBoxLayout* topLayout = new QHBoxLayout;
-    QVBoxLayout* rightLayout = new QVBoxLayout;
-    QVBoxLayout* leftLayout = new QVBoxLayout;
-    QHBoxLayout* buttonLayout = new QHBoxLayout;
-    leftLayout->addWidget(lblclientName);
-    leftLayout->addWidget(lblserverAdr);
+    mainLayout = new QVBoxLayout;
+    topLayout = new QHBoxLayout;
+    rightLayout = new QVBoxLayout;
+    leftLayout = new QVBoxLayout;
+    buttonLayout = new QHBoxLayout;
+    leftLayout->addWidget(clientNameLabel);
+    leftLayout->addWidget(serverAddressLabel);
     leftLayout->addWidget(autoconnectCheckBox);
     leftLayout->addWidget(enableSoundCheckBox);
-    rightLayout->addWidget(clientNameLe);
-    rightLayout->addWidget(serverAdrLe);
-    rightLayout->addWidget(lblautoconnect);
-    rightLayout->addWidget(lblenableSound);
-    buttonLayout->addWidget(pcmdOk);
-    buttonLayout->addWidget(pcmdCancel);
+    rightLayout->addWidget(clientNameEdit);
+    rightLayout->addWidget(serverAddressEdit);
+    rightLayout->addWidget(autoConnectLabel);
+    rightLayout->addWidget(enableSoundLabel);
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
     topLayout->addLayout(leftLayout);
     topLayout->addLayout(rightLayout);
     mainLayout->addLayout(topLayout);
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
-
     setWindowTitle(tr("Настройки - Quelea"));
 
-    QFile file("set.dat");
-
-    if (file.open(QIODevice::ReadOnly)){
-        QTextStream stream (&file);
-        clientNameLe->setText(stream.readLine());
-        serverAdrLe->setText(stream.readLine());
+    QFile file("settings.dat");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(&file);
+        clientNameEdit->setText(stream.readLine());
+        serverAddressEdit->setText(stream.readLine());
         if (stream.readLine()=="1")
             autoconnectCheckBox->setChecked(true);
         if (stream.readLine()=="1")
             enableSoundCheckBox->setChecked(true);
         file.close();
+    }
 }
+
+SettingsDialog::~SettingsDialog()
+{
+    delete clientNameEdit;
+    delete serverAddressEdit;
+    delete autoconnectCheckBox;
+    delete enableSoundCheckBox;
+    delete clientNameLabel;
+    delete serverAddressLabel;
+    delete autoConnectLabel;
+    delete enableSoundLabel;
+    delete okButton;
+    delete cancelButton;
+    delete mainLayout;
+    delete topLayout;
+    delete rightLayout;
+    delete leftLayout;
+    delete buttonLayout;
 }
 
 // ----------------------------------------------------------------------
+
 QString SettingsDialog::clientName() const
 {
-    return clientNameLe->text();
+    return clientNameEdit->text();
 }
 
 // ----------------------------------------------------------------------
-QString SettingsDialog::serverAdr() const
+
+QString SettingsDialog::serverAddress() const
 {
-    return serverAdrLe->text();
+    return serverAddressEdit->text();
 }
+
+// ----------------------------------------------------------------------
 
 bool SettingsDialog::autoconnect() const
 {
 return autoconnectCheckBox->isChecked();
 }
+
+// ----------------------------------------------------------------------
 
 bool SettingsDialog::enableSound() const
 {

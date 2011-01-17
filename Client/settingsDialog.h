@@ -1,24 +1,33 @@
-#ifndef _settingsDialog_h_
-#define _settingsDialog_h_
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include <QDialog>
+#include <QtGui>
 
-class QLineEdit;
-class QCheckBox;
-// ======================================================================
 class SettingsDialog : public QDialog {
     Q_OBJECT
 private:
-    QLineEdit* clientNameLe;
-    QLineEdit* serverAdrLe;
+    QLineEdit* clientNameEdit;
+    QLineEdit* serverAddressEdit;
     QCheckBox* autoconnectCheckBox;
     QCheckBox* enableSoundCheckBox;
-
+    QLabel* clientNameLabel;
+    QLabel* serverAddressLabel;
+    QLabel* autoConnectLabel;
+    QLabel* enableSoundLabel;
+    QPushButton* okButton;
+    QPushButton* cancelButton;
+    QVBoxLayout* mainLayout;
+    QHBoxLayout* topLayout;
+    QVBoxLayout* rightLayout;
+    QVBoxLayout* leftLayout;
+    QHBoxLayout* buttonLayout;
 public:
     SettingsDialog(QWidget* pwgt = 0);
+    ~SettingsDialog();
     QString clientName() const;
-    QString serverAdr() const;
+    QString serverAddress() const;
     bool autoconnect() const;
     bool enableSound() const;
 };
-#endif  //_settingsDialog_h_
+
+#endif

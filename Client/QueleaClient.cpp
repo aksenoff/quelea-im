@@ -37,13 +37,13 @@ QueleaClient::QueleaClient(QWidget* pwgt) : QWidget(pwgt), nextBlockSize(0)
     settingsButton = new QPushButton(tr("&Настройки"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
-    tabWidget = new TabWt;
+    tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
     connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
     tabWidget->addTab(textInfo,tr("Общий разговор"));
     connect(tabWidget, SIGNAL(currentChanged(int)),this,SLOT(sendButtonFunc(int)));
-    tabWidget->gettabbar()->setTabButton(0,QTabBar::RightSide,0);
+    tabWidget->getTabBar()->setTabButton(0,QTabBar::RightSide,0);
 
     //returning focus on messInput:
     connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),messInput,SLOT(setFocus()));
@@ -215,7 +215,7 @@ void QueleaClient::slotReadyRead()
     case MESSAGE_TO_CHAT:
         {
             if (tabWidget->currentIndex() != 0)
-                tabWidget->gettabbar()->setTabTextColor (0,"Blue");
+                tabWidget->getTabBar()->setTabTextColor (0,"Blue");
 
             QStringList mlist = mess.getText().split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
             QString fromWhoColor = "GREEN";
@@ -246,7 +246,7 @@ void QueleaClient::slotReadyRead()
                 tabState=true;
 
                 if (tabWidget->currentIndex() != i)
-                    tabWidget->gettabbar()->setTabTextColor (i,"Blue");
+                    tabWidget->getTabBar()->setTabTextColor (i,"Blue");
 
                 QWidget *widget = tabWidget->widget(i);
                 QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
@@ -259,7 +259,7 @@ void QueleaClient::slotReadyRead()
             {
                 QTextEdit* privateTextInfo = new QTextEdit;
                 privateTextInfo->setReadOnly(true);
-                tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
+                tabWidget->getTabBar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
                 privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
             }
 
@@ -344,14 +344,14 @@ void QueleaClient::openSettingDialog()
    connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
     if (setdial->exec() == QDialog::Accepted) {
 
-        serverAdr=setdial->serverAdr();
+        serverAdr=setdial->serverAddress();
         clientName=setdial->clientName();
         enableSound=setdial->enableSound();
 
         QFile file("set.dat");
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream (&file);
-            stream<<setdial->clientName()<<'\n'<<setdial->serverAdr()<<'\n'<<setdial->autoconnect()<<'\n'<<setdial->enableSound()<<flush;
+            stream<<setdial->clientName()<<'\n'<<setdial->serverAddress()<<'\n'<<setdial->autoconnect()<<'\n'<<setdial->enableSound()<<flush;
             file.close();
         }
 
@@ -383,7 +383,7 @@ void QueleaClient::addTab(QListWidgetItem * item)
 
 void QueleaClient::tabChanged(int tab)
 {
-    tabWidget->gettabbar()->setTabTextColor(tab,"black");
+    tabWidget->getTabBar()->setTabTextColor(tab,"black");
     if (tab!=0)
         setWindowTitle(tr("Разговор: ")+tabWidget->tabText(tabWidget->currentIndex())+tr(" - Quelea"));
     else
