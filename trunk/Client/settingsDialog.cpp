@@ -79,11 +79,11 @@ SettingsDialog::~SettingsDialog()
     delete enableSoundLabel;
     delete okButton;
     delete cancelButton;
-    delete mainLayout;
-    delete topLayout;
     delete rightLayout;
     delete leftLayout;
     delete buttonLayout;
+    delete topLayout;
+    delete mainLayout;
 }
 
 // ----------------------------------------------------------------------
