@@ -2,17 +2,18 @@
 #define MESSAGE_H
 
 #include <QWidget>
+#include <QtNetwork>
 
 class Message
 {
     unsigned char code;
     QString text;
 public:
-    operator int();
-    QString gettext();
-    friend QDataStream& operator<<(QDataStream&, const Message&);
-    friend QDataStream& operator>>(QDataStream&, Message*&);
+    operator int() const;
+    QString getText() const;
     Message(unsigned char, QString="");
+    Message(QTcpSocket*);
+    void send(QTcpSocket*) const;
 };
 
 #endif

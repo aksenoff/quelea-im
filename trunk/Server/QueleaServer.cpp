@@ -46,142 +46,115 @@ void QueleaServer::slotNewConnection()
             this,          SLOT(slotReadClient())
            );
     Message connected(CONNECTED);
-    sendToSocket(clientSocket, &connected);
+    connected.send(clientSocket);
 }
 
 // ----------------------------------------------------------------------
 
 void QueleaServer::slotReadClient()
 {
-    QTcpSocket* pClientSocket = (QTcpSocket*)sender();
-    QDataStream in(pClientSocket);
-    in.setVersion(QDataStream::Qt_4_5);
-    for (;;) {
-        if (!nextBlockSize) {
-            if (pClientSocket->bytesAvailable() < sizeof(quint16)) {
-                break;
+    QTcpSocket* clientSocket = (QTcpSocket*)sender();
+    Message* incomingMessage = new Message(clientSocket);
+    switch(*incomingMessage)
+    {
+    case AUTH_REQUEST:
+        {
+            Client* newClient = new Client(incomingMessage->getText(), clientSocket);
+            bool contCollState = false;
+            // finding out if chosen name is already used by another client
+            for(int i = 0; i < clients.size(); ++i)
+                if(clients[i]->getName() == incomingMessage->getText())
+                {
+                    contCollState = true;
+                    break;
+                }
+            // if yes then sending an error message
+            if (contCollState == true || incomingMessage->getText() == "all")
+            {
+                Message auth_error(AUTH_RESPONSE, "auth_error");
+                auth_error.send(newClient->getSocket());
+                delete newClient;
             }
-            in >> nextBlockSize;
-        }
-
-        if (pClientSocket->bytesAvailable() < nextBlockSize) {
+            else
+            {
+                // adding new client to vector
+                clients.push_back(newClient);
+                connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
+                        this, SLOT(slotByeClient(QTcpSocket*)));
+                ui->log("[" + QTime::currentTime().toString() + "]" + " " + tr("Подключен новый клиент ") + incomingMessage->getText());
+                // sending authorization confirmation
+                Message auth_ok(AUTH_RESPONSE, "auth_ok");
+                auth_ok.send(newClient->getSocket());
+            }
             break;
         }
-        QTime   time =  QTime::currentTime();
-        QString str;
-        Message *mess=0; //!
-        in >> mess;
-        switch(*mess)
+    case CONTACTS_REQUEST:
         {
-        case AUTH_REQUEST:
-            {
-                Client* newclient = new Client(mess->gettext(), pClientSocket);
-                bool contCollState=false;
-                for(int i=0; i<clients.size(); i++)
-                   if(clients[i]->getName()==mess->gettext())
-                    {
-                        contCollState=true;                   
-                        break;
-                    }
-
-                if (contCollState==true || mess->gettext()=="all"){
-                    Message auth_error(AUTH_RESPONSE,"auth_error");
-                    sendToSocket(newclient->getSocket(), &auth_error);
-                }
-
-
-                if(contCollState==false) {
-
-                clients.push_back(newclient);
-                connect(newclient,SIGNAL(goodbye(QTcpSocket*)),
-                        this, SLOT(slotByeClient(QTcpSocket*)));
-                ui->log("["+time.toString()+"]" + " "+tr("Подключен новый клиент ") + mess->gettext());
-                Message auth_ok(AUTH_RESPONSE,"auth_ok");
-                sendToSocket(newclient->getSocket(), &auth_ok);
-            }
-                break;
-
-
-            }
-        case CONTACTS_REQUEST:
-            {
-
-                QString contacts_string("");
-                for (int i=0; i<clients.size(); i++)
-                    contacts_string.append(clients[i]->getName()+";");
-                Message contacts_list(CONTACTS_RESPONSE, contacts_string);
-                for (int i=0;i<clients.size();i++)
-                    sendToSocket(clients[i]->getSocket(), &contacts_list);
-                break;
-            }
-        case MESSAGE_TO_SERVER:
-            {
-
-                QVector<Client*>::iterator from;
-                for(from=clients.begin();(*from)->getSocket()!=pClientSocket;from++);
-
-                QStringList messtoserv = mess->gettext().split(";");
-
-                QVector<Client*>::iterator i;
-                for(i=clients.begin();(*i)->getName()!=messtoserv[0];++i);
-                str=(*from)->getName()+";"+messtoserv[1]+";"+""; // (*from)->getname()=от кого, messtoserv[1]=текст
-
-                Message newmess(MESSAGE_TO_CLIENT, str);
-                sendToSocket((*i)->getSocket(), &newmess);
-                break;
-            }
-
-
-        case MESSAGE_TO_CHAT:
-            {
-                QVector<Client*>::iterator from;
-                for(from=clients.begin();(*from)->getSocket()!=pClientSocket;from++);
-
-                QStringList messtoserv = mess->gettext().split(";");
-
-                str=(*from)->getName()+";"+messtoserv[0]+";"+messtoserv[1]; // *from)->getname()=от кого, messtoserv[0]=кому, messtoserv[1]=текст сообщения
-                Message newmess(MESSAGE_TO_CHAT, str);
-                for (int u=0;u<clients.size();u++)
-                     sendToSocket(clients[u]->getSocket(), &newmess);
-                break;
-            }
-
+            QString contacts_string("");
+            // constructing string of client names
+            for (int i = 0; i < clients.size(); ++i)
+                contacts_string.append(clients[i]->getName()+";");
+            Message contacts_list(CONTACTS_RESPONSE, contacts_string);
+            // broadcasting
+            for (int i = 0; i < clients.size(); ++i)
+                contacts_list.send(clients[i]->getSocket());
+            break;
         }
-        nextBlockSize = 0;
+    case MESSAGE_TO_SERVER:
+        {
+            QVector<Client*>::iterator senderClient, receiverClient;
+            // searching vector for client who sent message via socket
+            for(senderClient = clients.begin(); (*senderClient)->getSocket() != clientSocket; ++senderClient);
+            // list: [0] - receiver name [1] - actual message
+            QStringList incomingMessageTextItems(incomingMessage->getText().split(";"));
+            QString receiverClientName(incomingMessageTextItems[0]);
+            QString actualMessage(incomingMessageTextItems[1]);
+            // constructing message text "sendername;actualmessage"
+            QString outcomingMessageText((*senderClient)->getName() + ";" + actualMessage);
+            Message outcomingMessage(MESSAGE_TO_CLIENT, outcomingMessageText);
+            // searching vector for receiver client by name
+            for(receiverClient = clients.begin(); (*receiverClient)->getName() != receiverClientName; ++receiverClient);
+            outcomingMessage.send((*receiverClient)->getSocket());
+            break;
+        }
+    case MESSAGE_TO_CHAT:
+        {
+            QVector<Client*>::iterator senderClient;
+            // searching vector for client who sent message via socket
+            for(senderClient = clients.begin(); (*senderClient)->getSocket() != clientSocket; ++senderClient);
+            // list: [0] - receiver name [1] - actual message
+            QStringList incomingMessageTextItems(incomingMessage->getText().split(";"));
+            QString receiverClientName(incomingMessageTextItems[0]);
+            QString actualMessage(incomingMessageTextItems[1]);
+            // constructing message text "sendername;receivername;actualmessage"
+            QString outcomingMessageText((*senderClient)->getName() + ";" + receiverClientName + ";" + actualMessage);
+            Message outcomingMessage(MESSAGE_TO_CHAT, outcomingMessageText);
+            // broadcasting
+            for (int i = 0; i < clients.size(); ++i)
+                outcomingMessage.send(clients[i]->getSocket());
+            break;
+        }
 
     }
+    delete incomingMessage;
 }
 
 //-------------------------------------------------------------------------
-void QueleaServer::sendToSocket(QTcpSocket* const socket, const Message* const message) const
+
+void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
 {
-
-    QByteArray  arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_5);
-
-
-    out << quint16(0)<< *message;
-
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-
-    socket->write(arrBlock);
-
-}
-
-void QueleaServer::slotByeClient(QTcpSocket* s)
-{
-    QVector<Client*>::iterator dissock;
-    for(dissock=clients.begin();(*dissock)->getSocket()!=s;dissock++);
-    ui->log("["+QTime::currentTime().toString()+"]" + " "+tr("Клиент ") +  (*dissock)->getName()+tr(" отключен"));
-    delete (*dissock);
-    clients.erase(dissock);
-
+    QVector<Client*>::iterator disconnectedClient;
+    // searching for client whose socket has disconnected
+    for(disconnectedClient = clients.begin(); (*disconnectedClient)->getSocket() != disconnectedClientSocket; ++disconnectedClient);
+    ui->log("[" + QTime::currentTime().toString() + "]" + " " + tr("Клиент ") +  (*disconnectedClient)->getName() + tr(" отключен"));
+    delete (*disconnectedClient);
+    // removing client from vector
+    clients.erase(disconnectedClient);
+    // constructing new contacts list and broadcasting it
     QString contacts_string = "";
-    for (int i=0; i<clients.size(); i++)
+    for (int i = 0; i < clients.size(); ++i)
         contacts_string.append(clients[i]->getName()+";");
     Message contacts_list(CONTACTS_RESPONSE, contacts_string);
-    for (int i=0;i<clients.size();i++)
-        sendToSocket(clients[i]->getSocket(), &contacts_list);
+    for (int i = 0; i < clients.size(); ++i)
+        contacts_list.send(clients[i]->getSocket());
 }
