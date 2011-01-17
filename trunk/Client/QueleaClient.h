@@ -12,7 +12,6 @@
 
 class QTextEdit;
 class QLineEdit;
-class TabWt;
 
 // ======================================================================
 class QueleaClient : public QWidget {
