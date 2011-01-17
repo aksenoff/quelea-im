@@ -4,10 +4,12 @@ SOURCES = main.cpp \
     QueleaClient.cpp \
     settingsDialog.cpp \
     systemTray.cpp \
+    clientTab.cpp \
     ../message.cpp
 HEADERS = QueleaClient.h \
     settingsDialog.h \
     systemTray.h \
+    clientTab.h \
     ../codes.h \
     ../message.h
 win32:TARGET = ../QueleaClient

@@ -8,6 +8,7 @@
 #include <QtGui>
 #include <QStateMachine>
 #include "../message.h"
+#include "clientTab.h"
 
 class QTextEdit;
 class QLineEdit;
@@ -41,7 +42,7 @@ private:
 public:
     QueleaClient(QWidget* pwgt = 0) ;
     QString clientStatus;
-    TabWt* tabWidget;
+    ClientTab* tabWidget;
 signals:
     void startedConnect();
     void sendButtonChangeToChat();
@@ -73,14 +74,5 @@ public slots:
      void openSettingDialog();
      void conn();
      void disconn();
-};
-
-class TabWt : public QTabWidget
-{
-public:
-    QTabBar * gettabbar()  const
-    {
-    return tabBar();
-    }
 };
 #endif
