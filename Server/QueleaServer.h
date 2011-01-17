@@ -17,7 +17,6 @@ private:
     quint16 port;
     QVector<Client*> clients;
     QueleaServerUI* ui;
-    void sendToSocket(QTcpSocket* const socket, const Message* const message) const;
 public:
     QueleaServer(QueleaServerUI* userInterface = 0);
 
