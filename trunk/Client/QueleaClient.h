@@ -7,10 +7,10 @@
 #include <QTime>
 #include <QtGui>
 #include <QStateMachine>
+#include "../message.h"
 
 class QTextEdit;
 class QLineEdit;
-class Message;
 class TabWt;
 
 // ======================================================================
@@ -73,25 +73,6 @@ public slots:
      void openSettingDialog();
      void conn();
      void disconn();
-};
-
-class Message
-{
-public:
-    unsigned char code;
-
-    QString text;
-    QVector<QString> contacts;
-public:
-    Message(unsigned char c, QString s=""):code(c),text(s){}
-    operator int(){return code;}
-    friend QDataStream& operator<<(QDataStream& out, const Message& m) {return out << m.code << m.text;}
-    friend QDataStream& operator>>(QDataStream& in, Message*& m) {
-        unsigned char code;
-        QString text;
-        QDataStream& ds = in >> code >> text;
-        if(!m) m = new Message(code, text);
-        return ds;}
 };
 
 class TabWt : public QTabWidget

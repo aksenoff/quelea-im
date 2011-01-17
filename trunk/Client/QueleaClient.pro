@@ -3,10 +3,12 @@ QT += network
 SOURCES = main.cpp \
     QueleaClient.cpp \
     settingsDialog.cpp \
-    systemTray.cpp
+    systemTray.cpp \
+    ../message.cpp
 HEADERS = QueleaClient.h \
-    ../codes.h \
     settingsDialog.h \
-    systemTray.h
+    systemTray.h \
+    ../codes.h \
+    ../message.h
 win32:TARGET = ../QueleaClient
 RC_FILE = resource.rc

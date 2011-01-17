@@ -167,125 +167,106 @@ void QueleaClient::conn()
 // ----------------------------------------------------------------------
 void QueleaClient::slotReadyRead()
 {
-    QDataStream in(tcpSocket);
-    in.setVersion(QDataStream::Qt_4_5);
-    for (;;) {
-        if (!nextBlockSize) {
-            if (tcpSocket->bytesAvailable() < sizeof(quint16)) {
-                break;
-            }
-            in >> nextBlockSize;
-        }
-
-        if (tcpSocket->bytesAvailable() < nextBlockSize) {
+    Message mess(tcpSocket);
+    QTime time = QTime::currentTime();
+    QString str;
+    switch(mess)
+    {
+    case CONNECTED:
+        {
+            str = tr("Соединено.");
+            Message auth_req(AUTH_REQUEST, clientName);
+            auth_req.send(tcpSocket);
+            stateLabel->setText(str);
             break;
         }
-        QTime time = QTime::currentTime();
-        QString str;
-        Message *mess=0; //!
-        in >> mess;
-        switch(int(*mess))
+
+    case AUTH_RESPONSE:
         {
-        case CONNECTED:
+            if(mess.getText()=="auth_ok")
             {
-                str = tr("Соединено.");
-                Message* auth_req = new Message(AUTH_REQUEST, clientName);
-                SendToServer(auth_req);
-                delete auth_req;
-                stateLabel->setText(str);
+                str = tr("Вход выполнен.");
+                Message contacts_req(CONTACTS_REQUEST);
+                contacts_req.send(tcpSocket);
+                changeStatus("online");
+            }
+            if(mess.getText()=="auth_error")
+            {
+                textInfo->append(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
+                emit toDisconnStateBydisconn();
+            }
+            break;
+        }
+    case CONTACTS_RESPONSE:
+        {
+            QStringList clist = mess.getText().split(";");
+            contlist->clear();
+            clist.removeOne(clientName);
+            clist.removeOne("");
+            if (clist.count()!=0)
+                contlist->addItem(tr(">Все собеседники"));
+            contlist->addItems(clist);
+            contlist->setCurrentRow(0);
+            enableSendButton();
+            tabChanged(tabWidget->currentIndex());
+            break;
+        }
+
+    case MESSAGE_TO_CHAT:
+        {
+            if (tabWidget->currentIndex() != 0)
+                tabWidget->gettabbar()->setTabTextColor (0,"Blue");
+
+            QStringList mlist = mess.getText().split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
+            QString fromWhoColor = "GREEN";
+            if (mlist[0]==clientName)
+                fromWhoColor = "DARKVIOLET";
+            if (mlist[1]=="all")
+                textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
+            else{
+                QString toWhoColor = "ORANGERED";
+                if (mlist[1]==clientName){
+                    toWhoColor = "DARKVIOLET";
+                    emit newMessage("all");
+                    playSound("chat");
+                }
+                textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
+            }
+            break;
+        }
+    case MESSAGE_TO_CLIENT: // incoming private message
+        {
+            bool tabState=false;
+            QStringList mlist = mess.getText().split(";"); //mlist[0]=from who, mlist[1]=text
+
+            for (int i=0; i<=tabWidget->count(); i++)
+
+                if (mlist[0]==tabWidget->tabText(i))
+                {
+                tabState=true;
+
+                if (tabWidget->currentIndex() != i)
+                    tabWidget->gettabbar()->setTabTextColor (i,"Blue");
+
+                QWidget *widget = tabWidget->widget(i);
+                QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
+                privateTextInfo->setReadOnly(true);
+                privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
                 break;
             }
 
-        case AUTH_RESPONSE:
-           {
-               if(mess->text=="auth_ok")
-                {
-               str = tr("Вход выполнен.");
-               Message* contacts_req = new Message(CONTACTS_REQUEST);
-               SendToServer(contacts_req);
-               delete contacts_req;
-               changeStatus("online");
-           }
-              if(mess->text=="auth_error")
-               {
-                  textInfo->append(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
-                  emit toDisconnStateBydisconn();
-              }
-               break;
-           }
-        case CONTACTS_RESPONSE:
-           {
-               QStringList clist = mess->text.split(";");
-               contlist->clear();
-               clist.removeOne(clientName);
-               clist.removeOne("");
-               if (clist.count()!=0)
-               contlist->addItem(tr(">Все собеседники"));
-               contlist->addItems(clist);
-               contlist->setCurrentRow(0);
-               enableSendButton();
-               tabChanged(tabWidget->currentIndex());
-               break;
-           }
-
-        case MESSAGE_TO_CHAT:
+            if (tabState==false)
             {
-               if (tabWidget->currentIndex() != 0)
-               tabWidget->gettabbar()->setTabTextColor (0,"Blue");
-
-               QStringList mlist = mess->text.split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
-               QString fromWhoColor = "GREEN";
-               if (mlist[0]==clientName)
-                     fromWhoColor = "DARKVIOLET";
-               if (mlist[1]=="all")
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
-               else{
-                   QString toWhoColor = "ORANGERED";
-                   if (mlist[1]==clientName){
-                       toWhoColor = "DARKVIOLET";
-                       emit newMessage("all");
-                       playSound("chat");
-                   }
-                   textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
-               }
-               break;
+                QTextEdit* privateTextInfo = new QTextEdit;
+                privateTextInfo->setReadOnly(true);
+                tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
+                privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
             }
-        case MESSAGE_TO_CLIENT: // incoming private message
-           {
-               bool tabState=false;
-               QStringList mlist = mess->text.split(";"); //mlist[0]=from who, mlist[1]=text
 
-               for (int i=0; i<=tabWidget->count(); i++)
+            messageReceived(mlist[0]);
 
-                  if (mlist[0]==tabWidget->tabText(i))
-                   {
-                      tabState=true;
-
-                      if (tabWidget->currentIndex() != i)
-                      tabWidget->gettabbar()->setTabTextColor (i,"Blue");
-
-                      QWidget *widget = tabWidget->widget(i);
-                      QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
-                      privateTextInfo->setReadOnly(true);
-                      privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
-                      break;
-                   }
-
-                   if (tabState==false)
-                      {
-                         QTextEdit* privateTextInfo = new QTextEdit;
-                          privateTextInfo->setReadOnly(true);
-                          tabWidget->gettabbar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
-                          privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
-                      }
-                   
-                   messageReceived(mlist[0]);
-                   
-               break;
-           }
+            break;
         }
-        delete mess;
-        nextBlockSize = 0;
     }
 }
 
@@ -307,18 +288,6 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
 
 }
 
-// ----------------------------------------------------------------------
-void QueleaClient::SendToServer(Message* message)
-{
-    QByteArray  arrBlock;
-    QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_5);
-    out << quint16(0)<< *message;
-    out.device()->seek(0);
-    out << quint16(arrBlock.size() - sizeof(quint16));
-    tcpSocket->write(arrBlock);
-}
-
 // ------------------------------------------------------------------
 
 void QueleaClient::sendmess() //outcoming private message
@@ -327,8 +296,8 @@ void QueleaClient::sendmess() //outcoming private message
     QTextEdit *edit = static_cast<QTextEdit *>(widget);
     edit->setReadOnly(true);
     QString str=tabWidget->tabText(tabWidget->currentIndex())+";"+messInput->toPlainText();
-    Message* newmess = new Message(MESSAGE_TO_SERVER,str);
-    SendToServer(newmess);
+    Message newmess(MESSAGE_TO_SERVER,str);
+    newmess.send(tcpSocket);
     edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->toPlainText());
     messInput->clear();
     enableSendButton();
@@ -343,8 +312,8 @@ void QueleaClient::sendchat()
         receiver = contlist->currentItem()->text();
 
     QString str=receiver+";"+messInput->toPlainText();
-    Message* newmess = new Message( MESSAGE_TO_CHAT,str);
-    SendToServer(newmess);
+    Message newmess(MESSAGE_TO_CHAT,str);
+    newmess.send(tcpSocket);;
     messInput->clear();
     enableSendButton();
 
