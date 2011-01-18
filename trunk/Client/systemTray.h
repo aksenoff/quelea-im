@@ -3,9 +3,6 @@
 
 #include "QueleaClient.h"
 
-class QSystemTrayIcon;
-class QMenu;
-
 class SystemTray : public QWidget{
 Q_OBJECT
 private:
@@ -15,23 +12,22 @@ private:
     QAction* actChangeStatus;
     QAction* actSettings;
     QAction* actQuit;
-    QString receiverName;
-    bool nMess;
+    QString newMessageSenderName;
+    bool newMessageExist;
     QueleaClient* client;
-protected:
-    virtual void closeEvent(QCloseEvent *);
-
+    void  visibleAtNewMessage();
 public:
     SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0);
     ~SystemTray();
-
-public slots:
-    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+protected:
+    virtual void closeEvent(QCloseEvent *);
+private slots:
+    void slotIconActivated(QSystemTrayIcon::ActivationReason reason);
     void slotShowHide();
-    void slotShowMessage(QString receiver);
+    void slotShowMessage(QString senderName);
     void slotChangeIcon(QString status="offline");
     void slotChangeStatus();
-    void slotNewMessage(QString receiver);
+    void slotNewMessage(QString senderName);
 };
 
 #endif // SYSTEMTRAY_H

@@ -5,7 +5,7 @@
 #include "systemTray.h"
 
 SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/)
-    : QWidget(pwgt), nMess(false),client(queleaClient)
+    : QWidget(pwgt), newMessageExist(false),client(queleaClient)
 {
     connect(client, SIGNAL(statusChanged(QString)),
             this, SLOT(slotChangeIcon(QString)));
@@ -41,7 +41,7 @@ SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/)
     trayIcon->setToolTip(tr("Quelea"));
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+            this, SLOT(slotIconActivated(QSystemTrayIcon::ActivationReason)));
 
     slotChangeIcon();
     trayIcon->show();
@@ -59,13 +59,12 @@ SystemTray::~SystemTray()
 
 void SystemTray::closeEvent(QCloseEvent * pe)
 {
-    if(trayIcon->isVisible())
-    {
+    if(trayIcon->isVisible()){
         client->hide();
     }
 }
 
-void SystemTray::iconActivated(QSystemTrayIcon::ActivationReason reason)
+void SystemTray::slotIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason)
     {
@@ -83,76 +82,74 @@ void SystemTray::slotShowHide()
 {
     client->setVisible(!(client->isVisible()));
 
-    if (client->isVisible())
-    {
+    if (client->isVisible()){
         actShowHide->setText(tr("Скрыть"));
         client->activateWindow();
-        if (nMess){
-            if (receiverName=="all")
-                client->tabWidget->setCurrentIndex(0);
-            else{
-                for (int i=0; i<=client->tabWidget->count();i++)
-                    if (receiverName==client->tabWidget->tabText(i)){
-                    client->tabWidget->setCurrentIndex(i);
-                    break;
-                }
-            }
-            slotChangeIcon(client->clientStatus);
-            nMess = false;
-            receiverName="";
-        }
+        if (newMessageExist)
+            visibleAtNewMessage();
     }
     else
         actShowHide->setText(tr("Показать"));
 }
 
-void SystemTray::slotShowMessage(QString receiverName)
+void SystemTray::slotShowMessage(QString senderName)
 {
-    if (receiverName=="all")
-        trayIcon->showMessage(tr("Сообщение из чата"),tr("Сообщение из чата для вас"),QSystemTrayIcon::Information,3000);
+    if (senderName=="all")
+        trayIcon->showMessage(tr("Сообщение в чате"),tr("Сообщение в чате для вас"),QSystemTrayIcon::NoIcon,3000);
     else
-        trayIcon->showMessage(tr("Новое сообщение"),tr("Новое сообщение от ")+receiverName,QSystemTrayIcon::Information,3000);
+        trayIcon->showMessage(tr("Новое сообщение"),tr("Отправитель: ")+senderName,QSystemTrayIcon::NoIcon,3000);
 }
 
 
  void SystemTray::slotChangeIcon(QString status)
  {
- QString pixmapName;
- if (status=="offline")
- {
+    QString pixmapName;
+    if (status=="offline"){
     pixmapName ="/icon-offline.png";
     actChangeStatus->setText(tr("Подключиться"));
- }
- else
-     if(status=="message")
-         pixmapName="/message.png";
-     else
-     {
+    }
+    else if(status=="message")
+        pixmapName="/message.png";
+    else{
         pixmapName ="/icon.png";
         actChangeStatus->setText(tr("Отключиться"));
-     }
- trayIcon->setIcon(QPixmap(pixmapName));
+    }
+    trayIcon->setIcon(QPixmap(pixmapName));
  }
 
  void SystemTray::slotChangeStatus()
  {
-
     if(client->clientStatus=="offline")
         client->conn();
     else
         client->disconn();
  }
 
- void SystemTray::slotNewMessage(QString receiver)
+ void SystemTray::slotNewMessage(QString senderName)
  {
      if (!client->isVisible()){
         slotChangeIcon("message");
-        slotShowMessage(receiver);
-    }
+        slotShowMessage(senderName);
+     }
      else
          if (!client->isActiveWindow())
              QApplication::alert(client);
-    nMess = true;
-    receiverName = receiver;
+     newMessageExist = true;
+     newMessageSenderName = senderName;
+ }
 
+ void SystemTray::visibleAtNewMessage()
+ {
+     if (newMessageSenderName=="all")
+         client->tabWidget->setCurrentIndex(0);
+     else{
+         for (int i=0; i<=client->tabWidget->count(); i++)
+             if (newMessageSenderName==client->tabWidget->tabText(i)){
+                 client->tabWidget->setCurrentIndex(i);
+                 break;
+             }
+     }
+     slotChangeIcon(client->clientStatus);
+     newMessageExist = false;
+     newMessageSenderName = "";
  }
