@@ -1,8 +1,5 @@
-
-
 #include <QApplication>
-#include "QueleaClient.h"
-#include"systemTray.h"
+#include "QueleaClientUI.h"
 
 
 // ----------------------------------------------------------------------
@@ -10,9 +7,8 @@ int main(int argc, char** argv)
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     QApplication app(argc, argv);
-    QueleaClient client;
+    QueleaClientUI clientUI;
     QApplication::setQuitOnLastWindowClosed(false);
-    client.show();
-    SystemTray st(0,&client);
+    clientUI.show();
     return app.exec();
 }
