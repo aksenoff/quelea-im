@@ -2,6 +2,10 @@
 #define SYSTEMTRAY_H
 
 #include "QueleaClient.h"
+#include "QueleaClientUI.h"
+
+class QueleaClient;
+class QueleaClientUI;
 
 class SystemTray : public QWidget{
 Q_OBJECT
@@ -15,9 +19,10 @@ private:
     QString newMessageSenderName;
     bool newMessageExist;
     QueleaClient* client;
+    QueleaClientUI* ui;
     void  visibleAtNewMessage();
 public:
-    SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0);
+    SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0, QueleaClientUI* userInterface = 0);
     ~SystemTray();
 protected:
     virtual void closeEvent(QCloseEvent *);
@@ -25,9 +30,14 @@ private slots:
     void slotIconActivated(QSystemTrayIcon::ActivationReason reason);
     void slotShowHide();
     void slotShowMessage(QString senderName);
-    void slotChangeIcon(QString status="offline");
     void slotChangeStatus();
     void slotNewMessage(QString senderName);
+public slots:
+    void slotChangeIcon(QString status="offline");
+
+signals:
+    void connectByTray();
+    void disconnectByTray();
 };
 
 #endif // SYSTEMTRAY_H

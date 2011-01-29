@@ -4,12 +4,12 @@
 #include <QApplication>
 #include "systemTray.h"
 
-SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/)
-    : QWidget(pwgt), newMessageExist(false),client(queleaClient)
+SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/, QueleaClientUI* userInterface /*= 0*/)
+    : QWidget(pwgt), newMessageExist(false),client(queleaClient),ui(userInterface)
 {
     connect(client, SIGNAL(statusChanged(QString)),
             this, SLOT(slotChangeIcon(QString)));
-    connect(client, SIGNAL(newMessage(QString)),
+    connect(ui, SIGNAL(newMessage(QString)),
             this, SLOT(slotNewMessage(QString)));
 
     actShowHide = new QAction(tr("Скрыть"),this);
@@ -22,7 +22,7 @@ SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/)
 
     actSettings = new QAction(tr("Настройки..."),this);
     connect(actSettings, SIGNAL(triggered()),
-            client, SLOT(openSettingDialog()));
+            ui, SLOT(openSettingDialog()));
 
     actQuit = new QAction(tr("Выход"),this);
     connect(actQuit, SIGNAL(triggered()),
@@ -60,7 +60,7 @@ SystemTray::~SystemTray()
 void SystemTray::closeEvent(QCloseEvent * pe)
 {
     if(trayIcon->isVisible()){
-        client->hide();
+        ui->hide();
     }
 }
 
@@ -80,11 +80,11 @@ void SystemTray::slotIconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void SystemTray::slotShowHide()
 {
-    client->setVisible(!(client->isVisible()));
+    ui->setVisible(!(ui->isVisible()));
 
-    if (client->isVisible()){
+    if (ui->isVisible()){
         actShowHide->setText(tr("Скрыть"));
-        client->activateWindow();
+        ui->activateWindow();
         if (newMessageExist)
             visibleAtNewMessage();
     }
@@ -119,37 +119,29 @@ void SystemTray::slotShowMessage(QString senderName)
 
  void SystemTray::slotChangeStatus()
  {
-    if(client->clientStatus=="offline")
-        client->conn();
+    if(client->getStatus()=="offline")
+        emit connectByTray();
     else
-        client->disconn();
+        emit disconnectByTray();
  }
 
  void SystemTray::slotNewMessage(QString senderName)
  {
-     if (!client->isVisible()){
+     if (ui->isVisible()){
         slotChangeIcon("message");
         slotShowMessage(senderName);
      }
      else
-         if (!client->isActiveWindow())
-             QApplication::alert(client);
+         if (!ui->isActiveWindow())
+             QApplication::alert(ui);
      newMessageExist = true;
      newMessageSenderName = senderName;
  }
 
  void SystemTray::visibleAtNewMessage()
  {
-     if (newMessageSenderName=="all")
-         client->tabWidget->setCurrentIndex(0);
-     else{
-         for (int i=0; i<=client->tabWidget->count(); i++)
-             if (newMessageSenderName==client->tabWidget->tabText(i)){
-                 client->tabWidget->setCurrentIndex(i);
-                 break;
-             }
-     }
-     slotChangeIcon(client->clientStatus);
+     ui->setCurrentTab(newMessageSenderName);
+     slotChangeIcon(client->getStatus());
      newMessageExist = false;
      newMessageSenderName = "";
  }

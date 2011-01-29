@@ -53,6 +53,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     setLayout(mainLayout);
     setWindowTitle(tr("Настройки - Quelea"));
 
+    //Reading settings:
     QFile file("settings.dat");
     if (file.open(QIODevice::ReadOnly))
     {
