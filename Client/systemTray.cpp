@@ -141,9 +141,12 @@ void SystemTray::slotShowMessage(QString senderName)
     slotChangeIcon("offline");
     actChangeStatus->setText(tr("Подключиться"));
  }
-
+\
+void SystemTray::enableConnection()
+{
+    actChangeStatus->setText(tr("Отключиться"));
+}
  void SystemTray::enableConnected()
  {
     slotChangeIcon("online");
-    actChangeStatus->setText(tr("Отключиться"));
  }
