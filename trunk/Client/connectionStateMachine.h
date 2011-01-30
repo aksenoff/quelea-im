@@ -13,11 +13,12 @@ class QueleaClient;
 class ConnectionStateMachine : public QStateMachine {
 Q_OBJECT
 private:
-    QueleaClient* client;
     QueleaClientUI* ui;
+    QueleaClient* client;
     SystemTray* st;
-    QState* connectedState;
     QState* disconnectedState;
+    QState* connectionState;
+    QState* connectedState;
 public:
     ConnectionStateMachine(QueleaClientUI*, QueleaClient*, SystemTray*);
 };

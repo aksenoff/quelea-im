@@ -21,7 +21,7 @@ QueleaClient::QueleaClient(QueleaClientUI* userInterface)
 
     //Reading settings:
 
-    QFile file("set.dat");
+    QFile file("settings.dat");
 
     if (file.open(QIODevice::ReadOnly)){
         QTextStream stream (&file);
@@ -45,11 +45,7 @@ QueleaClient::QueleaClient(QueleaClientUI* userInterface)
 // ---------------------------------------------------------------------
 void QueleaClient::conn()
 {
-    emit startedConnect();
-    ui->changeStatusLabel(tr("Соединение..."));
     tcpSocket->connectToHost(serverAdr, 49212);
-
-
 }
 
 // ----------------------------------------------------------------------
@@ -75,12 +71,13 @@ void QueleaClient::slotReadyRead()
                 ui->logAction(tr("Вход выполнен."));
                 Message contacts_req(CONTACTS_REQUEST);
                 contacts_req.send(tcpSocket);
+                emit authOkSignal();
                 changeStatus("online");
             }
             if(mess.getText()=="auth_error")
             {
                 ui->logAction(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
-                emit disconnectSignal();
+                emit authErrorSignal();
             }
             break;
         }
@@ -136,7 +133,6 @@ void QueleaClient::sendchat(QString receiver, QString messageText)
 
 void QueleaClient::disconn()
 {
-    disconnectSignal();
     tcpSocket->close();
     tcpSocket->abort();
     ui->setUItoDisconnected();
@@ -148,10 +144,6 @@ void QueleaClient::changeStatus(QString status)
 {
     clientStatus=status;
     emit statusChanged(status);
-    if(status=="online")
-        ui->changeStatusLabel(tr("<FONT COLOR=GREEN>В сети</FONT>"));
-    else
-        ui->changeStatusLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
 }
 
 void QueleaClient::setSettings(QString name, QString server)
@@ -165,12 +157,3 @@ QString QueleaClient::getStatus()
     return clientStatus;
 }
 
-void QueleaClientUI::setUISettings(bool sound)
-{
-    enableSound = sound;
-}
-
-void QueleaClientUI::changeStatusLabel(QString status)
-{
-    stateLabel->setText(status);
-}
