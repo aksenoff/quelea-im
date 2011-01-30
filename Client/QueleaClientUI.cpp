@@ -18,46 +18,59 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     contlist = new QListWidget;
     contlist->resize(50,100);
     contlist->setFocusProxy(messInput);
-    contlist->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::MinimumExpanding);
-    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),SLOT(addTab(QListWidgetItem*)));
-    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem *)),this, SLOT(enableSendButton()));
+    contlist->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            this, SLOT(addTab(QListWidgetItem*)));
+    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem *)),
+            this, SLOT(enableSendButton()));
 
     sendButton = new QPushButton(tr("&Отправить"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connect(sendButton,SIGNAL(clicked()),SLOT(sendButtonFunction()));
+    connect(sendButton, SIGNAL(clicked()),
+            this, SLOT(sendButtonFunction()));
 
     connbutton = new QPushButton(tr(" &Подключиться "));
     connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connect(connbutton,SIGNAL(clicked()),this,SIGNAL(connectButtonClicked()));
+    connect(connbutton, SIGNAL(clicked()),
+            this, SIGNAL(connectButtonClicked()));
 
     aboutButton = new QPushButton(tr(" О п&рограмме "));
     aboutButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     settingsButton = new QPushButton(tr("&Настройки"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connect(settingsButton, SIGNAL(clicked()), SLOT(openSettingDialog()));
+    connect(settingsButton, SIGNAL(clicked()),
+            this, SLOT(openSettingDialog()));
 
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
     tabWidget->addTab(textInfo,tr("Общий разговор"));
     tabWidget->getTabBar()->setTabButton(0,QTabBar::RightSide,0);
-    connect(tabWidget,SIGNAL(currentChanged(int)),SLOT(tabChanged(int)));
-    connect(tabWidget, SIGNAL(tabCloseRequested(int)),this,SLOT(closeTab(int)));
+    connect(tabWidget ,SIGNAL(currentChanged(int)),
+            this, SLOT(tabChanged(int)));
+    connect(tabWidget, SIGNAL(tabCloseRequested(int)),
+            this, SLOT(closeTab(int)));
 
     sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
-    connect(sendShortcut, SIGNAL(activated()), sendButton, SLOT(click()));
+    connect(sendShortcut, SIGNAL(activated()),
+            sendButton, SLOT(click()));
 
-    spacer1 = new QSpacerItem(300,0,QSizePolicy::MinimumExpanding);
-    spacer2 = new QSpacerItem(0,29);
-    spacer3 = new QSpacerItem(0,30);
+    spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
+    spacer2 = new QSpacerItem(0, 29);
+    spacer3 = new QSpacerItem(0, 30);
 
     //returning focus to messInput QTextEdit:
-    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),messInput,SLOT(setFocus()));
-    connect(contlist,SIGNAL(itemClicked(QListWidgetItem*)),messInput,SLOT(setFocus()));
-    connect(contlist,SIGNAL(clicked(QModelIndex)),messInput,SLOT(setFocus()));
-    connect(connbutton,SIGNAL(clicked()),messInput,SLOT(setFocus()));
-    connect(sendButton,SIGNAL(clicked()),messInput,SLOT(setFocus()));
+    connect(contlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            messInput, SLOT(setFocus()));
+    connect(contlist, SIGNAL(itemClicked(QListWidgetItem*)),
+            messInput, SLOT(setFocus()));
+    connect(contlist, SIGNAL(clicked(QModelIndex)),
+            messInput, SLOT(setFocus()));
+    connect(connbutton, SIGNAL(clicked()),
+            messInput, SLOT(setFocus()));
+    connect(sendButton, SIGNAL(clicked()),
+            messInput, SLOT(setFocus()));
 
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
@@ -91,9 +104,26 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     messInput->setFocus();
 
-    client = new QueleaClient(this);
+    //Reading settings:
+
+    QFile file("settings.dat");
+    QString serverAddress("");
+    bool autoConnect;
+    if (file.open(QIODevice::ReadOnly)){
+        QTextStream stream (&file);
+        clientName = stream.readLine();
+        serverAddress = stream.readLine();
+        autoConnect = stream.readLine().toInt();
+        enableSound = stream.readLine().toInt();
+        file.close();
+    }
+    else
+        openSettingDialog();
+
+
+    client = new QueleaClient(this, clientName, serverAddress);
     st = new SystemTray(0,client,this);
-    connectionState = new ConnectionStateMachine(this,client,st);
+    connectionState = new ConnectionStateMachine(this, client, st, autoConnect);
 }
 
 void QueleaClientUI::enableSendButton()
@@ -106,9 +136,9 @@ void QueleaClientUI::openSettingDialog()
    SettingsDialog* setdial = new SettingsDialog;
    connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
     if (setdial->exec() == QDialog::Accepted) {
-        enableSound=setdial->enableSound();
+        enableSound = setdial->enableSound();
         clientName = setdial->clientName();
-        client->setSettings(setdial->clientName(),setdial->serverAddress());
+        client->changeSettings(setdial->clientName(), setdial->serverAddress());
 
         QFile file("settings.dat");
         if (file.open(QIODevice::WriteOnly)){
@@ -280,7 +310,7 @@ void QueleaClientUI::parseMessage(Message message)
 
 void QueleaClientUI::logAction(QString action)
 {
-textInfo->append(action);
+    textInfo->append(action);
 }
 
 void QueleaClientUI::enableDisconnected()
@@ -288,17 +318,16 @@ void QueleaClientUI::enableDisconnected()
     connbutton->setText(tr(" &Подключиться "));
     stateLabel->setText(tr("<FONT COLOR=RED>Отключен</FONT>"));
     //st->slotChangeIcon("offline");
-
-    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
-    connect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
+    client->disconn();
+    contlist->clear();
+    enableSendButton();
 }
 
 void QueleaClientUI::enableConnection()
 {
     connbutton->setText(tr(" О&тключиться "));
     stateLabel->setText(tr("Соединение..."));
-    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
-    connect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
+    client->conn();
 }                            
 
 
@@ -306,13 +335,6 @@ void QueleaClientUI::enableConnected()
 {
     stateLabel->setText(tr("<FONT COLOR=GREEN>В сети</FONT>"));
    // st->slotChangeIcon("online");
-}
-
-
-void QueleaClientUI::setUItoDisconnected()
-{
-    contlist->clear();
-    enableSendButton();
 }
 
 void QueleaClientUI::setCurrentTab(QString sender)
@@ -327,9 +349,3 @@ void QueleaClientUI::setCurrentTab(QString sender)
             }
     };
 }
-
-void QueleaClientUI::setUISettings(bool sound)
-{
-    enableSound = sound;
-}
-

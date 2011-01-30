@@ -36,9 +36,6 @@ private:
     bool enableSound;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
-    void setUISettings(bool sound);
-
-
 private slots:
     void enableSendButton();
     void addTab(QListWidgetItem*);
@@ -54,9 +51,7 @@ public slots:
     void enableConnected();
     void parseMessage(Message message);
     void logAction(QString action);
-    void setUItoDisconnected();
     void setCurrentTab(QString sender);
-
 signals:
     void newMessage(QString receiver);
     void connectButtonClicked();

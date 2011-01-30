@@ -20,6 +20,6 @@ private:
     QState* connectionState;
     QState* connectedState;
 public:
-    ConnectionStateMachine(QueleaClientUI*, QueleaClient*, SystemTray*);
+    ConnectionStateMachine(QueleaClientUI*, QueleaClient*, SystemTray*, bool);
 };
 #endif
