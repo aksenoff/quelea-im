@@ -30,6 +30,8 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
     connect(disconnectedState, SIGNAL(entered()),
             st,SLOT(enableDisconnected()));
     connect(connectionState,SIGNAL(entered()),
+            st,SLOT(enableConnection()));
+    connect(connectedState,SIGNAL(entered()),
             st,SLOT(enableConnected()));
 
     addState(disconnectedState);

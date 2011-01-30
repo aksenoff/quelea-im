@@ -34,6 +34,7 @@ private slots:
 public slots:
     void slotChangeIcon(QString status="offline");
     void enableDisconnected();
+    void enableConnection();
     void enableConnected();
 
 signals:
