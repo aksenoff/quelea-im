@@ -49,11 +49,11 @@ private slots:
     void messageReceived(QString receiver);
 public slots:
     void openSettingDialog();
-    void enableConnected();
     void enableDisconnected();
+    void enableConnection();
+    void enableConnected();
     void parseMessage(Message message);
     void logAction(QString action);
-    void changeStatusLabel(QString status);
     void setUItoDisconnected();
     void setCurrentTab(QString sender);
 

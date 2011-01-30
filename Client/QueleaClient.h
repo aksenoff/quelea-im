@@ -42,5 +42,7 @@ signals:
     void disconnectSignal();
     void statusChanged(QString status);
     void socketError();
+    void authOkSignal();
+    void authErrorSignal();
 };
 #endif

@@ -283,24 +283,37 @@ void QueleaClientUI::logAction(QString action)
 textInfo->append(action);
 }
 
-void QueleaClientUI::enableConnected()
-{
-    connbutton->setText(tr(" О&тключиться "));
-    st->slotChangeIcon("online");
-
-    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
-    connect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
-}
-
-
 void QueleaClientUI::enableDisconnected()
 {
     connbutton->setText(tr(" &Подключиться "));
-    st->slotChangeIcon("offline");
+    stateLabel->setText(tr("<FONT COLOR=RED>Отключен</FONT>"));
+    //st->slotChangeIcon("offline");
 
     disconnect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
     connect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
 }
+
+void QueleaClientUI::disableDisconnected()
+{
+    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
+}
+
+void QueleaClientUI::enableConnection()
+{
+    connbutton->setText(tr(" О&тключиться "));
+    stateLabel->setText(tr("Соединение..."));
+  //  disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
+    connect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
+}
+
+
+
+void QueleaClientUI::enableConnected()
+{
+    stateLabel->setText(tr("<FONT COLOR=GREEN>В сети</FONT>"));
+   // st->slotChangeIcon("online");
+}
+
 
 void QueleaClientUI::setUItoDisconnected()
 {
@@ -320,3 +333,9 @@ void QueleaClientUI::setCurrentTab(QString sender)
             }
     };
 }
+
+void QueleaClientUI::setUISettings(bool sound)
+{
+    enableSound = sound;
+}
+
