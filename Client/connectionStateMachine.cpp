@@ -21,7 +21,6 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
     connectedState->addTransition(st,SIGNAL(disconnectByTray()),disconnectedState);
 
     connect(disconnectedState, SIGNAL(entered()), ui, SLOT(enableDisconnected()));
-    connect(disconnectedState, SIGNAL(exited()), ui, SLOT(disableDisconnected()));
     connect(connectionState, SIGNAL(entered()), ui, SLOT(enableConnection()));
     connect(connectedState, SIGNAL(entered()), ui, SLOT(enableConnected()));
 
