@@ -293,19 +293,13 @@ void QueleaClientUI::enableDisconnected()
     connect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
 }
 
-void QueleaClientUI::disableDisconnected()
-{
-    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
-}
-
 void QueleaClientUI::enableConnection()
 {
     connbutton->setText(tr(" О&тключиться "));
     stateLabel->setText(tr("Соединение..."));
-  //  disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
+    disconnect(connbutton, SIGNAL(clicked()), client, SLOT(conn()));
     connect(connbutton, SIGNAL(clicked()), client, SLOT(disconn()));
-}
-
+}                            
 
 
 void QueleaClientUI::enableConnected()
