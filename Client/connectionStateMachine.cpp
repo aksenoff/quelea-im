@@ -8,17 +8,17 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
     connectedState = new QState;
 
     disconnectedState->addTransition(ui, SIGNAL(connectButtonClicked()), connectionState);
-    disconnectedState->addTransition(st,SIGNAL(connectByTray()),connectionState);
+    disconnectedState->addTransition(st,SIGNAL(changeStateByTray()),connectionState);
 
     connectionState->addTransition(client, SIGNAL(authOkSignal()), connectedState);
     connectionState->addTransition(client, SIGNAL(authErrorSignal()), disconnectedState);
     connectionState->addTransition(ui, SIGNAL(connectButtonClicked()), disconnectedState);
     connectionState->addTransition(client, SIGNAL(socketError()),disconnectedState);
-    connectionState->addTransition(st,SIGNAL(disconnectByTray()),disconnectedState);
+    connectionState->addTransition(st,SIGNAL(changeStateByTray()),disconnectedState);
 
     connectedState->addTransition(ui, SIGNAL(connectButtonClicked()), disconnectedState);
     connectedState->addTransition(client, SIGNAL(socketError()),disconnectedState);
-    connectedState->addTransition(st,SIGNAL(disconnectByTray()),disconnectedState);
+    connectedState->addTransition(st,SIGNAL(changeStateByTray()),disconnectedState);
 
     connect(disconnectedState, SIGNAL(entered()),
             ui, SLOT(enableDisconnected()));
@@ -26,6 +26,11 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
             ui, SLOT(enableConnection()));
     connect(connectedState, SIGNAL(entered()),
             ui, SLOT(enableConnected()));
+
+    connect(disconnectedState, SIGNAL(entered()),
+            st,SLOT(enableDisconnected()));
+    connect(connectionState,SIGNAL(entered()),
+            st,SLOT(enableConnected()));
 
     addState(disconnectedState);
     addState(connectionState);
