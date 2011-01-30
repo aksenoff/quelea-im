@@ -17,8 +17,8 @@ SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/,
             this, SLOT(slotShowHide()));
 
     actChangeStatus = new QAction(tr("Подключиться"),this);
-    connect(actChangeStatus, SIGNAL(triggered()),
-            this, SLOT(slotChangeStatus()));
+    connect(actChangeStatus,SIGNAL(triggered()),
+            this, SIGNAL(changeStateByTray()));
 
     actSettings = new QAction(tr("Настройки..."),this);
     connect(actSettings, SIGNAL(triggered()),
@@ -104,25 +104,15 @@ void SystemTray::slotShowMessage(QString senderName)
  void SystemTray::slotChangeIcon(QString status)
  {
     QString pixmapName;
-    if (status=="offline"){
+    if (status=="offline")
     pixmapName ="/icon-offline.png";
-    actChangeStatus->setText(tr("Подключиться"));
-    }
+
     else if(status=="message")
         pixmapName="/message.png";
-    else{
-        pixmapName ="/icon.png";
-        actChangeStatus->setText(tr("Отключиться"));
-    }
-    trayIcon->setIcon(QPixmap(pixmapName));
- }
-
- void SystemTray::slotChangeStatus()
- {
-    if(client->getStatus()=="offline")
-        emit connectByTray();
     else
-        emit disconnectByTray();
+        pixmapName ="/icon.png";
+
+    trayIcon->setIcon(QPixmap(pixmapName));
  }
 
  void SystemTray::slotNewMessage(QString senderName)
@@ -144,4 +134,16 @@ void SystemTray::slotShowMessage(QString senderName)
      slotChangeIcon(client->getStatus());
      newMessageExist = false;
      newMessageSenderName = "";
+ }
+
+ void SystemTray::enableDisconnected()
+ {
+    slotChangeIcon("offline");
+    actChangeStatus->setText(tr("Подключиться"));
+ }
+
+ void SystemTray::enableConnected()
+ {
+    slotChangeIcon("online");
+    actChangeStatus->setText(tr("Отключиться"));
  }

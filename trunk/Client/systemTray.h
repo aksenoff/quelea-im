@@ -30,14 +30,14 @@ private slots:
     void slotIconActivated(QSystemTrayIcon::ActivationReason reason);
     void slotShowHide();
     void slotShowMessage(QString senderName);
-    void slotChangeStatus();
     void slotNewMessage(QString senderName);
 public slots:
     void slotChangeIcon(QString status="offline");
+    void enableDisconnected();
+    void enableConnected();
 
 signals:
-    void connectByTray();
-    void disconnectByTray();
+    void changeStateByTray();
 };
 
 #endif // SYSTEMTRAY_H
