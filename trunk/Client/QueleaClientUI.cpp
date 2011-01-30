@@ -7,9 +7,9 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
 {
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
-    statusInscriptionLabel = new QLabel(tr("Статус:"));
+    QLabel* statusInscriptionLabel = new QLabel(tr("Статус:"));
 
-    messInput = new QTextEdit;
+    messInput = new QTextEdit(this);
     connect(messInput, SIGNAL(textChanged()),this, SLOT(enableSendButton()));
 
     textInfo  = new QTextEdit;
@@ -52,13 +52,12 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),
             this, SLOT(closeTab(int)));
 
-    sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
+    QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
     connect(sendShortcut, SIGNAL(activated()),
             sendButton, SLOT(click()));
-
-    spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
-    spacer2 = new QSpacerItem(0, 29);
-    spacer3 = new QSpacerItem(0, 30);
+    QSpacerItem* spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
+    QSpacerItem* spacer2 = new QSpacerItem(0, 29);
+    QSpacerItem* spacer3 = new QSpacerItem(0, 30);
 
     //returning focus to messInput QTextEdit:
     connect(contlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
@@ -99,10 +98,11 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     mainLayout->addLayout(rightLayout);
     setLayout(mainLayout);
 
-    resize(560,370);
+    resize(560, 370);
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     messInput->setFocus();
+    client = 0;
 
     //Reading settings:
 
@@ -116,13 +116,11 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
         file.close();
+        client = new QueleaClient(this, clientName, serverAddress);
     }
     else
         openSettingDialog();
-
-
-    client = new QueleaClient(this, clientName, serverAddress);
-    st = new SystemTray(0,client,this);
+    st = new SystemTray(0, client, this);
     connectionState = new ConnectionStateMachine(this, client, st, autoConnect);
 }
 
@@ -133,20 +131,27 @@ void QueleaClientUI::enableSendButton()
 
 void QueleaClientUI::openSettingDialog()
 {
-   SettingsDialog* setdial = new SettingsDialog;
-   connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
+
+    SettingsDialog* setdial = new SettingsDialog;
+    connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
+    QString serverAddress;
+    bool autoConnect;
     if (setdial->exec() == QDialog::Accepted) {
         enableSound = setdial->enableSound();
         clientName = setdial->clientName();
-        client->changeSettings(setdial->clientName(), setdial->serverAddress());
+        serverAddress = setdial->serverAddress();
+        autoConnect = setdial->autoconnect();
+        if(client)
+            client->changeSettings(clientName, serverAddress);
+        else
+            client = new QueleaClient(this, clientName, serverAddress);
 
         QFile file("settings.dat");
         if (file.open(QIODevice::WriteOnly)){
-            QTextStream stream (&file);
-            stream<<setdial->clientName()<<'\n'<<setdial->serverAddress()<<'\n'<<setdial->autoconnect()<<'\n'<<setdial->enableSound()<<flush;
+            QTextStream stream(&file);
+            stream << clientName << '\n' << serverAddress << '\n' << autoConnect << '\n' << enableSound << flush;
             file.close();
         }
-
     }
     delete setdial;
 }
@@ -160,7 +165,7 @@ void QueleaClientUI::addTab(QListWidgetItem * item)
         for (int i=0; i<=tabWidget->count();i++)
         if (item->text()==tabWidget->tabText(i)){
             tabWidget->setCurrentIndex(i);
-            tabState=false;
+            tabState = false;
             break;
         }
          if (tabState==true){
@@ -199,8 +204,8 @@ void QueleaClientUI::sendButtonFunction()
             receiver = "all";
         else
             receiver = contlist->currentItem()->text();
-
-        client->sendchat(receiver,messInput->toPlainText());
+        QString messsageText = messInput->toPlainText();
+        client->sendchat(receiver, messsageText);
         messInput->clear();
         enableSendButton();
      }
@@ -208,27 +213,29 @@ void QueleaClientUI::sendButtonFunction()
         QWidget *widget = tabWidget->currentWidget();
         QTextEdit *edit = static_cast<QTextEdit *>(widget);
         edit->setReadOnly(true);
-        client->sendmess(tabWidget->tabText(tabWidget->currentIndex()),messInput->toPlainText());
+        QString receiver(tabWidget->tabText(tabWidget->currentIndex())), messageText(messInput->toPlainText());
+        client->sendmess(receiver, messageText);
         edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->toPlainText());
         messInput->clear();
         enableSendButton();
       }
 }
 
-void QueleaClientUI::messageReceived(QString receiver)
+void QueleaClientUI::messageReceived(QString& receiver)
 {
     emit newMessage(receiver);
-    playSound("message");
+    QString reason = "message";
+    playSound(reason);
 }
 
-void QueleaClientUI::playSound(QString reason)
+void QueleaClientUI::playSound(QString& reason)
 {
     if (QSound::isAvailable())
         if (enableSound)
             QSound::play("/"+reason+".wav");
 }
 
-void QueleaClientUI::parseMessage(Message message)
+void QueleaClientUI::parseMessage(Message& message)
 {
     QTime time = QTime::currentTime();
     QString str;
@@ -264,8 +271,10 @@ void QueleaClientUI::parseMessage(Message message)
                 QString toWhoColor = "ORANGERED";
                 if (mlist[1]==clientName){
                     toWhoColor = "DARKVIOLET";
-                    emit newMessage("all");
-                    playSound("chat");
+                    QString receiver = "all";
+                    emit newMessage(receiver);
+                    QString reason = "chat";
+                    playSound(reason);
                 }
                 textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
             }
@@ -308,7 +317,7 @@ void QueleaClientUI::parseMessage(Message message)
     }
 }
 
-void QueleaClientUI::logAction(QString action)
+void QueleaClientUI::logAction(QString& action)
 {
     textInfo->append(action);
 }
@@ -337,7 +346,7 @@ void QueleaClientUI::enableConnected()
    // st->slotChangeIcon("online");
 }
 
-void QueleaClientUI::setCurrentTab(QString sender)
+void QueleaClientUI::setCurrentTab(QString& sender)
 {
     if (sender=="all")
         tabWidget->setCurrentIndex(0);
@@ -348,4 +357,10 @@ void QueleaClientUI::setCurrentTab(QString sender)
                 break;
             }
     };
+}
+
+QueleaClientUI::~QueleaClientUI()
+{
+    delete st;
+    delete connectionState;
 }

@@ -23,7 +23,6 @@ private:
     QHBoxLayout* buttonLayout;
 public:
     SettingsDialog(QWidget* pwgt = 0);
-    ~SettingsDialog();
     QString clientName() const;
     QString serverAddress() const;
     bool autoconnect() const;
