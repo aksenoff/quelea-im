@@ -35,7 +35,8 @@ void QueleaClient::slotReadyRead()
     {
     case CONNECTED:
         {
-            ui->logAction(tr("Соединено."));
+            QString logString(tr("Соединено."));
+            ui->logAction(logString);
             Message auth_req(AUTH_REQUEST, clientName);
             auth_req.send(tcpSocket);
             break;
@@ -45,7 +46,8 @@ void QueleaClient::slotReadyRead()
         {
             if(mess.getText()=="auth_ok")
             {
-                ui->logAction(tr("Вход выполнен."));
+                QString logString(tr("Вход выполнен."));
+                ui->logAction(logString);
                 Message contacts_req(CONTACTS_REQUEST);
                 contacts_req.send(tcpSocket);
                 emit authOkSignal();
@@ -53,14 +55,14 @@ void QueleaClient::slotReadyRead()
             }
             if(mess.getText()=="auth_error")
             {
-                ui->logAction(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
+                QString logString(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
+                ui->logAction(logString);
                 emit authErrorSignal();
             }
             break;
         }
     default:
         ui->parseMessage(mess);
-
     }
 }
 
@@ -86,7 +88,7 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
 
 // ------------------------------------------------------------------
 
-void QueleaClient::sendmess(QString receiver, QString messageText) //outcoming private message
+void QueleaClient::sendmess(QString& receiver, QString& messageText) //outcoming private message
 {
     QString str=receiver+";"+messageText;
     Message newmess(MESSAGE_TO_SERVER,str);
@@ -94,15 +96,11 @@ void QueleaClient::sendmess(QString receiver, QString messageText) //outcoming p
 
 }
 
-void QueleaClient::sendchat(QString receiver, QString messageText)
+void QueleaClient::sendchat(QString& receiver, QString& messageText)
 {
-
-
     QString str=receiver+";"+messageText;
     Message newmess(MESSAGE_TO_CHAT,str);
     newmess.send(tcpSocket);;
-
-
 }
 // ----------------------------------------------------------------------
 

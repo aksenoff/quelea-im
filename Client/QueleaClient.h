@@ -28,12 +28,9 @@ private slots:
     void slotReadyRead();
     void slotError(QAbstractSocket::SocketError);
     void changeStatus(QString status);
-
 public slots:
-
-     void sendmess(QString receiver, QString messageText);
-     void sendchat(QString receiver, QString messageText);
-
+     void sendmess(QString& receiver, QString& messageText);
+     void sendchat(QString& receiver, QString& messageText);
 signals:
     void startedConnect();
     void sendButtonChangeToChat();

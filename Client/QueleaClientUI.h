@@ -20,40 +20,37 @@ private:
     ConnectionStateMachine* connectionState;
     QLabel* stateLabel;
     QLabel* yourCompanionsLabel;
-    QLabel* statusInscriptionLabel;
-    QTextEdit*  textInfo;
-    QTextEdit*  messInput;
+    QTextEdit* textInfo;
+    QTextEdit* messInput;
     QListWidget* contlist;
     QPushButton* connbutton;
     QPushButton* sendButton;
     QPushButton* settingsButton;
-    QPushButton* sendtochat;
     QPushButton* aboutButton;
-    QSpacerItem* spacer1,*spacer2,*spacer3;
-    QShortcut* sendShortcut;
     ClientTab* tabWidget;
     QString clientName;
     bool enableSound;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
+    ~QueleaClientUI();
 private slots:
     void enableSendButton();
     void addTab(QListWidgetItem*);
-    void tabChanged(int tab);
-    void closeTab(int index);
+    void tabChanged(int);
+    void closeTab(int);
     void sendButtonFunction();
-    void playSound(QString reason);
-    void messageReceived(QString receiver);
+    void playSound(QString&);
+    void messageReceived(QString&);
 public slots:
     void openSettingDialog();
     void enableDisconnected();
     void enableConnection();
     void enableConnected();
-    void parseMessage(Message message);
-    void logAction(QString action);
-    void setCurrentTab(QString sender);
+    void parseMessage(Message& message);
+    void logAction(QString&);
+    void setCurrentTab(QString&);
 signals:
-    void newMessage(QString receiver);
+    void newMessage(QString&);
     void connectButtonClicked();
 };
 

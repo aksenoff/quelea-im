@@ -68,24 +68,6 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     }
 }
 
-SettingsDialog::~SettingsDialog()
-{
-    delete clientNameEdit;
-    delete serverAddressEdit;
-    delete autoconnectCheckBox;
-    delete enableSoundCheckBox;
-    delete clientNameLabel;
-    delete serverAddressLabel;
-    delete autoConnectLabel;
-    delete enableSoundLabel;
-    delete okButton;
-    delete cancelButton;
-    delete rightLayout;
-    delete leftLayout;
-    delete buttonLayout;
-    delete topLayout;
-    delete mainLayout;
-}
 
 // ----------------------------------------------------------------------
 
