@@ -8,8 +8,8 @@
 #include "../message.h"
 
 // ----------------------------------------------------------------------
-QueleaClient::QueleaClient(QueleaClientUI* userInterface)
-    : ui(userInterface), nextBlockSize(0)
+QueleaClient::QueleaClient(QueleaClientUI* userInterface, QString cn, QString sa)
+    : serverAddress(sa), clientName(cn), ui(userInterface)
 {
     clientStatus="offline";
     tcpSocket = new QTcpSocket(this);
@@ -17,35 +17,12 @@ QueleaClient::QueleaClient(QueleaClientUI* userInterface)
 
     connect(tcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
     connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(slotError(QAbstractSocket::SocketError)));
-
-
-    //Reading settings:
-
-    QFile file("settings.dat");
-
-    if (file.open(QIODevice::ReadOnly)){
-        QTextStream stream (&file);
-        bool autoconnect;
-        clientName = stream.readLine();
-        serverAdr = stream.readLine();
-        autoconnect = stream.readLine().toInt();
-        ui->setUISettings(stream.readLine().toInt());
-        if (autoconnect){
-            conn();
-         //   connectionStatus.setInitialState(connectedState);
-        }
-        file.close();
-    }
-    else
-        ui->openSettingDialog();
-
-
 }
 
 // ---------------------------------------------------------------------
 void QueleaClient::conn()
 {
-    tcpSocket->connectToHost(serverAdr, 49212);
+    tcpSocket->connectToHost(serverAddress, 49212);
 }
 
 // ----------------------------------------------------------------------
@@ -135,7 +112,6 @@ void QueleaClient::disconn()
 {
     tcpSocket->close();
     tcpSocket->abort();
-    ui->setUItoDisconnected();
     changeStatus("offline");
 }
 
@@ -146,14 +122,14 @@ void QueleaClient::changeStatus(QString status)
     emit statusChanged(status);
 }
 
-void QueleaClient::setSettings(QString name, QString server)
-{
-    clientName = name;
-    serverAdr = server;
-}
 
 QString QueleaClient::getStatus()
 {
     return clientStatus;
 }
 
+void QueleaClient::changeSettings(QString cn, QString sa)
+{
+    clientName = cn;
+    serverAddress = sa;
+}

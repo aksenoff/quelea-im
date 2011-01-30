@@ -14,24 +14,23 @@ class QueleaClient : public QTcpSocket {
 Q_OBJECT
 private:
     QTcpSocket* tcpSocket;
-    QString serverAdr;
+    QString serverAddress;
     QString clientName;
     QString clientStatus;
     QueleaClientUI* ui;
-    quint16     nextBlockSize;
 public:
-    QueleaClient(QueleaClientUI*);
-    void setSettings(QString name, QString server);
+    QueleaClient(QueleaClientUI*, QString, QString);
     QString getStatus();
-
+    void changeSettings(QString, QString);
+    void conn();
+    void disconn();
 private slots:
     void slotReadyRead();
     void slotError(QAbstractSocket::SocketError);
     void changeStatus(QString status);
 
 public slots:
-     void conn();
-     void disconn();
+
      void sendmess(QString receiver, QString messageText);
      void sendchat(QString receiver, QString messageText);
 

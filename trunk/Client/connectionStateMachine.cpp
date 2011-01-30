@@ -1,6 +1,6 @@
 #include "connectionStateMachine.h"
 
-ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, QueleaClient* c, SystemTray* s)
+ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, QueleaClient* c, SystemTray* s, bool autoConnect)
     :ui(userInterface), client(c) ,st(s)
 {
     disconnectedState = new QState;
@@ -20,13 +20,17 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
     connectedState->addTransition(client, SIGNAL(socketError()),disconnectedState);
     connectedState->addTransition(st,SIGNAL(disconnectByTray()),disconnectedState);
 
-    connect(disconnectedState, SIGNAL(entered()), ui, SLOT(enableDisconnected()));
-    connect(connectionState, SIGNAL(entered()), ui, SLOT(enableConnection()));
-    connect(connectedState, SIGNAL(entered()), ui, SLOT(enableConnected()));
+    connect(disconnectedState, SIGNAL(entered()),
+            ui, SLOT(enableDisconnected()));
+    connect(connectionState, SIGNAL(entered()),
+            ui, SLOT(enableConnection()));
+    connect(connectedState, SIGNAL(entered()),
+            ui, SLOT(enableConnected()));
 
     addState(disconnectedState);
     addState(connectionState);
     addState(connectedState);
-    setInitialState(disconnectedState);
+    autoConnect? setInitialState(connectionState)
+        :setInitialState(disconnectedState);
     start();
 }
