@@ -21,16 +21,14 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
 
 // ----------------------------------------------------------------------
 
-void QueleaServerUI::log(const QString &string) const
+void QueleaServerUI::log(const QString &event) const
 {
-    serverLog->append(string);
+    serverLog->append(event);
 }
 
 //-----------------------------------------------------------------------
 
 QueleaServerUI::~QueleaServerUI()
 {
-    delete serverLog;
-    delete mainLayout;
     delete server;
 }

@@ -1,51 +1,52 @@
 #include "QueleaClientUI.h"
 #include "settingsDialog.h"
-#include "systemTray.h"
 #include "../codes.h"
 
-QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
+QueleaClientUI::QueleaClientUI(QWidget* pwgt)
+    : QWidget(pwgt)
 {
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     QLabel* statusInscriptionLabel = new QLabel(tr("Статус:"));
 
-    messInput = new QTextEdit(this);
-    connect(messInput, SIGNAL(textChanged()),this, SLOT(enableSendButton()));
+    messageInput = new QTextEdit(this);
+    connect(messageInput, SIGNAL(textChanged()),
+            this, SLOT(enableSendButton()));
 
-    textInfo  = new QTextEdit;
-    textInfo->setReadOnly(true);
+    chatLog = new QTextEdit;
+    chatLog->setReadOnly(true);
 
-    contlist = new QListWidget;
-    contlist->resize(50,100);
-    contlist->setFocusProxy(messInput);
-    contlist->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
-    connect(contlist,SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+    contactsList = new QListWidget;
+    contactsList->resize(50, 100);
+    contactsList->setFocusProxy(messageInput);
+    contactsList->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+    connect(contactsList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(addTab(QListWidgetItem*)));
-    connect(contlist, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem *)),
+    connect(contactsList, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem *)),
             this, SLOT(enableSendButton()));
 
     sendButton = new QPushButton(tr("&Отправить"));
     sendButton->setEnabled(false);
-    sendButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
-    connbutton = new QPushButton(tr(" &Подключиться "));
-    connbutton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    connect(connbutton, SIGNAL(clicked()),
+    connectButton = new QPushButton(tr(" &Подключиться "));
+    connectButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
     aboutButton = new QPushButton(tr(" О п&рограмме "));
-    aboutButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     settingsButton = new QPushButton(tr("&Настройки"));
-    settingsButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()),
             this, SLOT(openSettingDialog()));
 
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
-    tabWidget->addTab(textInfo,tr("Общий разговор"));
+    tabWidget->addTab(chatLog, tr("Общий разговор"));
     tabWidget->getTabBar()->setTabButton(0,QTabBar::RightSide,0);
     connect(tabWidget ,SIGNAL(currentChanged(int)),
             this, SLOT(tabChanged(int)));
@@ -59,17 +60,17 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     QSpacerItem* spacer2 = new QSpacerItem(0, 29);
     QSpacerItem* spacer3 = new QSpacerItem(0, 30);
 
-    //returning focus to messInput QTextEdit:
-    connect(contlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            messInput, SLOT(setFocus()));
-    connect(contlist, SIGNAL(itemClicked(QListWidgetItem*)),
-            messInput, SLOT(setFocus()));
-    connect(contlist, SIGNAL(clicked(QModelIndex)),
-            messInput, SLOT(setFocus()));
-    connect(connbutton, SIGNAL(clicked()),
-            messInput, SLOT(setFocus()));
+    //returning focus to messageInput QTextEdit:
+    connect(contactsList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            messageInput, SLOT(setFocus()));
+    connect(contactsList, SIGNAL(itemClicked(QListWidgetItem*)),
+            messageInput, SLOT(setFocus()));
+    connect(contactsList, SIGNAL(clicked(QModelIndex)),
+            messageInput, SLOT(setFocus()));
+    connect(connectButton, SIGNAL(clicked()),
+            messageInput, SLOT(setFocus()));
     connect(sendButton, SIGNAL(clicked()),
-            messInput, SLOT(setFocus()));
+            messageInput, SLOT(setFocus()));
 
     //Layout setup
     QHBoxLayout* mainLayout = new QHBoxLayout;
@@ -80,18 +81,18 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
 
     buttonLayout->addWidget(aboutButton);
     buttonLayout->addWidget(settingsButton);
-    buttonLayout->addWidget(statusInscriptionLabel,0,Qt::AlignRight);
+    buttonLayout->addWidget(statusInscriptionLabel, 0, Qt::AlignRight);
     buttonLayout->addWidget(stateLabel);
-    buttonLayout->addWidget(connbutton);
+    buttonLayout->addWidget(connectButton);
     leftLayout->addLayout(buttonLayout);
     leftLayout->addWidget(tabWidget);
-    leftLayout->addWidget(messInput);
+    leftLayout->addWidget(messageInput);
     sendLayout->addSpacerItem(spacer1);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
     rightLayout->addSpacerItem(spacer3);
     rightLayout->addWidget(yourCompanionsLabel);//may be hidden
-    rightLayout->addWidget(contlist); //may be hidden
+    rightLayout->addWidget(contactsList); //may be hidden
     rightLayout->addSpacerItem(spacer2);
 
     mainLayout->addLayout(leftLayout);
@@ -101,266 +102,306 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt) : QWidget(pwgt)
     resize(560, 370);
     setWindowTitle(tr("Quelea"));
     setWindowIcon(QIcon::QIcon ("resource.rc"));
-    messInput->setFocus();
+    messageInput->setFocus();
     client = 0;
 
     //Reading settings:
-
     QFile file("settings.dat");
-    QString serverAddress("");
-    bool autoConnect;
-    if (file.open(QIODevice::ReadOnly)){
+    bool autoConnect = false;
+    if (file.open(QIODevice::ReadOnly))
+    {
         QTextStream stream (&file);
-        clientName = stream.readLine();
-        serverAddress = stream.readLine();
+        myName = stream.readLine();
+        QString serverAddress(stream.readLine());
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
         file.close();
-        client = new QueleaClient(this, clientName, serverAddress);
+        client = new QueleaClient(this, myName, serverAddress);
     }
     else
-        openSettingDialog();
-    st = new SystemTray(0, client, this);
-    connectionState = new ConnectionStateMachine(this, client, st, autoConnect);
+        openSettingDialog(); // client may be created there as well
+    tray = new SystemTray(0, client, this);
+    connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::enableSendButton()
 {
-    sendButton->setEnabled(!messInput->toPlainText().isEmpty() && contlist->count()!=0);
+    sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0);
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::openSettingDialog()
 {
 
-    SettingsDialog* setdial = new SettingsDialog;
-    connect(setdial,SIGNAL(finished(int)),messInput,SLOT(setFocus()));
-    QString serverAddress;
-    bool autoConnect;
-    if (setdial->exec() == QDialog::Accepted) {
-        enableSound = setdial->enableSound();
-        clientName = setdial->clientName();
-        serverAddress = setdial->serverAddress();
-        autoConnect = setdial->autoconnect();
+    SettingsDialog* settingsDialog = new SettingsDialog;
+    connect(settingsDialog, SIGNAL(finished(int)),
+            messageInput, SLOT(setFocus()));
+    if (settingsDialog->exec() == QDialog::Accepted)
+    {
+        enableSound = settingsDialog->enableSound();
+        myName = settingsDialog->clientName();
+        QString serverAddress(settingsDialog->serverAddress());
+        bool autoConnect = settingsDialog->autoConnect();
         if(client)
-            client->changeSettings(clientName, serverAddress);
+            client->changeSettings(myName, serverAddress);
         else
-            client = new QueleaClient(this, clientName, serverAddress);
+            client = new QueleaClient(this, myName, serverAddress);
 
         QFile file("settings.dat");
-        if (file.open(QIODevice::WriteOnly)){
+        if (file.open(QIODevice::WriteOnly))
+        {
             QTextStream stream(&file);
-            stream << clientName << '\n' << serverAddress << '\n' << autoConnect << '\n' << enableSound << flush;
+            stream << myName << '\n'
+                   << serverAddress << '\n'
+                   << autoConnect << '\n'
+                   << enableSound << flush;
             file.close();
         }
     }
-    delete setdial;
+    disconnect(settingsDialog, SIGNAL(finished(int)),
+               messageInput, SLOT(setFocus()));
+    delete settingsDialog;
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::addTab(QListWidgetItem * item)
 {
-    if (item->listWidget()->currentRow()==0)
+    if (item->listWidget()->currentRow() == 0)
         tabWidget->setCurrentIndex(0);
-    else {
+    else
+    {
         bool tabState = true;
-        for (int i=0; i<=tabWidget->count();i++)
-        if (item->text()==tabWidget->tabText(i)){
-            tabWidget->setCurrentIndex(i);
-            tabState = false;
-            break;
+        for (int i = 0; i <= tabWidget->count(); i++)
+            if (item->text()==tabWidget->tabText(i))
+            {
+                tabWidget->setCurrentIndex(i);
+                tabState = false;
+                break;
+            }
+        if (tabState==true)
+        {
+            QTextEdit* privatechatLog = new QTextEdit;
+            privatechatLog->setReadOnly(true);
+            tabWidget->setCurrentIndex(tabWidget->addTab(privatechatLog,item->text()));
         }
-         if (tabState==true){
-            QTextEdit* privateTextInfo = new QTextEdit;
-            privateTextInfo->setReadOnly(true);
-            tabWidget->setCurrentIndex(tabWidget->addTab(privateTextInfo,item->text()));
-         }
-     }
+    }
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::tabChanged(int tab)
 {
     tabWidget->getTabBar()->setTabTextColor(tab,"black");
-    if (tab!=0){
-        contlist->setHidden(true);
+    if (tab != 0)
+    {
+        contactsList->setHidden(true);
         yourCompanionsLabel->setHidden(true);
-        setWindowTitle(tr("Разговор: ")+tabWidget->tabText(tabWidget->currentIndex())+tr(" - Quelea"));
+        setWindowTitle(tr("Разговор: ")
+                       + tabWidget->tabText(tabWidget->currentIndex())
+                       + tr(" - Quelea"));
     }
-    else{
-        contlist->setHidden(false);
+    else
+    {
+        contactsList->setHidden(false);
         yourCompanionsLabel->setHidden(false);
-        setWindowTitle(tr("Чат - Quelea "));
+        setWindowTitle(tr("Чат - Quelea"));
     }
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::closeTab(int index)
 {
     tabWidget->removeTab(index);
 }
 
+//---------------------------------------------------------
+
 void QueleaClientUI::sendButtonFunction()
 {
-    if (tabWidget->currentIndex()==0){
-        QString receiver;
-        if (contlist->currentRow()==0)
-            receiver = "all";
-        else
-            receiver = contlist->currentItem()->text();
-        QString messsageText = messInput->toPlainText();
-        client->sendchat(receiver, messsageText);
-        messInput->clear();
+    if (tabWidget->currentIndex() == 0)
+    {
+        QString receiverName = (contactsList->currentRow() == 0)? "all":
+                                                                  contactsList->currentItem()->text();
+        QString messageText(messageInput->toPlainText());
+        client->sendChatMessage(receiverName, messageText);
+        messageInput->clear();
         enableSendButton();
-     }
-    else{  
-        QWidget *widget = tabWidget->currentWidget();
-        QTextEdit *edit = static_cast<QTextEdit *>(widget);
-        edit->setReadOnly(true);
-        QString receiver(tabWidget->tabText(tabWidget->currentIndex())), messageText(messInput->toPlainText());
-        client->sendmess(receiver, messageText);
-        edit->append("<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]</FONT>"+" "+"<FONT COLOR=GREEN>"+clientName+" "+"</FONT>: "+messInput->toPlainText());
-        messInput->clear();
+    }
+    else
+    {
+        QTextEdit *privateChatLog = static_cast<QTextEdit*>(tabWidget->currentWidget());
+        privateChatLog->setReadOnly(true);
+        QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
+        QString messageText(messageInput->toPlainText());
+        client->sendPrivateMessage(receiverName, messageText);
+        privateChatLog->append("<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>" + " "
+                               + "<FONT COLOR=GREEN>" + myName + " " + "</FONT>: " + messageText);
+        messageInput->clear();
         enableSendButton();
       }
 }
 
-void QueleaClientUI::messageReceived(QString& receiver)
+//---------------------------------------------------------
+
+void QueleaClientUI::messageReceived(const QString& receiver)
 {
     emit newMessage(receiver);
-    QString reason = "message";
-    playSound(reason);
+    playSound("message");
 }
 
-void QueleaClientUI::playSound(QString& reason)
+//---------------------------------------------------------
+
+void QueleaClientUI::playSound(const QString& reason) const
 {
-    if (QSound::isAvailable())
-        if (enableSound)
+    if (QSound::isAvailable() && enableSound)
             QSound::play("/"+reason+".wav");
 }
 
-void QueleaClientUI::parseMessage(Message& message)
+//---------------------------------------------------------
+
+void QueleaClientUI::parseMessage(const Message& incomingMessage)
 {
     QTime time = QTime::currentTime();
-    QString str;
-    switch(message){
-
+    switch(incomingMessage)
+    {
     case CONTACTS_RESPONSE:
         {
-            QStringList clist = message.getText().split(";");
-            contlist->clear();
-            clist.removeOne(clientName);
-            clist.removeOne("");
-            if (clist.count()!=0)
-                contlist->addItem(tr(">Все собеседники"));
-            contlist->addItems(clist);
-            contlist->setCurrentRow(0);
+            QStringList contacts = incomingMessage.getText().split(";");
+            contactsList->clear();
+            contacts.removeOne(myName);
+            contacts.removeOne("");
+            if (contacts.count() != 0)
+                contactsList->addItem(tr(">Все собеседники"));
+            contactsList->addItems(contacts);
+            contactsList->setCurrentRow(0);
             enableSendButton();
             tabChanged(tabWidget->currentIndex());
             break;
         }
-
     case MESSAGE_TO_CHAT:
         {
             if (tabWidget->currentIndex() != 0)
-                tabWidget->getTabBar()->setTabTextColor (0,"Blue");
-
-            QStringList mlist = message.getText().split(";"); // mlist[0]=от кого, mlist[1]=кому, mlist[2]=текст сообщения
+                tabWidget->getTabBar()->setTabTextColor (0, "Blue");
+            QStringList incomingMessageTextItems = incomingMessage.getText().split(";");
+            QString senderName(incomingMessageTextItems[0]);
+            QString receiverName(incomingMessageTextItems[1]);
+            QString actualMessage(incomingMessageTextItems[2]);
             QString fromWhoColor = "GREEN";
-            if (mlist[0]==clientName)
+            if (senderName == myName)
                 fromWhoColor = "DARKVIOLET";
-            if (mlist[1]=="all")
-                textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+mlist[2]);
-            else{
+            if (receiverName == "all")
+                chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>"+ " "
+                                + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
+                                + actualMessage);
+            else
+            {
                 QString toWhoColor = "ORANGERED";
-                if (mlist[1]==clientName){
+                if (receiverName == myName)
+                {
                     toWhoColor = "DARKVIOLET";
-                    QString receiver = "all";
-                    emit newMessage(receiver);
-                    QString reason = "chat";
-                    playSound(reason);
+                    emit newMessage("all");
+                    playSound("chat");
                 }
-                textInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR="+fromWhoColor+">"+mlist[0]+"</FONT>"+": "+"<FONT COLOR="+toWhoColor+">["+mlist[1]+"]</FONT> "+mlist[2]);
+                chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                                + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
+                                + "<FONT COLOR=" + toWhoColor + ">[" + receiverName + "]</FONT> "
+                                + actualMessage);
             }
             break;
         }
     case MESSAGE_TO_CLIENT: // incoming private message
         {
-            bool tabState=false;
-            QStringList mlist = message.getText().split(";"); //mlist[0]=from who, mlist[1]=text
-
-            for (int i=0; i<=tabWidget->count(); i++)
-
-                if (mlist[0]==tabWidget->tabText(i))
+            bool tabState = false;
+            QStringList incomingMessageTextItems = incomingMessage.getText().split(";");
+            QString senderName(incomingMessageTextItems[0]);
+            QString actualMessage(incomingMessageTextItems[1]);
+            for (int i = 0; i <= tabWidget->count(); i++)
+                if (senderName == tabWidget->tabText(i))
                 {
-                tabState=true;
-
-                if (tabWidget->currentIndex() != i)
-                    tabWidget->getTabBar()->setTabTextColor (i,"Blue");
-
-                QWidget *widget = tabWidget->widget(i);
-                QTextEdit *privateTextInfo = static_cast<QTextEdit *>(widget);
-                privateTextInfo->setReadOnly(true);
-                privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
-                break;
-            }
-
-            if (tabState==false)
+                    tabState = true;
+                    if (tabWidget->currentIndex() != i)
+                        tabWidget->getTabBar()->setTabTextColor(i, "Blue");
+                    QWidget* widget = tabWidget->widget(i);
+                    QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
+                    privateChatLog->setReadOnly(true);
+                    privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                                           + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
+                                           + actualMessage);
+                    break;
+                }
+            if (tabState == false)
             {
-                QTextEdit* privateTextInfo = new QTextEdit;
-                privateTextInfo->setReadOnly(true);
-                tabWidget->getTabBar()->setTabTextColor (tabWidget->addTab(privateTextInfo,mlist[0]),"Blue");
-                privateTextInfo->append("<FONT COLOR=BLUE>["+time.toString()+"]</FONT>"+ " "+"<FONT COLOR=DARKVIOLET>"+mlist[0]+"</FONT>: "+mlist[1]);
+                QTextEdit* privateChatLog = new QTextEdit;
+                privateChatLog->setReadOnly(true);
+                tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
+                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                                       + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
+                                       + actualMessage);
             }
-
-            messageReceived(mlist[0]);
-
+            messageReceived(senderName);
             break;
-        }
-
+        }        
     }
 }
 
-void QueleaClientUI::logAction(QString& action)
+//---------------------------------------------------------
+
+void QueleaClientUI::log(const QString& event)
 {
-    textInfo->append(action);
+    chatLog->append(event);
 }
+
+//---------------------------------------------------------
 
 void QueleaClientUI::enableDisconnected()
 {
-    connbutton->setText(tr(" &Подключиться "));
-    stateLabel->setText(tr("<FONT COLOR=RED>Отключен</FONT>"));
-    //st->slotChangeIcon("offline");
-    client->disconn();
-    contlist->clear();
+    connectButton->setText(" " + tr("&Подключиться") + " ");
+    stateLabel->setText("<FONT COLOR=RED>" + tr("Отключен") + "</FONT>");
+    contactsList->clear();
     enableSendButton();
 }
 
+//---------------------------------------------------------
+
 void QueleaClientUI::enableConnection()
 {
-    connbutton->setText(tr(" О&тключиться "));
-    stateLabel->setText(tr("Соединение..."));
-    client->conn();
+    connectButton->setText(" " + tr("О&тключиться") + " ");
+    stateLabel->setText(tr("Подключение..."));
 }                            
 
+//---------------------------------------------------------
 
 void QueleaClientUI::enableConnected()
 {
-    stateLabel->setText(tr("<FONT COLOR=GREEN>В сети</FONT>"));
-   // st->slotChangeIcon("online");
+    stateLabel->setText("<FONT COLOR=GREEN>" + tr("В сети") + "</FONT>");
 }
 
-void QueleaClientUI::setCurrentTab(QString& sender)
+//---------------------------------------------------------
+
+void QueleaClientUI::setCurrentTab(const QString& senderName)
 {
-    if (sender=="all")
+    if (senderName == "all")
         tabWidget->setCurrentIndex(0);
-    else{
-        for (int i=0; i<=tabWidget->count(); i++)
-            if (sender == tabWidget->tabText(i)){
+    else
+    {
+        for (int i = 0; i <= tabWidget->count(); i++)
+            if (senderName == tabWidget->tabText(i))
+            {
                 tabWidget->setCurrentIndex(i);
                 break;
             }
-    };
+    }
 }
+
+//---------------------------------------------------------
 
 QueleaClientUI::~QueleaClientUI()
 {
-    delete st;
+    delete tray;
     delete connectionState;
 }

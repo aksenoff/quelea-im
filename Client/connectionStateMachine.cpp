@@ -28,11 +28,16 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
             ui, SLOT(enableConnected()));
 
     connect(disconnectedState, SIGNAL(entered()),
-            st,SLOT(enableDisconnected()));
+            st, SLOT(enableDisconnected()));
     connect(connectionState,SIGNAL(entered()),
-            st,SLOT(enableConnection()));
+            st, SLOT(enableConnection()));
     connect(connectedState,SIGNAL(entered()),
-            st,SLOT(enableConnected()));
+            st, SLOT(enableConnected()));
+
+    connect(disconnectedState, SIGNAL(entered()),
+            client, SLOT(disconnectFromServer()));
+    connect(connectionState,SIGNAL(entered()),
+            client, SLOT(connectToServer()));
 
     addState(disconnectedState);
     addState(connectionState);

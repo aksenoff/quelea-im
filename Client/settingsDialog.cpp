@@ -6,17 +6,17 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
 {
     clientNameEdit = new QLineEdit;
     serverAddressEdit  = new QLineEdit;
-    autoconnectCheckBox = new QCheckBox;
+    autoConnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
 
-    clientNameLabel = new QLabel(tr("&Имя:"));
-    serverAddressLabel = new QLabel(tr("&Сервер:"));
-    autoConnectLabel = new QLabel(tr("&Подключаться при запуске"));
-    enableSoundLabel = new QLabel(tr("&Включить звуки"));
+    QLabel* clientNameLabel = new QLabel(tr("&Имя:"));
+    QLabel* serverAddressLabel = new QLabel(tr("&Сервер:"));
+    QLabel* autoConnectLabel = new QLabel(tr("&Подключаться при запуске"));
+    QLabel* enableSoundLabel = new QLabel(tr("&Включить звуки"));
 
     clientNameLabel->setBuddy(clientNameEdit);
     serverAddressLabel ->setBuddy(serverAddressEdit);
-    autoConnectLabel->setBuddy(autoconnectCheckBox);
+    autoConnectLabel->setBuddy(autoConnectCheckBox);
     enableSoundLabel->setBuddy(enableSoundCheckBox);
 
     okButton = new QPushButton(tr("&OK"));
@@ -31,14 +31,14 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
             this, SLOT(reject()));
 
     //Layout setup
-    mainLayout = new QVBoxLayout;
-    topLayout = new QHBoxLayout;
-    rightLayout = new QVBoxLayout;
-    leftLayout = new QVBoxLayout;
-    buttonLayout = new QHBoxLayout;
+    QVBoxLayout*mainLayout = new QVBoxLayout;
+    QHBoxLayout* topLayout = new QHBoxLayout;
+    QVBoxLayout* rightLayout = new QVBoxLayout;
+    QVBoxLayout* leftLayout = new QVBoxLayout;
+    QHBoxLayout* buttonLayout = new QHBoxLayout;
     leftLayout->addWidget(clientNameLabel);
     leftLayout->addWidget(serverAddressLabel);
-    leftLayout->addWidget(autoconnectCheckBox);
+    leftLayout->addWidget(autoConnectCheckBox);
     leftLayout->addWidget(enableSoundCheckBox);
     rightLayout->addWidget(clientNameEdit);
     rightLayout->addWidget(serverAddressEdit);
@@ -60,14 +60,13 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
         QTextStream stream(&file);
         clientNameEdit->setText(stream.readLine());
         serverAddressEdit->setText(stream.readLine());
-        if (stream.readLine()=="1")
-            autoconnectCheckBox->setChecked(true);
-        if (stream.readLine()=="1")
+        if (stream.readLine() == "1")
+            autoConnectCheckBox->setChecked(true);
+        if (stream.readLine() == "1")
             enableSoundCheckBox->setChecked(true);
         file.close();
     }
 }
-
 
 // ----------------------------------------------------------------------
 
@@ -85,9 +84,9 @@ QString SettingsDialog::serverAddress() const
 
 // ----------------------------------------------------------------------
 
-bool SettingsDialog::autoconnect() const
+bool SettingsDialog::autoConnect() const
 {
-return autoconnectCheckBox->isChecked();
+return autoConnectCheckBox->isChecked();
 }
 
 // ----------------------------------------------------------------------

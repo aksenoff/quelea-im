@@ -1,5 +1,3 @@
-
-
 #include <QtNetwork>
 #include <QtGui>
 #include "QueleaClient.h"
@@ -7,69 +5,65 @@
 #include "../codes.h"
 #include "../message.h"
 
-// ----------------------------------------------------------------------
-QueleaClient::QueleaClient(QueleaClientUI* userInterface, QString cn, QString sa)
-    : serverAddress(sa), clientName(cn), ui(userInterface)
+QueleaClient::QueleaClient(QueleaClientUI* UI, const QString& cn, const QString& sa)
+    : serverAddress(sa), clientName(cn), ui(UI)
 {
-    clientStatus="offline";
-    tcpSocket = new QTcpSocket(this);
-
-
-    connect(tcpSocket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
-    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(slotError(QAbstractSocket::SocketError)));
+    clientStatus = "offline";
+    serverSocket = new QTcpSocket(this);
+    connect(serverSocket, SIGNAL(readyRead()),
+            this, SLOT(slotReadServer()));
+    connect(serverSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(slotError(QAbstractSocket::SocketError)));
 }
 
 // ---------------------------------------------------------------------
-void QueleaClient::conn()
+
+void QueleaClient::connectToServer()
 {
-    tcpSocket->connectToHost(serverAddress, 49212);
+    serverSocket->connectToHost(serverAddress, 49212);
 }
 
 // ----------------------------------------------------------------------
-void QueleaClient::slotReadyRead()
+
+void QueleaClient::slotReadServer()
 {
-    Message mess(tcpSocket);
-    QTime time = QTime::currentTime();
-    QString str;
-    switch(mess)
+    Message incomingMessage(serverSocket);
+    switch(incomingMessage)
     {
     case CONNECTED:
         {
-            QString logString(tr("Соединено."));
-            ui->logAction(logString);
+            ui->log(tr("Соединено."));
             Message auth_req(AUTH_REQUEST, clientName);
-            auth_req.send(tcpSocket);
+            auth_req.send(serverSocket);
             break;
         }
-
     case AUTH_RESPONSE:
         {
-            if(mess.getText()=="auth_ok")
+            if(incomingMessage.getText()=="auth_ok")
             {
-                QString logString(tr("Вход выполнен."));
-                ui->logAction(logString);
+                ui->log(tr("Вход выполнен."));
                 Message contacts_req(CONTACTS_REQUEST);
-                contacts_req.send(tcpSocket);
+                contacts_req.send(serverSocket);
                 emit authOkSignal();
                 changeStatus("online");
             }
-            if(mess.getText()=="auth_error")
+            if(incomingMessage.getText()=="auth_error")
             {
-                QString logString(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
-                ui->logAction(logString);
+                ui->log(tr("<FONT COLOR=RED>Ошибка: Такое имя уже используется<FONT>"));
                 emit authErrorSignal();
             }
             break;
         }
     default:
-        ui->parseMessage(mess);
+        ui->parseMessage(incomingMessage);
     }
 }
 
 // ----------------------------------------------------------------------
+
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
-    QString strError =
+    QString error =
         "<FONT COLOR=BLUE>["+QTime::currentTime().toString()+"]<FONT>"+" <FONT COLOR=RED>"+tr("Ошибка: ") +
                     (err == QAbstractSocket::HostNotFoundError ?
                      tr("Сервер не найден.") :
@@ -77,56 +71,57 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      tr("Удалённый хост закрыл соединение.") :
                      err == QAbstractSocket::ConnectionRefusedError ?
                      tr("В соединении было отказано.") :
-                     QString(tcpSocket->errorString())
+                     QString(serverSocket->errorString())
                     )+"<FONT>";
 
     emit socketError();
-    ui->logAction(strError);
+    ui->log(error);
     changeStatus("offline");
-
 }
 
 // ------------------------------------------------------------------
 
-void QueleaClient::sendmess(QString& receiver, QString& messageText) //outcoming private message
+void QueleaClient::sendPrivateMessage(const QString& receiver, const QString& messageText) const //outcoming private message
 {
-    QString str=receiver+";"+messageText;
-    Message newmess(MESSAGE_TO_SERVER,str);
-    newmess.send(tcpSocket);
-
+    QString str = receiver + ";" + messageText;
+    Message newmess(MESSAGE_TO_SERVER, str);
+    newmess.send(serverSocket);
 }
 
-void QueleaClient::sendchat(QString& receiver, QString& messageText)
+void QueleaClient::sendChatMessage(const QString& receiver, const QString& messageText) const
 {
-    QString str=receiver+";"+messageText;
-    Message newmess(MESSAGE_TO_CHAT,str);
-    newmess.send(tcpSocket);;
+    QString str = receiver + ";" + messageText;
+    Message newmess(MESSAGE_TO_CHAT, str);
+    newmess.send(serverSocket);
 }
+
 // ----------------------------------------------------------------------
 
-
-
-void QueleaClient::disconn()
+void QueleaClient::disconnectFromServer()
 {
-    tcpSocket->close();
-    tcpSocket->abort();
+    serverSocket->close();
+    serverSocket->abort();
     changeStatus("offline");
 }
 
+// ----------------------------------------------------------------------
 
-void QueleaClient::changeStatus(QString status)
+void QueleaClient::changeStatus(const QString& status)
 {
-    clientStatus=status;
-    emit statusChanged(status);
+    clientStatus = status;
+    emit statusChanged(status); //?
 }
 
+// ----------------------------------------------------------------------
 
-QString QueleaClient::getStatus()
+QString QueleaClient::getStatus() const
 {
     return clientStatus;
 }
 
-void QueleaClient::changeSettings(QString cn, QString sa)
+// ----------------------------------------------------------------------
+
+void QueleaClient::changeSettings(const QString& cn, const QString& sa)
 {
     clientName = cn;
     serverAddress = sa;
