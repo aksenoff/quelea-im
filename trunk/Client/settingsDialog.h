@@ -8,24 +8,15 @@ class SettingsDialog : public QDialog {
 private:
     QLineEdit* clientNameEdit;
     QLineEdit* serverAddressEdit;
-    QCheckBox* autoconnectCheckBox;
+    QCheckBox* autoConnectCheckBox;
     QCheckBox* enableSoundCheckBox;
-    QLabel* clientNameLabel;
-    QLabel* serverAddressLabel;
-    QLabel* autoConnectLabel;
-    QLabel* enableSoundLabel;
     QPushButton* okButton;
     QPushButton* cancelButton;
-    QVBoxLayout* mainLayout;
-    QHBoxLayout* topLayout;
-    QVBoxLayout* rightLayout;
-    QVBoxLayout* leftLayout;
-    QHBoxLayout* buttonLayout;
 public:
     SettingsDialog(QWidget* pwgt = 0);
     QString clientName() const;
     QString serverAddress() const;
-    bool autoconnect() const;
+    bool autoConnect() const;
     bool enableSound() const;
 };
 

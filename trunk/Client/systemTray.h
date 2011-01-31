@@ -20,19 +20,18 @@ private:
     bool newMessageExist;
     QueleaClient* client;
     QueleaClientUI* ui;
-    void  visibleAtNewMessage();
+    void visibleAtNewMessage();
 public:
-    SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0, QueleaClientUI* userInterface = 0);
-    ~SystemTray();
+    SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0, QueleaClientUI* userInterface = 0); //?
 protected:
-    virtual void closeEvent(QCloseEvent *);
+    virtual void closeEvent(QCloseEvent*);
 private slots:
-    void slotIconActivated(QSystemTrayIcon::ActivationReason reason);
+    void slotIconActivated(QSystemTrayIcon::ActivationReason);
     void slotShowHide();
-    void slotShowMessage(QString senderName);
-    void slotNewMessage(QString senderName);
+    void slotShowMessage(const QString&);
+    void slotNewMessage(const QString&);
 public slots:
-    void slotChangeIcon(QString status="offline");
+    void slotChangeIcon(const QString&);
     void enableDisconnected();
     void enableConnection();
     void enableConnected();
@@ -41,4 +40,4 @@ signals:
     void changeStateByTray();
 };
 
-#endif // SYSTEMTRAY_H
+#endif

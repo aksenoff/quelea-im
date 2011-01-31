@@ -22,4 +22,5 @@ private:
 public:
     ConnectionStateMachine(QueleaClientUI*, QueleaClient*, SystemTray*, bool);
 };
+
 #endif

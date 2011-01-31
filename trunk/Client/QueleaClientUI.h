@@ -16,19 +16,19 @@ class QueleaClientUI : public QWidget {
 Q_OBJECT
 private:
     QueleaClient* client;
-    SystemTray* st;
+    SystemTray* tray;
     ConnectionStateMachine* connectionState;
     QLabel* stateLabel;
     QLabel* yourCompanionsLabel;
-    QTextEdit* textInfo;
-    QTextEdit* messInput;
-    QListWidget* contlist;
-    QPushButton* connbutton;
+    QTextEdit* chatLog;
+    QTextEdit* messageInput;
+    QListWidget* contactsList;
+    QPushButton* connectButton;
     QPushButton* sendButton;
     QPushButton* settingsButton;
     QPushButton* aboutButton;
     ClientTab* tabWidget;
-    QString clientName;
+    QString myName;
     bool enableSound;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
@@ -36,21 +36,21 @@ public:
 private slots:
     void enableSendButton();
     void addTab(QListWidgetItem*);
-    void tabChanged(int);
-    void closeTab(int);
+    void tabChanged(const int);
+    void closeTab(const int);
     void sendButtonFunction();
-    void playSound(QString&);
-    void messageReceived(QString&);
+    void playSound(const QString&) const;
+    void messageReceived(const QString&);
 public slots:
     void openSettingDialog();
     void enableDisconnected();
     void enableConnection();
     void enableConnected();
-    void parseMessage(Message& message);
-    void logAction(QString&);
-    void setCurrentTab(QString&);
+    void parseMessage(const Message& message);
+    void log(const QString&);
+    void setCurrentTab(const QString&);
 signals:
-    void newMessage(QString&);
+    void newMessage(const QString&);
     void connectButtonClicked();
 };
 
