@@ -128,7 +128,14 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
 
 void QueleaClientUI::enableSendButton()
 {
-     sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0);
+    bool currentContactExist = false;
+    for (int i = 1; i < contactsList->count(); i++)
+        if (contactsList->item(i)->text() == tabWidget->tabText(tabWidget->currentIndex()) || tabWidget->currentIndex() == 0){
+            currentContactExist = true;
+            break;
+        }
+
+    sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0 && currentContactExist);
 }
 
 //---------------------------------------------------------
@@ -210,6 +217,7 @@ void QueleaClientUI::tabChanged(int tab)
         yourCompanionsLabel->setHidden(false);
         setWindowTitle(tr("Чат - Quelea"));
     }
+    enableSendButton();
 }
 
 //---------------------------------------------------------
@@ -277,8 +285,29 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             contacts.removeOne("");
             if (contacts.count() != 0)
                 contactsList->addItem(tr(">Все собеседники"));
+            contacts.sort();
             contactsList->addItems(contacts);
             contactsList->setCurrentRow(0);
+
+            bool tabFound = false;
+            int i;
+            for (i = 1; i < tabWidget->count() && !(tabFound); i++)
+            {
+                 bool matchFound = false;
+                 for (int j = 1; j < contactsList->count() && !(matchFound); j++)
+                     if (tabWidget->tabText(i) == contactsList->item(j)->text())
+                         matchFound = true;
+                     if(!matchFound)
+                         tabFound = true;
+            }
+            if (tabFound == true){
+                QWidget* widget = tabWidget->widget(i-1);
+                QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
+                privateChatLog->setReadOnly(true);
+                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString() + "]"+tr(" Клиент ")
+                                       +tabWidget->tabText(i-1)+tr(" отключен")+"</FONT>");
+            }
+
             enableSendButton();
             tabChanged(tabWidget->currentIndex());
             break;
