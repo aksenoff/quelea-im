@@ -120,7 +120,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     }
     else
         openSettingDialog(); // client may be created there as well
-    tray = new SystemTray(0, client, this);
+    tray = new SystemTray(client, this);
     connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
 }
 
@@ -128,7 +128,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
 
 void QueleaClientUI::enableSendButton()
 {
-    sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0);
+     sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0);
 }
 
 //---------------------------------------------------------

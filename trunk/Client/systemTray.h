@@ -22,7 +22,7 @@ private:
     QueleaClientUI* ui;
     void visibleAtNewMessage();
 public:
-    SystemTray(QWidget* pwgt = 0, QueleaClient* qc = 0, QueleaClientUI* userInterface = 0); //?
+    SystemTray(QueleaClient*, QueleaClientUI*);
 protected:
     virtual void closeEvent(QCloseEvent*);
 private slots:
