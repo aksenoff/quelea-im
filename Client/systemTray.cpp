@@ -4,8 +4,8 @@
 #include <QApplication>
 #include "systemTray.h"
 
-SystemTray::SystemTray(QWidget *pwgt /*=0*/, QueleaClient* queleaClient /*= 0*/, QueleaClientUI* userInterface /*= 0*/)
-    : QWidget(pwgt), newMessageExist(false), client(queleaClient), ui(userInterface)
+SystemTray::SystemTray(QueleaClient* queleaClient, QueleaClientUI* userInterface)
+    : newMessageExist(false), client(queleaClient), ui(userInterface)
 {
     connect(client, SIGNAL(statusChanged(const QString&)),
             this, SLOT(slotChangeIcon(const QString&)));
@@ -60,16 +60,9 @@ void SystemTray::closeEvent(QCloseEvent * pe)
 
 void SystemTray::slotIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    switch (reason)
-    {
-    case QSystemTrayIcon::Trigger:
-        {
-            slotShowHide(); // gownocode detected. Roma, kamenti?
-            break;
-        }
-    default:
-        ;
-    }
+    if (reason == QSystemTrayIcon::Trigger)
+        slotShowHide();
+
 }
 
 //---------------------------------------------------------
@@ -119,7 +112,7 @@ void SystemTray::slotChangeIcon(const QString& status)
 
 void SystemTray::slotNewMessage(const QString& senderName)
 {
-    if (ui->isVisible())
+    if (!ui->isVisible())
     {
         slotChangeIcon("message");
         slotShowMessage(senderName);
@@ -135,7 +128,7 @@ void SystemTray::slotNewMessage(const QString& senderName)
 
 void SystemTray::visibleAtNewMessage()
 {
-    ui->setCurrentTab(newMessageSenderName); //?
+    ui->setCurrentTab(newMessageSenderName);
     slotChangeIcon(client->getStatus());
     newMessageExist = false;
     newMessageSenderName = "";
