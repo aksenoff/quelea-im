@@ -38,6 +38,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
 
     aboutButton = new QPushButton(tr(" О п&рограмме "));
     aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(aboutButton,SIGNAL(clicked()),
+            this,SLOT(showAboutBox()));
 
     settingsButton = new QPushButton(tr("&Настройки"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -426,7 +428,16 @@ void QueleaClientUI::setCurrentTab(const QString& senderName)
             }
     }
 }
-
+//---------------------------------------------------------
+void QueleaClientUI::showAboutBox()
+{
+    QMessageBox aboutBox;
+    aboutBox.setWindowTitle(tr("О программе - Quelea"));
+    aboutBox.setIconPixmap(QPixmap("/icon.png"));
+    aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
+    aboutBox.setInformativeText("<p>"+tr("Используется Qt 4.7.1<br>Распространяется по лизензии <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p><p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")+"<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"+tr("© Разработчики Quelea, 2011"));
+    aboutBox.exec();
+}
 //---------------------------------------------------------
 
 QueleaClientUI::~QueleaClientUI()
@@ -434,3 +445,4 @@ QueleaClientUI::~QueleaClientUI()
     delete tray;
     delete connectionState;
 }
+
