@@ -13,10 +13,17 @@ private:
     QComboBox* ipAddressesCombo;
     QueleaServer* server;
     QVBoxLayout* mainLayout;
+    QHBoxLayout* buttonsLayout;
+    QPushButton* startStopButton;
+    QPushButton* aboutButton;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
     void log(const QString& string) const;
     ~QueleaServerUI();
+private slots:
+    void showAboutBox();
+    void startServer();
+    void stopServer();
 };
 
 #endif

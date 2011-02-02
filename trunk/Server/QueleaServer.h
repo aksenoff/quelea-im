@@ -12,17 +12,14 @@ class QueleaServerUI;
 class QueleaServer : public QTcpServer {
 Q_OBJECT
 private:
-    quint16 nextBlockSize;
     QString ipAddress;
     quint16 port;
     QVector<Client*> clients;
     QueleaServerUI* ui;
 public:
     QueleaServer(QueleaServerUI* userInterface = 0);
-
+    ~QueleaServer();
 public slots:
-    //void slotStartServer();
-    //void slotStopServer();
     void slotNewConnection();
     void slotReadClient();
     void slotByeClient(QTcpSocket*);

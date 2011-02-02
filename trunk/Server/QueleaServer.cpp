@@ -2,16 +2,16 @@
 #include <QMessageBox>
 #include "../codes.h"
 
-// ----------------------------------------------------------------------
-
 QueleaServer::QueleaServer(QueleaServerUI* userInterface)
-    : nextBlockSize(0), ipAddress(""), port(49212), ui(userInterface)
+    : ipAddress(""), port(49212), ui(userInterface)
 {
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     // searching for first non-localhost ip
-    for (int i = 0; i < ipAddressesList.size(); ++i) {
+    for (int i = 0; i < ipAddressesList.size(); ++i)
+    {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address()) {
+            ipAddressesList.at(i).toIPv4Address())
+        {
             ipAddress = ipAddressesList.at(i).toString();
             break;
         }
@@ -28,9 +28,10 @@ QueleaServer::QueleaServer(QueleaServerUI* userInterface)
         close();
         return;
     }
-    ui->log("<b>["+QTime::currentTime().toString()+"]"+" "+tr("Сервер запущен на ")+ipAddress+":"+QString::number(port)+"</b>");
+    ui->log("<b>[" + QTime::currentTime().toString() + "]" + " "
+            + tr("Сервер запущен на") + " " + ipAddress + ":" + QString::number(port) + "</b>");
     connect(this, SIGNAL(newConnection()),
-            this,         SLOT(slotNewConnection())
+            this, SLOT(slotNewConnection())
            );
 }
 
@@ -81,7 +82,8 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newClient);
                 connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                ui->log("[" + QTime::currentTime().toString() + "]" + " " + tr("Подключен новый клиент ") + incomingMessage->getText());
+                ui->log("[" + QTime::currentTime().toString() + "]" + " "
+                        + tr("Подключен новый клиент ") + incomingMessage->getText());
                 // sending authorization confirmation
                 Message auth_ok(AUTH_RESPONSE, "auth_ok");
                 auth_ok.send(newClient->getSocket());
@@ -146,7 +148,8 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     QVector<Client*>::iterator disconnectedClient;
     // searching for client whose socket has disconnected
     for(disconnectedClient = clients.begin(); (*disconnectedClient)->getSocket() != disconnectedClientSocket; ++disconnectedClient);
-    ui->log("[" + QTime::currentTime().toString() + "]" + " " + tr("Клиент ") +  (*disconnectedClient)->getName() + tr(" отключен"));
+    ui->log("[" + QTime::currentTime().toString() + "]" + " "
+            + tr("Клиент") + " " +  (*disconnectedClient)->getName() + " " + tr("отключен"));
     delete (*disconnectedClient);
     // removing client from vector
     clients.erase(disconnectedClient);
@@ -157,4 +160,11 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     Message contacts_list(CONTACTS_RESPONSE, contacts_string);
     for (int i = 0; i < clients.size(); ++i)
         contacts_list.send(clients[i]->getSocket());
+}
+
+//-------------------------------------------------------------------------
+
+QueleaServer::~QueleaServer()
+{
+    ui->log("<b>[" + QTime::currentTime().toString() + "]" + " " + tr("Сервер остановлен.") + "</b>");
 }
