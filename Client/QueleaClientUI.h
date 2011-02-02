@@ -40,6 +40,7 @@ private slots:
     void closeTab(const int);
     void sendButtonFunction();
     void playSound(const QString&) const;
+    void showAboutBox();
     void messageReceived(const QString&);
 public slots:
     void openSettingDialog();
