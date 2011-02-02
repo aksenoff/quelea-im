@@ -60,7 +60,6 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
             sendButton, SLOT(click()));
     QSpacerItem* spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
     QSpacerItem* spacer2 = new QSpacerItem(0, 29);
-    QSpacerItem* spacer3 = new QSpacerItem(0, 30);
 
     //returning focus to messageInput QTextEdit:
     connect(contactsList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
@@ -85,14 +84,13 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     buttonLayout->addWidget(settingsButton);
     buttonLayout->addWidget(statusInscriptionLabel, 0, Qt::AlignRight);
     buttonLayout->addWidget(stateLabel);
-    buttonLayout->addWidget(connectButton);
     leftLayout->addLayout(buttonLayout);
     leftLayout->addWidget(tabWidget);
     leftLayout->addWidget(messageInput);
     sendLayout->addSpacerItem(spacer1);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
-    rightLayout->addSpacerItem(spacer3);
+    rightLayout->addWidget(connectButton);
     rightLayout->addWidget(yourCompanionsLabel);//may be hidden
     rightLayout->addWidget(contactsList); //may be hidden
     rightLayout->addSpacerItem(spacer2);
