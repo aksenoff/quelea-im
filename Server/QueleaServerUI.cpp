@@ -37,6 +37,7 @@ void QueleaServerUI::stopServer()
     connect(startStopButton, SIGNAL(clicked()),
             this, SLOT(startServer()));
     delete server;
+    server = 0;
     startStopButton->setText(tr("Пуск"));
 }
 
@@ -80,5 +81,5 @@ void QueleaServerUI::showAboutBox()
 
 QueleaServerUI::~QueleaServerUI()
 {
-    delete server;
+    if(server) delete server;
 }
