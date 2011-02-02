@@ -1,6 +1,5 @@
-
-#ifndef _QueleaClient_h_
-#define _QueleaClient_h_
+#ifndef QUELEACLIENT_H
+#define QUELEACLIENT_H
 
 #include <QWidget>
 #include <QTcpSocket>
@@ -15,29 +14,22 @@ private:
     QTcpSocket* serverSocket;
     QString serverAddress;
     QString clientName;
-    QString clientStatus;
     QueleaClientUI* ui;
 public:
     QueleaClient(QueleaClientUI*, const QString&, const QString&);
-    QString getStatus() const; //?
     void changeSettings(const QString&, const QString&);
 private slots:
     void slotReadServer();
     void slotError(QAbstractSocket::SocketError);
-    void changeStatus(const QString&);
 public slots:
     void sendPrivateMessage(const QString&, const QString&) const;
     void sendChatMessage(const QString&, const QString&) const;
     void connectToServer();
-    void disconnectFromServer();;
+    void disconnectFromServer();
 signals:
-    void startedConnect();
-    void sendButtonChangeToChat();
-    void sendButtonChangeToPrivate();
-    void disconnectSignal();
-    void statusChanged(const QString&);
     void socketError();
     void authOkSignal();
     void authErrorSignal();
 };
+
 #endif

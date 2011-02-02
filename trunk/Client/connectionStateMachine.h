@@ -15,12 +15,18 @@ Q_OBJECT
 private:
     QueleaClientUI* ui;
     QueleaClient* client;
-    SystemTray* st;
+    SystemTray* tray;
+    QString currentState;
     QState* disconnectedState;
     QState* connectionState;
     QState* connectedState;
+private slots:
+    void setConnectionState();
+    void setConnectedState();
+    void setDisconnectedState();
 public:
     ConnectionStateMachine(QueleaClientUI*, QueleaClient*, SystemTray*, bool);
+    const QString& currentConnectionState() const;
 };
 
 #endif
