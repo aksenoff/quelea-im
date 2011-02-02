@@ -18,7 +18,7 @@ SystemTray::SystemTray(QueleaClientUI* userInterface)
     connect(actChangeStatus,SIGNAL(triggered()),
             this, SIGNAL(changeStateByTray()));
 
-    actSettings = new QAction(tr("Настройки..."), this);
+    actSettings = new QAction(QPixmap(":/images/settings.png"),tr("Настройки..."), this);
     connect(actSettings, SIGNAL(triggered()),
             ui, SLOT(openSettingDialog()));
 
@@ -102,12 +102,12 @@ void SystemTray::slotChangeIcon(const QString& status)
 {
     QString pixmapName;
     if (status=="offline")
-        pixmapName ="/icon-offline.png";
+        pixmapName =":/images/icon-offline.png";
 
     else if(status=="message")
-        pixmapName="/message.png";
+        pixmapName=":/images/message.png";
     else
-        pixmapName ="/icon.png";
+        pixmapName =":/images/icon.png";
 
     trayIcon->setIcon(QPixmap(pixmapName));
 }
@@ -144,6 +144,7 @@ void SystemTray::enableDisconnected()
 {
     slotChangeIcon("offline");
     actChangeStatus->setText(tr("Подключиться"));
+    actChangeStatus->setIcon(QPixmap(":/images/connect.png"));
 }
 
 //---------------------------------------------------------
@@ -151,6 +152,7 @@ void SystemTray::enableDisconnected()
 void SystemTray::enableConnection()
 {
     actChangeStatus->setText(tr("Отключиться"));
+    actChangeStatus->setIcon(QPixmap(":/images/disconnect.png"));
 }
 
 //---------------------------------------------------------

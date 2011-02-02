@@ -18,3 +18,6 @@ HEADERS = QueleaClient.h \
     connectionStateMachine.h
 win32:TARGET = ../QueleaClient
 RC_FILE = resource.rc
+
+RESOURCES += \
+    resources.qrc

@@ -25,7 +25,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(contactsList, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem *)),
             this, SLOT(enableSendButton()));
 
-    sendButton = new QPushButton(tr("&Отправить"));
+    sendButton = new QPushButton(QPixmap(":/images/send.png"),tr("&Отправить"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(sendButton, SIGNAL(clicked()),
@@ -36,12 +36,12 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
-    aboutButton = new QPushButton(tr(" О п&рограмме "));
+    aboutButton = new QPushButton(QPixmap(":/images/about.png"),tr(" О п&рограмме "));
     aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(aboutButton,SIGNAL(clicked()),
             this,SLOT(showAboutBox()));
 
-    settingsButton = new QPushButton(tr("&Настройки"));
+    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr("&Настройки"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()),
             this, SLOT(openSettingDialog()));
@@ -269,7 +269,7 @@ void QueleaClientUI::messageReceived(const QString& receiver)
 void QueleaClientUI::playSound(const QString& reason) const
 {
     if (QSound::isAvailable() && enableSound)
-            QSound::play("/"+reason+".wav");
+            QSound::play(":/sound/"+reason+".wav");
 }
 
 //---------------------------------------------------------
@@ -392,6 +392,7 @@ void QueleaClientUI::log(const QString& event)
 void QueleaClientUI::enableDisconnected()
 {
     connectButton->setText(" " + tr("&Подключиться") + " ");
+    connectButton->setIcon(QPixmap(":/images/connect.png"));
     stateLabel->setText("<FONT COLOR=RED>" + tr("Отключен") + "</FONT>");
     contactsList->clear();
     enableSendButton();
@@ -402,6 +403,7 @@ void QueleaClientUI::enableDisconnected()
 void QueleaClientUI::enableConnection()
 {
     connectButton->setText(" " + tr("О&тключиться") + " ");
+    connectButton->setIcon(QPixmap(":/images/disconnect.png"));
     stateLabel->setText(tr("Подключение..."));
 }                            
 
@@ -433,7 +435,7 @@ void QueleaClientUI::showAboutBox()
 {
     QMessageBox aboutBox;
     aboutBox.setWindowTitle(tr("О программе - Quelea"));
-    aboutBox.setIconPixmap(QPixmap("/icon.png"));
+    aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
     aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
     aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.1<br>Распространяется по лизензии "
                                          "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
