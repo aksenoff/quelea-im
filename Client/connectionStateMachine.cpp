@@ -1,24 +1,36 @@
 #include "connectionStateMachine.h"
 
-ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, QueleaClient* c, SystemTray* s, bool autoConnect)
-    :ui(userInterface), client(c) ,st(s)
+ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* UI, QueleaClient* qc, SystemTray* st, bool autoConnect)
+    :ui(UI), client(qc) ,tray(st)
 {
+    tray->assignMachine(this);
     disconnectedState = new QState;
     connectionState = new QState;
     connectedState = new QState;
 
+    // ways to beigin connecting: pressing a button in main window
     disconnectedState->addTransition(ui, SIGNAL(connectButtonClicked()), connectionState);
-    disconnectedState->addTransition(st,SIGNAL(changeStateByTray()),connectionState);
+    //                            clicking a tray menu
+    disconnectedState->addTransition(tray, SIGNAL(changeStateByTray()), connectionState);
 
+    // way to succeessfully end connection process: "ok" authorization response
     connectionState->addTransition(client, SIGNAL(authOkSignal()), connectedState);
-    connectionState->addTransition(client, SIGNAL(authErrorSignal()), disconnectedState);
-    connectionState->addTransition(ui, SIGNAL(connectButtonClicked()), disconnectedState);
-    connectionState->addTransition(client, SIGNAL(socketError()),disconnectedState);
-    connectionState->addTransition(st,SIGNAL(changeStateByTray()),disconnectedState);
 
+    // ways to fail connection: "error" authorization response
+    connectionState->addTransition(client, SIGNAL(authErrorSignal()), disconnectedState);
+    //                          pressing a button in main window
+    connectionState->addTransition(ui, SIGNAL(connectButtonClicked()), disconnectedState);
+    //                          having a socket error
+    connectionState->addTransition(client, SIGNAL(socketError()), disconnectedState);
+    //                          clicking a tray menu
+    connectionState->addTransition(tray, SIGNAL(changeStateByTray()), disconnectedState);
+
+    // ways to disconnect: pressing a button in main window
     connectedState->addTransition(ui, SIGNAL(connectButtonClicked()), disconnectedState);
-    connectedState->addTransition(client, SIGNAL(socketError()),disconnectedState);
-    connectedState->addTransition(st,SIGNAL(changeStateByTray()),disconnectedState);
+    //                     having a socket error
+    connectedState->addTransition(client, SIGNAL(socketError()), disconnectedState);
+    //                     clicking a tray menu
+    connectedState->addTransition(tray, SIGNAL(changeStateByTray()), disconnectedState);
 
     connect(disconnectedState, SIGNAL(entered()),
             ui, SLOT(enableDisconnected()));
@@ -39,10 +51,39 @@ ConnectionStateMachine::ConnectionStateMachine(QueleaClientUI* userInterface, Qu
     connect(connectionState,SIGNAL(entered()),
             client, SLOT(connectToServer()));
 
+    connect(connectionState, SIGNAL(entered()),
+            this, SLOT(setConnectionState()));
+    connect(connectedState, SIGNAL(entered()),
+            this, SLOT(setConnectedState()));
+    connect(disconnectedState, SIGNAL(entered()),
+            this, SLOT(setDisconnectedState()));
+
     addState(disconnectedState);
     addState(connectionState);
     addState(connectedState);
+
     autoConnect? setInitialState(connectionState)
         :setInitialState(disconnectedState);
+
     start();
+}
+
+void ConnectionStateMachine::setConnectionState()
+{
+    currentState = "connecting";
+}
+
+void ConnectionStateMachine::setConnectedState()
+{
+    currentState = "online";
+}
+
+void ConnectionStateMachine::setDisconnectedState()
+{
+    currentState = "offline";
+}
+
+const QString& ConnectionStateMachine::currentConnectionState() const
+{
+    return currentState;
 }

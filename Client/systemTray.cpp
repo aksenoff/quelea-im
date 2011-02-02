@@ -4,11 +4,9 @@
 #include <QApplication>
 #include "systemTray.h"
 
-SystemTray::SystemTray(QueleaClient* queleaClient, QueleaClientUI* userInterface)
-    : newMessageExist(false), client(queleaClient), ui(userInterface)
+SystemTray::SystemTray(QueleaClientUI* userInterface)
+    : newMessageExists(false), ui(userInterface)
 {
-    connect(client, SIGNAL(statusChanged(const QString&)),
-            this, SLOT(slotChangeIcon(const QString&)));
     connect(ui, SIGNAL(newMessage(const QString&)),
             this, SLOT(slotNewMessage(const QString&)));
 
@@ -48,6 +46,13 @@ SystemTray::SystemTray(QueleaClient* queleaClient, QueleaClientUI* userInterface
 
 //---------------------------------------------------------
 
+void SystemTray::assignMachine(ConnectionStateMachine* machine)
+{
+    stateMachine = machine;
+}
+
+//---------------------------------------------------------
+
 void SystemTray::closeEvent(QCloseEvent * pe)
 {
     if(trayIcon->isVisible())
@@ -62,7 +67,6 @@ void SystemTray::slotIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if (reason == QSystemTrayIcon::Trigger)
         slotShowHide();
-
 }
 
 //---------------------------------------------------------
@@ -75,7 +79,7 @@ void SystemTray::slotShowHide()
     {
         actShowHide->setText(tr("Скрыть"));
         ui->activateWindow();
-        if (newMessageExist)
+        if (newMessageExists)
             visibleAtNewMessage();
     }
     else
@@ -120,7 +124,7 @@ void SystemTray::slotNewMessage(const QString& senderName)
     else
         if (!ui->isActiveWindow())
             QApplication::alert(ui);
-    newMessageExist = true;
+    newMessageExists = true;
     newMessageSenderName = senderName;
 }
 
@@ -129,8 +133,8 @@ void SystemTray::slotNewMessage(const QString& senderName)
 void SystemTray::visibleAtNewMessage()
 {
     ui->setCurrentTab(newMessageSenderName);
-    slotChangeIcon(client->getStatus());
-    newMessageExist = false;
+    slotChangeIcon(stateMachine->currentConnectionState());
+    newMessageExists = false;
     newMessageSenderName = "";
 }
 

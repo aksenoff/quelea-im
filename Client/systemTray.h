@@ -1,10 +1,10 @@
 #ifndef SYSTEMTRAY_H
 #define SYSTEMTRAY_H
 
-#include "QueleaClient.h"
+#include "ConnectionStateMachine.h"
 #include "QueleaClientUI.h"
 
-class QueleaClient;
+class ConnectionStateMachine;
 class QueleaClientUI;
 
 class SystemTray : public QWidget{
@@ -17,12 +17,13 @@ private:
     QAction* actSettings;
     QAction* actQuit;
     QString newMessageSenderName;
-    bool newMessageExist;
-    QueleaClient* client;
+    bool newMessageExists;
+    ConnectionStateMachine* stateMachine;
     QueleaClientUI* ui;
     void visibleAtNewMessage();
 public:
-    SystemTray(QueleaClient*, QueleaClientUI*);
+    SystemTray(QueleaClientUI*);
+    void assignMachine(ConnectionStateMachine*);
 protected:
     virtual void closeEvent(QCloseEvent*);
 private slots:

@@ -122,7 +122,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     }
     else
         openSettingDialog(); // client may be created there as well
-    tray = new SystemTray(client, this);
+    tray = new SystemTray(this);
     connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
 }
 
@@ -435,7 +435,12 @@ void QueleaClientUI::showAboutBox()
     aboutBox.setWindowTitle(tr("О программе - Quelea"));
     aboutBox.setIconPixmap(QPixmap("/icon.png"));
     aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
-    aboutBox.setInformativeText("<p>"+tr("Используется Qt 4.7.1<br>Распространяется по лизензии <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p><p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")+"<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"+tr("© Разработчики Quelea, 2011"));
+    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.1<br>Распространяется по лизензии "
+                                         "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
+                                         "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
+                                         "<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")
+                                + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
+                                + tr("© Разработчики Quelea, 2011"));
     aboutBox.exec();
 }
 //---------------------------------------------------------

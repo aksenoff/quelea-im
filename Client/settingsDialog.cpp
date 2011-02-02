@@ -30,8 +30,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     connect(cancelButton, SIGNAL(clicked()),
             this, SLOT(reject()));
 
-    //Layout setup
-    QVBoxLayout*mainLayout = new QVBoxLayout;
+    // Layout setup
+    QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* topLayout = new QHBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
     QVBoxLayout* leftLayout = new QVBoxLayout;
@@ -53,7 +53,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     setLayout(mainLayout);
     setWindowTitle(tr("Настройки - Quelea"));
 
-    //Reading settings:
+    // Reading settings to populate the dialog
     QFile file("settings.dat");
     if (file.open(QIODevice::ReadOnly))
     {
@@ -86,12 +86,12 @@ QString SettingsDialog::serverAddress() const
 
 bool SettingsDialog::autoConnect() const
 {
-return autoConnectCheckBox->isChecked();
+    return autoConnectCheckBox->isChecked();
 }
 
 // ----------------------------------------------------------------------
 
 bool SettingsDialog::enableSound() const
 {
-return enableSoundCheckBox->isChecked();
+    return enableSoundCheckBox->isChecked();
 }

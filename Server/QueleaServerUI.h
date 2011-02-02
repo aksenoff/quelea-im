@@ -6,8 +6,6 @@
 
 class QueleaServer;
 
-// ======================================================================
-
 class QueleaServerUI : public QWidget {
 Q_OBJECT
 private:
@@ -17,7 +15,7 @@ private:
     QVBoxLayout* mainLayout;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
-    void log(const QString& string) const; // протоколирование
+    void log(const QString& string) const;
     ~QueleaServerUI();
 };
 
