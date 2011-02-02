@@ -12,3 +12,6 @@ HEADERS = QueleaServer.h \
     ../message.h
 win32:TARGET = ../QueleaServer
 RC_FILE = resource.rc
+
+RESOURCES += \
+    resources.qrc
