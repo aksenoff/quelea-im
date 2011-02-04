@@ -10,7 +10,7 @@ class Message
     QString text;
 public:
     operator int() const;
-    QString getText() const;
+    const QString& getText() const;
     Message(unsigned char, QString="");
     Message(QTcpSocket*);
     void send(QTcpSocket*) const;

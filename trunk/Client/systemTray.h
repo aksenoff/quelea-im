@@ -28,15 +28,14 @@ protected:
     virtual void closeEvent(QCloseEvent*);
 private slots:
     void slotIconActivated(QSystemTrayIcon::ActivationReason);
-    void slotShowHide();
     void slotShowMessage(const QString&);
     void slotNewMessage(const QString&);
 public slots:
+    void slotShowHide();
     void slotChangeIcon(const QString&);
     void enableDisconnected();
     void enableConnection();
     void enableConnected();
-
 signals:
     void changeStateByTray();
 };

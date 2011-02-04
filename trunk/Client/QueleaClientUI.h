@@ -33,6 +33,8 @@ private:
 public:
     QueleaClientUI(QWidget* pwgt = 0);
     ~QueleaClientUI();
+protected:
+    void closeEvent(QCloseEvent *event);
 private slots:
     void enableSendButton();
     void addTab(QListWidgetItem*);

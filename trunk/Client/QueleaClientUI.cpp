@@ -6,18 +6,22 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     : QWidget(pwgt)
 {
     stateLabel = new QLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
+    stateLabel->setFixedWidth(100);
     yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
     QLabel* statusInscriptionLabel = new QLabel(tr("Статус:"));
 
     messageInput = new QTextEdit(this);
+    messageInput->document()->setDefaultFont(QFont("Arial",11));
     connect(messageInput, SIGNAL(textChanged()),
             this, SLOT(enableSendButton()));
 
     chatLog = new QTextEdit;
     chatLog->setReadOnly(true);
+    chatLog->document()->setDefaultFont((QFont("Arial",11)));
 
     contactsList = new QListWidget;
-    contactsList->resize(50, 100);
+    contactsList->setFont((QFont("Arial",10)));
+    contactsList->setMinimumWidth(150);
     contactsList->setFocusProxy(messageInput);
     contactsList->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     connect(contactsList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
@@ -32,7 +36,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
             this, SLOT(sendButtonFunction()));
 
     connectButton = new QPushButton(tr(" &Подключиться "));
-    connectButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connectButton->setFixedSize(110, 24);
     connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
@@ -41,7 +45,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(aboutButton,SIGNAL(clicked()),
             this,SLOT(showAboutBox()));
 
-    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr("&Настройки"));
+    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr(" &Настройки "));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()),
             this, SLOT(openSettingDialog()));
@@ -49,8 +53,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
     tabWidget->addTab(chatLog, tr("Общий разговор"));
-    tabWidget->getTabBar()->setTabButton(0,QTabBar::RightSide,0);
-    connect(tabWidget ,SIGNAL(currentChanged(int)),
+    tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide,0);
+    connect(tabWidget, SIGNAL(currentChanged(int)),
             this, SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),
             this, SLOT(closeTab(int)));
@@ -60,6 +64,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
             sendButton, SLOT(click()));
     QSpacerItem* spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
     QSpacerItem* spacer2 = new QSpacerItem(0, 29);
+    QSpacerItem* spacer3 = new QSpacerItem(0, 30);
 
     //returning focus to messageInput QTextEdit:
     connect(contactsList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
@@ -84,13 +89,14 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     buttonLayout->addWidget(settingsButton);
     buttonLayout->addWidget(statusInscriptionLabel, 0, Qt::AlignRight);
     buttonLayout->addWidget(stateLabel);
+    buttonLayout->addWidget(connectButton);
     leftLayout->addLayout(buttonLayout);
-    leftLayout->addWidget(tabWidget);
-    leftLayout->addWidget(messageInput);
+    leftLayout->addWidget(tabWidget, 3);
+    leftLayout->addWidget(messageInput, 1);
     sendLayout->addSpacerItem(spacer1);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
-    rightLayout->addWidget(connectButton);
+    rightLayout->addSpacerItem(spacer3);
     rightLayout->addWidget(yourCompanionsLabel);//may be hidden
     rightLayout->addWidget(contactsList); //may be hidden
     rightLayout->addSpacerItem(spacer2);
@@ -191,9 +197,10 @@ void QueleaClientUI::addTab(QListWidgetItem * item)
             }
         if (tabState==true)
         {
-            QTextEdit* privatechatLog = new QTextEdit;
-            privatechatLog->setReadOnly(true);
-            tabWidget->setCurrentIndex(tabWidget->addTab(privatechatLog,item->text()));
+            QTextEdit* privateChatLog = new QTextEdit;
+            privateChatLog->setReadOnly(true);
+            privateChatLog->document()->setDefaultFont((QFont("Arial",11)));
+            tabWidget->setCurrentIndex(tabWidget->addTab(privateChatLog, item->text()));
         }
     }
 }
@@ -279,7 +286,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
     {
     case CONTACTS_RESPONSE:
         {
-            QStringList contacts = incomingMessage.getText().split(";");
+            QStringList contacts = incomingMessage.getText().split(QChar::Null);
             contactsList->clear();
             contacts.removeOne(myName);
             contacts.removeOne("");
@@ -316,7 +323,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
         {
             if (tabWidget->currentIndex() != 0)
                 tabWidget->getTabBar()->setTabTextColor (0, "Blue");
-            QStringList incomingMessageTextItems = incomingMessage.getText().split(";");
+            QStringList incomingMessageTextItems = incomingMessage.getText().split(QChar::Null);
             QString senderName(incomingMessageTextItems[0]);
             QString receiverName(incomingMessageTextItems[1]);
             QString actualMessage(incomingMessageTextItems[2]);
@@ -346,7 +353,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
     case MESSAGE_TO_CLIENT: // incoming private message
         {
             bool tabState = false;
-            QStringList incomingMessageTextItems = incomingMessage.getText().split(";");
+            QStringList incomingMessageTextItems = incomingMessage.getText().split(QChar::Null);
             QString senderName(incomingMessageTextItems[0]);
             QString actualMessage(incomingMessageTextItems[1]);
             for (int i = 0; i <= tabWidget->count(); i++)
@@ -428,20 +435,30 @@ void QueleaClientUI::setCurrentTab(const QString& senderName)
             }
     }
 }
+
 //---------------------------------------------------------
+
 void QueleaClientUI::showAboutBox()
 {
     QMessageBox aboutBox;
     aboutBox.setWindowTitle(tr("О программе - Quelea"));
     aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
     aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.1<br>Распространяется по лизензии "
+    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.1<br>Распространяется по лицензии "
                                          "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
                                          "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
                                          "<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
                                 + tr("© Разработчики Quelea, 2011"));
     aboutBox.exec();
+}
+
+//---------------------------------------------------------
+
+void QueleaClientUI::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
+    tray->slotShowHide();
 }
 //---------------------------------------------------------
 
