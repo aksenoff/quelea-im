@@ -4,7 +4,7 @@ Message::operator int() const
 {
     return code;
 }
-QString Message::getText() const
+const QString& Message::getText() const
 {
     return text;
 }
@@ -24,7 +24,7 @@ Message::Message(QTcpSocket* clientSocket)
 
 void Message::send(QTcpSocket* socket) const
 {
-    QByteArray  arrBlock;
+    QByteArray arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_6);
     out << quint16(0) << code << text;

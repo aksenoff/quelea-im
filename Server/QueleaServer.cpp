@@ -95,7 +95,7 @@ void QueleaServer::slotReadClient()
             QString contacts_string("");
             // constructing string of client names
             for (int i = 0; i < clients.size(); ++i)
-                contacts_string.append(clients[i]->getName()+";");
+                contacts_string.append(clients[i]->getName()+QChar::Null);
             Message contacts_list(CONTACTS_RESPONSE, contacts_string);
             // broadcasting
             for (int i = 0; i < clients.size(); ++i)
@@ -108,11 +108,11 @@ void QueleaServer::slotReadClient()
             // searching vector for client who sent message via socket
             for(senderClient = clients.begin(); (*senderClient)->getSocket() != clientSocket; ++senderClient);
             // list: [0] - receiver name [1] - actual message
-            QStringList incomingMessageTextItems(incomingMessage->getText().split(";"));
+            QStringList incomingMessageTextItems(incomingMessage->getText().split(QChar::Null));
             QString receiverClientName(incomingMessageTextItems[0]);
             QString actualMessage(incomingMessageTextItems[1]);
-            // constructing message text "sendername;actualmessage"
-            QString outcomingMessageText((*senderClient)->getName() + ";" + actualMessage);
+            // constructing message text "sendername0x0000actualmessage"
+            QString outcomingMessageText((*senderClient)->getName() + QChar::Null + actualMessage);
             Message outcomingMessage(MESSAGE_TO_CLIENT, outcomingMessageText);
             // searching vector for receiver client by name
             for(receiverClient = clients.begin(); (*receiverClient)->getName() != receiverClientName; ++receiverClient);
@@ -125,11 +125,11 @@ void QueleaServer::slotReadClient()
             // searching vector for client who sent message via socket
             for(senderClient = clients.begin(); (*senderClient)->getSocket() != clientSocket; ++senderClient);
             // list: [0] - receiver name [1] - actual message
-            QStringList incomingMessageTextItems(incomingMessage->getText().split(";"));
+            QStringList incomingMessageTextItems(incomingMessage->getText().split(QChar::Null));
             QString receiverClientName(incomingMessageTextItems[0]);
             QString actualMessage(incomingMessageTextItems[1]);
-            // constructing message text "sendername;receivername;actualmessage"
-            QString outcomingMessageText((*senderClient)->getName() + ";" + receiverClientName + ";" + actualMessage);
+            // constructing message text "sendername0x0000receivername0x0000actualmessage"
+            QString outcomingMessageText((*senderClient)->getName() + QChar::Null + receiverClientName + QChar::Null + actualMessage);
             Message outcomingMessage(MESSAGE_TO_CHAT, outcomingMessageText);
             // broadcasting
             for (int i = 0; i < clients.size(); ++i)

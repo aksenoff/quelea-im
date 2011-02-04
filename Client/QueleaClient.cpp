@@ -85,8 +85,8 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
 
 void QueleaClient::sendPrivateMessage(const QString& receiverName, const QString& actualMessage) const
 {
-    // constructing message text "receivername;actualmessage"
-    QString messageText = receiverName + ";" + actualMessage;
+    // constructing message text "receivername0x0000actualmessage"
+    QString messageText = receiverName + QChar::Null + actualMessage;
     Message outcomingMessage(MESSAGE_TO_SERVER, messageText);
     outcomingMessage.send(serverSocket);
 }
@@ -95,8 +95,8 @@ void QueleaClient::sendPrivateMessage(const QString& receiverName, const QString
 
 void QueleaClient::sendChatMessage(const QString& receiverName, const QString& actualMessage) const
 {
-    // constructing message text "receivername;actualmessage"
-    QString messageText = receiverName + ";" + actualMessage;
+    // constructing message text "receivername0x0000actualmessage"
+    QString messageText = receiverName + QChar::Null + actualMessage;
     Message outcomingMessage(MESSAGE_TO_CHAT, messageText);
     outcomingMessage.send(serverSocket);
 }
