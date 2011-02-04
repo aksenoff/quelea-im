@@ -374,6 +374,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             {
                 QTextEdit* privateChatLog = new QTextEdit;
                 privateChatLog->setReadOnly(true);
+                privateChatLog->document()->setDefaultFont(QFont("Arial",11));
                 tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
                 privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
