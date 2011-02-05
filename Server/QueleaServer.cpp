@@ -2,37 +2,20 @@
 #include <QMessageBox>
 #include "../codes.h"
 
-QueleaServer::QueleaServer(QueleaServerUI* userInterface)
-    : ipAddress(""), port(49212), ui(userInterface)
+QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface)
+    : ipAddress(ip), port(49212), ui(userInterface)
 {
-    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-    // searching for first non-localhost ip
-    for (int i = 0; i < ipAddressesList.size(); ++i)
-    {
-        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address())
-        {
-            ipAddress = ipAddressesList.at(i).toString();
-            break;
-        }
-    }
-
-    // not found? using localhost
-    if (ipAddress == "")
-        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-
     // starting server
     if (!listen(static_cast<QHostAddress>(ipAddress), port))
     {
-        QMessageBox::critical(0, tr("Ошибка сервера"), tr("Невозможно запустить сервер:") + errorString());
+        QMessageBox::critical(0, tr("Ошибка сервера"), tr("Невозможно запустить сервер:") + " " + errorString());
         close();
         return;
     }
     ui->log("<b>[" + QTime::currentTime().toString() + "]" + " "
             + tr("Сервер запущен на") + " " + ipAddress + ":" + QString::number(port) + "</b>");
     connect(this, SIGNAL(newConnection()),
-            this, SLOT(slotNewConnection())
-           );
+            this, SLOT(slotNewConnection()));
 }
 
 // ----------------------------------------------------------------------

@@ -10,15 +10,17 @@ class QueleaServerUI : public QWidget {
 Q_OBJECT
 private:
     QTextEdit* serverLog;
-    QComboBox* ipAddressesCombo;
+    QComboBox* ipBox;
     QueleaServer* server;
     QVBoxLayout* mainLayout;
     QHBoxLayout* buttonsLayout;
     QPushButton* startStopButton;
     QPushButton* aboutButton;
+    bool populateIpBox();
+    QString currentIp;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
-    void log(const QString& string) const;
+    void log(const QString&) const;
     ~QueleaServerUI();
 private slots:
     void showAboutBox();
