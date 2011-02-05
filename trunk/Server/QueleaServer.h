@@ -17,7 +17,7 @@ private:
     QVector<Client*> clients;
     QueleaServerUI* ui;
 public:
-    QueleaServer(QueleaServerUI* userInterface = 0);
+    QueleaServer(const QString&, QueleaServerUI*);
     ~QueleaServer();
 public slots:
     void slotNewConnection();
