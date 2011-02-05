@@ -44,11 +44,7 @@ UninstPage uninstConfirm
 UninstPage instfiles
 
 Section
-  ${If} $INSTDIR == "$PROGRAMFILES\${PRODUCT_NAME}"
-	SetOutPath "$INSTDIR"
-  ${Else}
-	SetOutPath "$INSTDIR\${PRODUCT_NAME}"
-  ${EndIf}
+  SetOutPath "$INSTDIR"
   
   File  "${pkgdir}\mingwm10.dll"
   File  "${pkgdir}\libgcc_s_dw2-1.dll"
