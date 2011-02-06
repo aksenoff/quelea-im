@@ -29,6 +29,7 @@ private:
     QPushButton* aboutButton;
     ClientTab* tabWidget;
     QString myName;
+    QString serverAddress;
     bool enableSound;
 public:
     QueleaClientUI(QWidget* pwgt = 0);

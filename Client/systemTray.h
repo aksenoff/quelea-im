@@ -24,6 +24,7 @@ private:
 public:
     SystemTray(QueleaClientUI*);
     void assignMachine(ConnectionStateMachine*);
+    void setConnectionActionEnabled(bool);
 protected:
     virtual void closeEvent(QCloseEvent*);
 private slots:

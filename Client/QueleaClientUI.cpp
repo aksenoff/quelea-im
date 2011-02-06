@@ -37,6 +37,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
 
     connectButton = new QPushButton(tr(" &Подключиться "));
     connectButton->setFixedSize(110, 24);
+    connectButton->setEnabled(false); // we don't know if connection settings are present
     connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
@@ -110,24 +111,33 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     setWindowIcon(QIcon::QIcon ("resource.rc"));
     messageInput->setFocus();
     client = 0;
+    connectionState = 0;
 
     //Reading settings:
     QFile file("settings.dat");
     bool autoConnect = false;
+    tray = new SystemTray(this);
+    tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
     if (file.open(QIODevice::ReadOnly))
     {
-        QTextStream stream (&file);
+        QTextStream stream(&file);
         myName = stream.readLine();
-        QString serverAddress(stream.readLine());
+        serverAddress = stream.readLine();
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
         file.close();
-        client = new QueleaClient(this, myName, serverAddress);
+        if(!(myName.isEmpty() || serverAddress.isEmpty())) // connection settings are present, whew
+        {
+            client = new QueleaClient(this, myName, serverAddress); // creating client and state machine
+            connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
+            tray->setConnectionActionEnabled(true); // allowing user
+            connectButton->setEnabled(true);        // to connect
+        }
+        else // setting provided by the file are unsuffucient
+            openSettingDialog();
     }
     else
         openSettingDialog(); // client may be created there as well
-    tray = new SystemTray(this);
-    connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
 }
 
 //---------------------------------------------------------
@@ -140,7 +150,6 @@ void QueleaClientUI::enableSendButton()
             currentContactExist = true;
             break;
         }
-
     sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0 && currentContactExist);
 }
 
@@ -152,18 +161,38 @@ void QueleaClientUI::openSettingDialog()
     SettingsDialog* settingsDialog = new SettingsDialog;
     connect(settingsDialog, SIGNAL(finished(int)),
             messageInput, SLOT(setFocus()));
-    if (settingsDialog->exec() == QDialog::Accepted)
+    if (settingsDialog->exec() == QDialog::Accepted) // ok button pressed
     {
         enableSound = settingsDialog->enableSound();
         myName = settingsDialog->clientName();
-        QString serverAddress(settingsDialog->serverAddress());
+        serverAddress = settingsDialog->serverAddress();
         bool autoConnect = settingsDialog->autoConnect();
-        if(client)
-            client->changeSettings(myName, serverAddress);
-        else
-            client = new QueleaClient(this, myName, serverAddress);
-
-        QFile file("settings.dat");
+        if(!(myName.isEmpty() || serverAddress.isEmpty())) // we have connection settings
+        {
+            if(client) // if client is present, update its settings
+            {
+                client->changeSettings(myName, serverAddress);
+                connectButton->setEnabled(true);        // allowing user
+                tray->setConnectionActionEnabled(true); // to connect
+            }
+            else // seems to be the first time we entered settings
+            {    // creating client and state machine
+                client = new QueleaClient(this, myName, serverAddress);
+                connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
+                connectButton->setEnabled(true);        // allowing user
+                tray->setConnectionActionEnabled(true); // to connect
+            }
+        }
+        else  // the fields were left blank
+            if(connectionState) // if client and state machine exist (i.e. user deleted connection settings)
+            {                   // and we're offline, disable connection ways
+                if(connectionState->currentConnectionState() == "offline")
+                {               // (if we're online, they'll be disabled automatically after disconnection)
+                    connectButton->setEnabled(false);
+                    tray->setConnectionActionEnabled(false);
+                }
+            }
+        QFile file("settings.dat"); // anyway, write to the file anything we have
         if (file.open(QIODevice::WriteOnly))
         {
             QTextStream stream(&file);
@@ -403,6 +432,8 @@ void QueleaClientUI::enableDisconnected()
     stateLabel->setText("<FONT COLOR=RED>" + tr("Отключен") + "</FONT>");
     contactsList->clear();
     enableSendButton();
+    if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
+        connectButton->setEnabled(false);
 }
 
 //---------------------------------------------------------
@@ -462,6 +493,7 @@ void QueleaClientUI::closeEvent(QCloseEvent *event)
     event->ignore();
     tray->slotShowHide();
 }
+
 //---------------------------------------------------------
 
 QueleaClientUI::~QueleaClientUI()
