@@ -24,26 +24,48 @@ OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
 Var Dialog
 Var shotcutState
 Var CheckBox
+Var shotcutAllState
+Var shotcutSelectLabel
+Var shotcutAllRadio
+Var shotcutCurrentRadio
 
 Function fnCustomInit
-	!insertmacro MUI_HEADER_TEXT "Ярлык" "Не ставьте тут галку, а то пожалеете"
+	!insertmacro MUI_HEADER_TEXT "Ярлыки" "Выберите нужные опции"
 	nsDialogs::Create 1018
 	Pop $Dialog
 
 	${NSD_CreateCheckBox} 0 5u 100u 10u "Ярлык на рабочем столе"
 	Pop $CheckBox
 	
+	${NSD_CreateLabel} 0 25u 100u 10u "Установить ярлыки"
+	Pop $shotcutSelectLabel
+
+	${NSD_CreateRadioButton} 15 40u 100u 10u "Для всех пользователей"
+	Pop $shotcutAllRadio
+	${NSD_Check} $shotcutAllRadio 
+	
+	${NSD_CreateRadioButton} 15 55u 200u 10u "Только для текущего пользователя"
+	Pop $shotcutCurrentRadio
+	
 	nsDialogs::Show
 FunctionEnd
 
 Function fnCustomDestroy
 	${NSD_GetState} $CheckBox $shotcutState
+    ${NSD_GetState} $shotcutAllRadio $shotcutAllState
 FunctionEnd
 
 UninstPage uninstConfirm
 UninstPage instfiles
 
 Section
+  
+  ${If} $shotcutAllState == "1"
+	SetShellVarContext all
+  ${Else}
+	SetShellVarContext current
+  ${EndIF}	
+
   SetOutPath "$INSTDIR"
   
   File  "${pkgdir}\mingwm10.dll"
@@ -81,10 +103,16 @@ Section "Uninstall"
   Delete "$OUTDIR\QueleaServer.exe"
   RMDir $OUTDIR
   
+  SetShellVarContext all
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Удалить ${PRODUCT_NAME}.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
+  Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
   
+    SetShellVarContext current
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Удалить ${PRODUCT_NAME}.lnk"
+  RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
   
   DeleteRegKey HKLM  "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
