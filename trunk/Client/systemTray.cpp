@@ -53,6 +53,13 @@ void SystemTray::assignMachine(ConnectionStateMachine* machine)
 
 //---------------------------------------------------------
 
+void SystemTray::setConnectionActionEnabled(bool enabled)
+{
+    actChangeStatus->setEnabled(enabled);
+}
+
+//---------------------------------------------------------
+
 void SystemTray::closeEvent(QCloseEvent * pe)
 {
     if(trayIcon->isVisible())
