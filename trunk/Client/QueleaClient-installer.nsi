@@ -53,6 +53,13 @@ Section
   File  "${pkgdir}\QtNetwork4.dll"
   File  "${pkgdir}\QueleaClient.exe"
   
+  SetOutPath "$INSTDIR\sound"
+  
+  File  "${pkgdir}\sound\message.wav"
+  File  "${pkgdir}\sound\chat.wav"
+  
+  SetOutPath "$INSTDIR"
+  
   WriteUninstaller "$OUTDIR\Uninstall.exe"
   
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
@@ -67,9 +74,8 @@ Section
   WriteRegStr HKLM SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME} "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKLM SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME} "URLInfoAbout" "http://quelea-im.googlecode.com/"
   WriteRegStr HKLM SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME} "UninstallString" "$OUTDIR\Uninstall.exe"
-  
-  
 SectionEnd
+
 
 Section "Uninstall"
   Delete "$OUTDIR\Uninstall.exe"
@@ -79,6 +85,9 @@ Section "Uninstall"
   Delete "$OUTDIR\QtGui4.dll"
   Delete "$OUTDIR\QtNetwork4.dll"
   Delete "$OUTDIR\QueleaClient.exe"
+  Delete  "$OUTDIR\sound\message.wav"
+  Delete  "$OUTDIR\sound\chat.wav"
+  RMDir "$OUTDIR\sound"
   RMDir $OUTDIR
   
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
