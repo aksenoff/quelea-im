@@ -304,7 +304,7 @@ void QueleaClientUI::messageReceived(const QString& receiver)
 void QueleaClientUI::playSound(const QString& reason) const
 {
     if (QSound::isAvailable() && enableSound)
-            QSound::play(":/sound/"+reason+".wav");
+            QSound::play("sound/"+reason+".wav");
 }
 
 //---------------------------------------------------------

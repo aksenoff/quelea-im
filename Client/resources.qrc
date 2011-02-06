@@ -7,8 +7,6 @@
         <file>images/send.png</file>
         <file>images/settings.png</file>
         <file>images/сonnected.png</file>
-        <file>sound/chat.wav</file>
-        <file>sound/message.wav</file>
         <file>images/connect.png</file>
         <file>images/disconnect.png</file>
     </qresource>
