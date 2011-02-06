@@ -221,6 +221,7 @@ void QueleaClientUI::tabChanged(int tab)
     else
     {
         contactsList->setHidden(false);
+        contactsList->setCurrentRow(0);
         yourCompanionsLabel->setHidden(false);
         setWindowTitle(tr("Чат - Quelea"));
     }
@@ -242,7 +243,7 @@ void QueleaClientUI::sendButtonFunction()
     {
         QString receiverName = (contactsList->currentRow() == 0)? "all":
                                                                   contactsList->currentItem()->text();
-        QString messageText(messageInput->toPlainText());
+        QString messageText(messageInput->toHtml());
         client->sendChatMessage(receiverName, messageText);
         messageInput->clear();
         enableSendButton();
@@ -252,10 +253,10 @@ void QueleaClientUI::sendButtonFunction()
         QTextEdit *privateChatLog = static_cast<QTextEdit*>(tabWidget->currentWidget());
         privateChatLog->setReadOnly(true);
         QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
-        QString messageText(messageInput->toPlainText());
+        QString messageText(messageInput->toHtml());
         client->sendPrivateMessage(receiverName, messageText);
         privateChatLog->append("<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>" + " "
-                               + "<FONT COLOR=GREEN>" + myName + " " + "</FONT>: " + messageText);
+                               + "<FONT COLOR=GREEN>" + myName + "</FONT>: " + messageText);
         messageInput->clear();
         enableSendButton();
       }
@@ -445,7 +446,7 @@ void QueleaClientUI::showAboutBox()
     aboutBox.setWindowTitle(tr("О программе - Quelea"));
     aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
     aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.1<br>Распространяется по лицензии "
+    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.0<br>Распространяется по лицензии "
                                          "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
                                          "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
                                          "<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")

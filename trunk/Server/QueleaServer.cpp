@@ -139,7 +139,7 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     // constructing new contacts list and broadcasting it
     QString contacts_string = "";
     for (int i = 0; i < clients.size(); ++i)
-        contacts_string.append(clients[i]->getName()+";");
+        contacts_string.append(clients[i]->getName() + QChar::Null);
     Message contacts_list(CONTACTS_RESPONSE, contacts_string);
     for (int i = 0; i < clients.size(); ++i)
         contacts_list.send(clients[i]->getSocket());
