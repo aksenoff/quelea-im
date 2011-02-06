@@ -40,6 +40,8 @@ SystemTray::SystemTray(QueleaClientUI* userInterface)
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(slotIconActivated(QSystemTrayIcon::ActivationReason)));
+    connect(trayIcon, SIGNAL(messageClicked()),
+            this, SLOT(slotShowHide()));
 
     trayIcon->show();
 }
