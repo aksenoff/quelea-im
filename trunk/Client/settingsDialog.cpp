@@ -51,6 +51,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     mainLayout->addLayout(topLayout);
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
+    clientNameEdit->setFocus();
     setWindowTitle(tr("Настройки - Quelea"));
 
     // Reading settings to populate the dialog
