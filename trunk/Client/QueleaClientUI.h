@@ -20,6 +20,7 @@ private:
     ConnectionStateMachine* connectionState;
     QLabel* stateLabel;
     QLabel* yourCompanionsLabel;
+    QLabel* currentLengthLabel;
     QTextEdit* chatLog;
     QTextEdit* messageInput;
     QListWidget* contactsList;
@@ -37,6 +38,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event);
 private slots:
+    void calculateLength();
     void enableSendButton();
     void addTab(QListWidgetItem*);
     void tabChanged(const int);

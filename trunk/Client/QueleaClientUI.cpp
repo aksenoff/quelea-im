@@ -29,6 +29,10 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(contactsList, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem *)),
             this, SLOT(enableSendButton()));
 
+    currentLengthLabel = new QLabel("", this);
+    currentLengthLabel->setFixedWidth(200);
+    currentLengthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
     sendButton = new QPushButton(QPixmap(":/images/send.png"),tr("&Отправить"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -44,7 +48,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     aboutButton = new QPushButton(QPixmap(":/images/about.png"),tr(" О п&рограмме "));
     aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(aboutButton,SIGNAL(clicked()),
-            this,SLOT(showAboutBox()));
+            this, SLOT(showAboutBox()));
 
     settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr(" &Настройки "));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -63,7 +67,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
     connect(sendShortcut, SIGNAL(activated()),
             sendButton, SLOT(click()));
-    QSpacerItem* spacer1 = new QSpacerItem(300, 0, QSizePolicy::MinimumExpanding);
+    QSpacerItem* spacer1 = new QSpacerItem(100, 0, QSizePolicy::MinimumExpanding);
     QSpacerItem* spacer2 = new QSpacerItem(0, 29);
     QSpacerItem* spacer3 = new QSpacerItem(0, 30);
 
@@ -95,6 +99,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     leftLayout->addWidget(tabWidget, 3);
     leftLayout->addWidget(messageInput, 1);
     sendLayout->addSpacerItem(spacer1);
+    sendLayout->addWidget(currentLengthLabel);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
     rightLayout->addSpacerItem(spacer3);
@@ -151,6 +156,34 @@ void QueleaClientUI::enableSendButton()
             break;
         }
     sendButton->setEnabled(!messageInput->toPlainText().isEmpty() && contactsList->count() != 0 && currentContactExist);
+}
+
+//---------------------------------------------------------
+
+void QueleaClientUI::calculateLength()
+{
+    if(messageInput->toPlainText().length() > 3500)
+    {
+        if(messageInput->toPlainText().length() > 4000)
+        {
+            currentLengthLabel->setText(tr("Предел превышен на") + " "
+                                        + QString::number(messageInput->toPlainText().length() - 4000)
+                                        + " " + tr("знак(ов)"));
+            sendButton->setEnabled(false);
+        }
+        else
+        {
+            currentLengthLabel->setText(tr("Осталось") + " "
+                                            + QString::number(4000 - messageInput->toPlainText().length())
+                                            + " " + tr("знак(ов)"));
+            enableSendButton();
+        }
+    }
+    else
+    {
+        currentLengthLabel->clear();
+        enableSendButton();
+    }
 }
 
 //---------------------------------------------------------
@@ -272,7 +305,7 @@ void QueleaClientUI::sendButtonFunction()
     {
         QString receiverName = (contactsList->currentRow() == 0)? "all":
                                                                   contactsList->currentItem()->text();
-        QString messageText(messageInput->toHtml());
+        QString messageText(messageInput->toPlainText());
         client->sendChatMessage(receiverName, messageText);
         messageInput->clear();
         enableSendButton();
@@ -282,7 +315,7 @@ void QueleaClientUI::sendButtonFunction()
         QTextEdit *privateChatLog = static_cast<QTextEdit*>(tabWidget->currentWidget());
         privateChatLog->setReadOnly(true);
         QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
-        QString messageText(messageInput->toHtml());
+        QString messageText(messageInput->toPlainText());
         client->sendPrivateMessage(receiverName, messageText);
         privateChatLog->append("<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>" + " "
                                + "<FONT COLOR=GREEN>" + myName + "</FONT>: " + messageText);
@@ -363,7 +396,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             if (receiverName == "all")
                 chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>"+ " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
-                                + actualMessage);
+                                + actualMessage.replace("\n", "<br>"));
             else
             {
                 QString toWhoColor = "ORANGERED";
@@ -376,7 +409,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + "<FONT COLOR=" + toWhoColor + ">[" + receiverName + "]</FONT> "
-                                + actualMessage);
+                                + actualMessage.replace("\n", "<br>"));
             }
             break;
         }
@@ -397,7 +430,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     privateChatLog->setReadOnly(true);
                     privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
                                            + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
-                                           + actualMessage);
+                                           + actualMessage.replace("\n", "<br>"));
                     break;
                 }
             if (tabState == false)
@@ -408,7 +441,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
                 privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
-                                       + actualMessage);
+                                       + actualMessage.replace("\n", "<br>"));
             }
             messageReceived(senderName);
             break;
@@ -434,6 +467,8 @@ void QueleaClientUI::enableDisconnected()
     enableSendButton();
     if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
         connectButton->setEnabled(false);
+    disconnect(messageInput, SIGNAL(textChanged()),
+               this, SLOT(calculateLength()));
 }
 
 //---------------------------------------------------------
@@ -450,6 +485,9 @@ void QueleaClientUI::enableConnection()
 void QueleaClientUI::enableConnected()
 {
     stateLabel->setText("<FONT COLOR=GREEN>" + tr("В сети") + "</FONT>");
+    calculateLength();
+    connect(messageInput, SIGNAL(textChanged()),
+            this, SLOT(calculateLength()));
 }
 
 //---------------------------------------------------------
