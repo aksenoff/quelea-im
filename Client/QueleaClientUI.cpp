@@ -162,19 +162,19 @@ void QueleaClientUI::enableSendButton()
 
 void QueleaClientUI::calculateLength()
 {
-    if(messageInput->toPlainText().length() > 3500)
+    if(messageInput->toPlainText().length() > 750)
     {
-        if(messageInput->toPlainText().length() > 4000)
+        if(messageInput->toPlainText().length() > 1000)
         {
             currentLengthLabel->setText(tr("Предел превышен на") + " "
-                                        + QString::number(messageInput->toPlainText().length() - 4000)
+                                        + QString::number(messageInput->toPlainText().length() - 1000)
                                         + " " + tr("знак(ов)"));
             sendButton->setEnabled(false);
         }
         else
         {
             currentLengthLabel->setText(tr("Осталось") + " "
-                                            + QString::number(4000 - messageInput->toPlainText().length())
+                                            + QString::number(1000 - messageInput->toPlainText().length())
                                             + " " + tr("знак(ов)"));
             enableSendButton();
         }
