@@ -534,9 +534,18 @@ void QueleaClientUI::closeEvent(QCloseEvent *event)
 
 //---------------------------------------------------------
 
+void QueleaClientUI::slotShow()
+{
+    if (!isVisible())
+        tray->slotShowHide();
+    else
+        QApplication::alert(this);
+}
+
+//---------------------------------------------------------
+
 QueleaClientUI::~QueleaClientUI()
 {
     delete tray;
     delete connectionState;
 }
-
