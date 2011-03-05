@@ -55,6 +55,7 @@ public slots:
     void parseMessage(const Message& message);
     void log(const QString&);
     void setCurrentTab(const QString&);
+    void slotShow();
 signals:
     void newMessage(const QString&);
     void connectButtonClicked();
