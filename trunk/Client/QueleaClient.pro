@@ -16,10 +16,10 @@ HEADERS = QueleaClient.h \
     ../message.h \
     QueleaClientUI.h \
     connectionStateMachine.h
-include(singleapplication/config.pri)
 win32:TARGET = ../QueleaClient
 RC_FILE = resource.rc
 
 RESOURCES += \
     resources.qrc
-
+include(singleapplication/config.pri)
+include(singleapplication/singleapplication.pri)
