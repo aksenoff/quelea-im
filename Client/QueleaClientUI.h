@@ -32,12 +32,15 @@ private:
     QString myName;
     QString serverAddress;
     bool enableSound;
+    bool autoConnect;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
     ~QueleaClientUI();
 protected:
     void closeEvent(QCloseEvent *event);
 private slots:
+    void readSettings(QString settingsPath);
+    void writeSettings(bool writeGlobal);
     void calculateLength();
     void enableSendButton();
     void addTab(QListWidgetItem*);

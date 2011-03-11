@@ -34,7 +34,7 @@ SystemTray::SystemTray(QueleaClientUI* userInterface)
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(actQuit);
 
-    trayIcon = new QSystemTrayIcon(this);
+    trayIcon = new QSystemTrayIcon(QPixmap(":/images/icon-offline.png"),this);
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip(tr("Quelea"));
 

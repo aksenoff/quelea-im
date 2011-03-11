@@ -39,7 +39,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
-    connectButton = new QPushButton(tr(" &Подключиться "));
+    connectButton = new QPushButton(QPixmap(":/images/connect.png"),tr(" &Подключиться "));
     connectButton->setFixedSize(110, 24);
     connectButton->setEnabled(false); // we don't know if connection settings are present
     connect(connectButton, SIGNAL(clicked()),
@@ -118,31 +118,32 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     client = 0;
     connectionState = 0;
 
-    //Reading settings:
-    QFile file("settings.dat");
-    bool autoConnect = false;
     tray = new SystemTray(this);
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QTextStream stream(&file);
-        myName = stream.readLine();
-        serverAddress = stream.readLine();
-        autoConnect = stream.readLine().toInt();
-        enableSound = stream.readLine().toInt();
-        file.close();
-        if(!(myName.isEmpty() || serverAddress.isEmpty())) // connection settings are present, whew
-        {
-            client = new QueleaClient(this, myName, serverAddress); // creating client and state machine
-            connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
-            tray->setConnectionActionEnabled(true); // allowing user
-            connectButton->setEnabled(true);        // to connect
-        }
-        else // setting provided by the file are unsuffucient
-            openSettingDialog();
-    }
+
+
+    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"\\Quelea\\settings.dat";
+    const QString globalSettings = "settings.dat";
+
+    if (QFile::exists(localSettings))
+        readSettings(localSettings);
     else
-        openSettingDialog(); // client may be created there as well
+        if (QFile::exists(globalSettings)){
+            readSettings(globalSettings);
+            writeSettings(false);
+        }
+        else
+            openSettingDialog();
+
+    if(!(myName.isEmpty() || serverAddress.isEmpty())) // connection settings are present, whew
+    {
+        client = new QueleaClient(this, myName, serverAddress); // creating client and state machine
+        connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
+        tray->setConnectionActionEnabled(true); // allowing user
+        connectButton->setEnabled(true);        // to connect
+    }
+    else // setting provided by the file are unsuffucient
+        openSettingDialog(); //!!
 }
 
 //---------------------------------------------------------
@@ -188,6 +189,56 @@ void QueleaClientUI::calculateLength()
 
 //---------------------------------------------------------
 
+void QueleaClientUI::readSettings(QString settingsPath)
+{
+    autoConnect = false;
+    QFile file(settingsPath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(&file);
+        myName = stream.readLine();
+        serverAddress = stream.readLine();
+        autoConnect = stream.readLine().toInt();
+        enableSound = stream.readLine().toInt();
+        file.close();
+
+    }
+}
+//--------------------------------------------------------
+
+void QueleaClientUI::writeSettings(bool writeGlobal)
+{
+    if (writeGlobal)
+    {
+        QFile globalFile("settings.dat");
+        if (globalFile.open(QIODevice::WriteOnly))
+        {
+            QTextStream stream(&globalFile);
+            stream << myName << '\n'
+                   << serverAddress << '\n'
+                   << autoConnect << '\n'
+                   << enableSound << flush;
+            globalFile.close();
+        }
+    }
+
+    QDir localDir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+    if (!localDir.exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"\\Quelea"))
+        localDir.mkdir("Quelea");
+
+    QFile localFile(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"\\Quelea\\settings.dat");
+    if (localFile.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&localFile);
+        stream << myName << '\n'
+               << serverAddress << '\n'
+               << autoConnect << '\n'
+               << enableSound << flush;
+        localFile.close();
+    }
+}
+//---------------------------------------------------------
+
 void QueleaClientUI::openSettingDialog()
 {
 
@@ -197,6 +248,7 @@ void QueleaClientUI::openSettingDialog()
     if (settingsDialog->exec() == QDialog::Accepted) // ok button pressed
     {
         enableSound = settingsDialog->enableSound();
+        autoConnect = settingsDialog->autoConnect();
         myName = settingsDialog->clientName();
         serverAddress = settingsDialog->serverAddress();
         bool autoConnect = settingsDialog->autoConnect();
@@ -225,16 +277,7 @@ void QueleaClientUI::openSettingDialog()
                     tray->setConnectionActionEnabled(false);
                 }
             }
-        QFile file("settings.dat"); // anyway, write to the file anything we have
-        if (file.open(QIODevice::WriteOnly))
-        {
-            QTextStream stream(&file);
-            stream << myName << '\n'
-                   << serverAddress << '\n'
-                   << autoConnect << '\n'
-                   << enableSound << flush;
-            file.close();
-        }
+        writeSettings(true);
     }
     disconnect(settingsDialog, SIGNAL(finished(int)),
                messageInput, SLOT(setFocus()));
