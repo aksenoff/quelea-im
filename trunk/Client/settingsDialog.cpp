@@ -55,7 +55,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     setWindowTitle(tr("Настройки - Quelea"));
 
     // Reading settings to populate the dialog
-    QFile file("settings.dat");
+    QFile file(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"\\Quelea\\settings.dat");
     if (file.open(QIODevice::ReadOnly))
     {
         QTextStream stream(&file);
