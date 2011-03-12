@@ -73,6 +73,7 @@ Section
   File  "${pkgdir}\QtCore4.dll"
   File  "${pkgdir}\QtGui4.dll"
   File  "${pkgdir}\QtNetwork4.dll"
+  File  "${pkgdir}\singleapplication.dll"
   File  "${pkgdir}\QueleaClient.exe"
   
   SetOutPath "$INSTDIR\sound"
@@ -107,9 +108,10 @@ Section "Uninstall"
   Delete "$OUTDIR\QtCore4.dll"
   Delete "$OUTDIR\QtGui4.dll"
   Delete "$OUTDIR\QtNetwork4.dll"
+  Delete "$OUTDIR\singleapplication.dll"
   Delete "$OUTDIR\QueleaClient.exe"
-  Delete  "$OUTDIR\sound\message.wav"
-  Delete  "$OUTDIR\sound\chat.wav"
+  Delete "$OUTDIR\sound\message.wav"
+  Delete "$OUTDIR\sound\chat.wav"
   RMDir "$OUTDIR\sound"
   RMDir $OUTDIR
   
