@@ -19,7 +19,7 @@ Page custom fnCustomInit fnCustomDestroy
 Name "${PRODUCT_NAME}"
 Caption "Установка ${PRODUCT_NAME} ${PRODUCT_VERSION}"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
-OutFile "${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
+OutFile "QueleaServer-${PRODUCT_VERSION}.exe"
 
 Var Dialog
 Var shotcutState
