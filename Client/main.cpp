@@ -10,13 +10,13 @@ int main(int argc, char** argv)
 
     QueleaClientUI clientUI;
 
-    SingleApplication instance("Quelea", &app);
-    if(instance.isRunning())
-        if(instance.sendMessage("!"))
-            return 0;
+   // SingleApplication instance("Quelea", &app);
+    //if(instance.isRunning())
+     //   if(instance.sendMessage("!"))
+      //      return 0;
 
-    QObject::connect(&instance, SIGNAL(messageReceived(const QString&)),
-                     &clientUI, SLOT(slotShow()));
+    // QObject::connect(&instance, SIGNAL(messageReceived(const QString&)),
+                     //&clientUI, SLOT(slotShow()));
 
     clientUI.show();
     return app.exec();
