@@ -163,28 +163,28 @@ void QueleaClientUI::enableSendButton()
 
 void QueleaClientUI::calculateLength()
 {
-//    if(messageInput->toPlainText().length() > 750)
-//    {
-//        if(messageInput->toPlainText().length() > 1000)
-//        {
-//            currentLengthLabel->setText(tr("Предел превышен на") + " "
-//                                        + QString::number(messageInput->toPlainText().length() - 1000)
-//                                        + " " + tr("знак(ов)"));
-//            sendButton->setEnabled(false);
-//        }
-//        else
-//        {
-//            currentLengthLabel->setText(tr("Осталось") + " "
-//                                            + QString::number(1000 - messageInput->toPlainText().length())
-//                                            + " " + tr("знак(ов)"));
-//            enableSendButton();
-//        }
-//    }
-//    else
-//    {
-//        currentLengthLabel->clear();
-//        enableSendButton();
-//    }
+    if(messageInput->toPlainText().length() > 499000)
+    {
+        if(messageInput->toPlainText().length() > 500000)
+        {
+            currentLengthLabel->setText(tr("Предел превышен на") + " "
+                                        + QString::number(messageInput->toPlainText().length() - 500000)
+                                        + " " + tr("знак(ов)"));
+            sendButton->setEnabled(false);
+        }
+        else
+        {
+            currentLengthLabel->setText(tr("Осталось") + " "
+                                            + QString::number(500000 - messageInput->toPlainText().length())
+                                            + " " + tr("знак(ов)"));
+            enableSendButton();
+        }
+    }
+    else
+    {
+        currentLengthLabel->clear();
+        enableSendButton();
+    }
 }
 
 //---------------------------------------------------------
@@ -251,19 +251,11 @@ void QueleaClientUI::openSettingDialog()
         autoConnect = settingsDialog->autoConnect();
         myName = settingsDialog->clientName();
         serverAddress = settingsDialog->serverAddress();
-        bool autoConnect = settingsDialog->autoConnect();
         if(!(myName.isEmpty() || serverAddress.isEmpty())) // we have connection settings
         {
             if(client) // if client is present, update its settings
             {
                 client->changeSettings(myName, serverAddress);
-                connectButton->setEnabled(true);        // allowing user
-                tray->setConnectionActionEnabled(true); // to connect
-            }
-            else // seems to be the first time we entered settings
-            {    // creating client and state machine
-                client = new QueleaClient(this, myName, serverAddress);
-                connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
                 connectButton->setEnabled(true);        // allowing user
                 tray->setConnectionActionEnabled(true); // to connect
             }
@@ -360,7 +352,7 @@ void QueleaClientUI::sendButtonFunction()
         QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
         QString messageText(messageInput->toPlainText());
         client->sendPrivateMessage(receiverName, messageText);
-        privateChatLog->append("<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>" + " "
+        privateChatLog->append("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>" + " "
                                + "<FONT COLOR=GREEN>" + myName + "</FONT>: " + messageText);
         messageInput->clear();
         enableSendButton();
@@ -387,7 +379,7 @@ void QueleaClientUI::playSound(const QString& reason) const
 
 void QueleaClientUI::parseMessage(const Message& incomingMessage)
 {
-    QTime time = QTime::currentTime();
+    QDateTime time = QDateTime::currentDateTime();
     switch(incomingMessage)
     {
     case CONTACTS_RESPONSE:
@@ -557,7 +549,7 @@ void QueleaClientUI::showAboutBox()
     QMessageBox aboutBox;
     aboutBox.setWindowTitle(tr("О программе - Quelea"));
     aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
-    aboutBox.setText("<strong>"+tr("Quelea 1.0 beta")+"</strong>");
+    aboutBox.setText("<strong>"+tr("Quelea 1.0 beta 2")+"</strong>");
     aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.0<br>Распространяется по лицензии "
                                          "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
                                          "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"

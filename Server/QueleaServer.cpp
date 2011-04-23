@@ -12,7 +12,7 @@ QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface)
         close();
         return;
     }
-    ui->log("<b>[" + QTime::currentTime().toString() + "]" + " "
+    ui->log("<b>[" + QDateTime::currentDateTime().toString() + "]" + " "
             + tr("Сервер запущен на") + " " + ipAddress + ":" + QString::number(port) + "</b>");
     connect(this, SIGNAL(newConnection()),
             this, SLOT(slotNewConnection()));
@@ -65,7 +65,7 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newClient);
                 connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                ui->log("[" + QTime::currentTime().toString() + "]" + " "
+                ui->log("[" + QDateTime::currentDateTime().toString() + "]" + " "
                         + tr("Подключен новый клиент ") + incomingMessage->getText());
                 // sending authorization confirmation
                 Message auth_ok(AUTH_RESPONSE, "auth_ok");
@@ -131,7 +131,7 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     QVector<Client*>::iterator disconnectedClient;
     // searching for client whose socket has disconnected
     for(disconnectedClient = clients.begin(); (*disconnectedClient)->getSocket() != disconnectedClientSocket; ++disconnectedClient);
-    ui->log("[" + QTime::currentTime().toString() + "]" + " "
+    ui->log("[" + QDateTime::currentDateTime().toString() + "]" + " "
             + tr("Клиент") + " " +  (*disconnectedClient)->getName() + " " + tr("отключен"));
     delete (*disconnectedClient);
     // removing client from vector
@@ -149,5 +149,5 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
 
 QueleaServer::~QueleaServer()
 {
-    ui->log("<b>[" + QTime::currentTime().toString() + "]" + " " + tr("Сервер остановлен.") + "</b>");
+    ui->log("<b>[" + QDateTime::currentDateTime().toString() + "]" + " " + tr("Сервер остановлен.") + "</b>");
 }

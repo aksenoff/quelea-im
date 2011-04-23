@@ -27,6 +27,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
 
     setWindowTitle(tr("Quelea Server"));
     setWindowIcon(QIcon::QIcon("resource.rc"));
+    resize(450, 300);
     populateIpBox();
     startServer();
 }
@@ -110,7 +111,7 @@ void QueleaServerUI::showAboutBox()
     QMessageBox aboutBox;
     aboutBox.setWindowTitle(tr("О программе - Quelea Server"));
     aboutBox.setIconPixmap(QPixmap(":/icon.png"));
-    aboutBox.setText("<strong>"+tr("Quelea Server 1.0 beta")+"</strong>");
+    aboutBox.setText("<strong>"+tr("Quelea Server 1.0 beta 2")+"</strong>");
     aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.0<br>Распространяется по лицензии "
                                          "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
                                          "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
