@@ -31,7 +31,7 @@ void QueleaClient::slotReadServer()
     {
     case CONNECTED:
         {
-            ui->log("<FONT COLOR=GRAY>[" + QTime::currentTime().toString() + "] " + tr("Соединено.") + "</FONT>");
+            ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Соединено.") + "</FONT>");
             // if we're connected, send an authorization request
             Message auth_req(AUTH_REQUEST, clientName);
             auth_req.send(serverSocket);
@@ -41,7 +41,7 @@ void QueleaClient::slotReadServer()
         {
             if(incomingMessage.getText()=="auth_ok")
             {
-                ui->log("<FONT COLOR=GRAY>[" + QTime::currentTime().toString() + "] " + tr("Вход выполнен.") + "</FONT>");
+                ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Вход выполнен.") + "</FONT>");
                 // if we're authorized, request a list of other clients connected to the server
                 Message contacts_req(CONTACTS_REQUEST);
                 contacts_req.send(serverSocket);
@@ -49,7 +49,7 @@ void QueleaClient::slotReadServer()
             }
             if(incomingMessage.getText()=="auth_error")
             {
-                ui->log("<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>"
+                ui->log("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>"
                         + " <FONT COLOR=RED>" + tr("Ошибка: Такое имя уже используется.") + "</FONT>");
                 emit authErrorSignal();
             }
@@ -65,7 +65,7 @@ void QueleaClient::slotReadServer()
 
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
-    QString error = "<FONT COLOR=BLUE>[" + QTime::currentTime().toString() + "]</FONT>"
+    QString error = "<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>"
                     + " <FONT COLOR=RED>" + tr("Ошибка:") + " " +
                     (err == QAbstractSocket::HostNotFoundError ?
                      tr("Сервер не найден.") :
@@ -105,7 +105,7 @@ void QueleaClient::sendChatMessage(const QString& receiverName, const QString& a
 
 void QueleaClient::disconnectFromServer()
 {
-    ui->log("<FONT COLOR=GRAY>[" + QTime::currentTime().toString() + "] " + tr("Отключено.") + "</FONT>");
+    ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Отключено.") + "</FONT>");
     serverSocket->close();
     serverSocket->abort();
 }
