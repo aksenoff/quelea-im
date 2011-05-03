@@ -1,6 +1,6 @@
 #include <QApplication>
 #include "QueleaClientUI.h"
-#include "singleapplication\src\singleapplication.h"
+#include "singleapplication/src/singleapplication.h"
 
 int main(int argc, char** argv)
 {

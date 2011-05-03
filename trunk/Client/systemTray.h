@@ -1,7 +1,7 @@
 #ifndef SYSTEMTRAY_H
 #define SYSTEMTRAY_H
 
-#include "ConnectionStateMachine.h"
+#include "connectionStateMachine.h"
 #include "QueleaClientUI.h"
 
 class ConnectionStateMachine;
