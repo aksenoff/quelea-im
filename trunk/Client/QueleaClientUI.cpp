@@ -5,10 +5,10 @@
 QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     : QWidget(pwgt)
 {
-    stateLabel = new QLabel(tr("<FONT COLOR=RED>Отключен</FONT>"));
+    stateLabel = new QLabel("<FONT COLOR=RED>"+tr("Offline")+"</FONT>");
     stateLabel->setFixedWidth(100);
-    yourCompanionsLabel = new QLabel(tr("Ваши собеседники:"));
-    QLabel* statusInscriptionLabel = new QLabel(tr("Статус:"));
+    yourCompanionsLabel = new QLabel(tr("Contact list")+":");
+    QLabel* statusInscriptionLabel = new QLabel(tr("State")+":");
 
     messageInput = new QTextEdit(this);
     messageInput->document()->setDefaultFont(QFont("Arial",11));
@@ -33,31 +33,31 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     currentLengthLabel->setFixedWidth(200);
     currentLengthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    sendButton = new QPushButton(QPixmap(":/images/send.png"),tr("&Отправить"));
+    sendButton = new QPushButton(QPixmap(":/images/send.png"),tr("&Send"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
-    connectButton = new QPushButton(QPixmap(":/images/connect.png"),tr(" &Подключиться "));
+    connectButton = new QPushButton(QPixmap(":/images/connect.png"),tr("&Connect"));
     connectButton->setFixedSize(110, 24);
     connectButton->setEnabled(false); // we don't know if connection settings are present
     connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
-    aboutButton = new QPushButton(QPixmap(":/images/about.png"),tr(" О п&рограмме "));
+    aboutButton = new QPushButton(QPixmap(":/images/about.png"),tr("&About"));
     aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(aboutButton,SIGNAL(clicked()),
             this, SLOT(showAboutBox()));
 
-    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr(" &Настройки "));
+    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr("&Settings"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()),
             this, SLOT(openSettingDialog()));
 
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
-    tabWidget->addTab(chatLog, tr("Общий разговор"));
+    tabWidget->addTab(chatLog, tr("Public chat"));
     tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide,0);
     connect(tabWidget, SIGNAL(currentChanged(int)),
             this, SLOT(tabChanged(int)));
@@ -172,16 +172,16 @@ void QueleaClientUI::calculateLength()
     {
         if(messageInput->toPlainText().length() > 500000)
         {
-            currentLengthLabel->setText(tr("Предел превышен на") + " "
+            currentLengthLabel->setText(tr("Limit is exceeded for") + " "
                                         + QString::number(messageInput->toPlainText().length() - 500000)
-                                        + " " + tr("знак(ов)"));
+                                        + " " + tr("character(s)"));
             sendButton->setEnabled(false);
         }
         else
         {
-            currentLengthLabel->setText(tr("Осталось") + " "
+            currentLengthLabel->setText(tr("Remaining") + " "
                                             + QString::number(500000 - messageInput->toPlainText().length())
-                                            + " " + tr("знак(ов)"));
+                                            + " " + tr("character(s)"));
             enableSendButton();
         }
     }
@@ -316,16 +316,16 @@ void QueleaClientUI::tabChanged(int tab)
     {
         contactsList->setHidden(true);
         yourCompanionsLabel->setHidden(true);
-        setWindowTitle(tr("Разговор: ")
+        setWindowTitle(tr("Dialog")+": "
                        + tabWidget->tabText(tabWidget->currentIndex())
-                       + tr(" - Quelea"));
+                       + " - Quelea");
     }
     else
     {
         contactsList->setHidden(false);
         contactsList->setCurrentRow(0);
         yourCompanionsLabel->setHidden(false);
-        setWindowTitle(tr("Чат - Quelea"));
+        setWindowTitle(tr("Chat")+" - Quelea");
     }
     enableSendButton();
 }
@@ -394,7 +394,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             contacts.removeOne(myName);
             contacts.removeOne("");
             if (contacts.count() != 0)
-                contactsList->addItem(tr(">Все собеседники"));
+                contactsList->addItem(">" + tr("Send to all"));
             contacts.sort();
             contactsList->addItems(contacts);
             contactsList->setCurrentRow(0);
@@ -414,8 +414,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 QWidget* widget = tabWidget->widget(i-1);
                 QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                 privateChatLog->setReadOnly(true);
-                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString() + "]"+tr(" Клиент ")
-                                       +tabWidget->tabText(i-1)+tr(" отключен")+"</FONT>");
+                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString() + "]"+" "
+                                       +tabWidget->tabText(i-1)+" "+tr("is offline")+"</FONT>");
             }
 
             enableSendButton();
@@ -500,9 +500,9 @@ void QueleaClientUI::log(const QString& event)
 
 void QueleaClientUI::enableDisconnected()
 {
-    connectButton->setText(" " + tr("&Подключиться") + " ");
+    connectButton->setText(" " + tr("&Connect") + " ");
     connectButton->setIcon(QPixmap(":/images/connect.png"));
-    stateLabel->setText("<FONT COLOR=RED>" + tr("Отключен") + "</FONT>");
+    stateLabel->setText("<FONT COLOR=RED>" + tr("Offline") + "</FONT>");
     contactsList->clear();
     enableSendButton();
     if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
@@ -515,16 +515,16 @@ void QueleaClientUI::enableDisconnected()
 
 void QueleaClientUI::enableConnection()
 {
-    connectButton->setText(" " + tr("О&тключиться") + " ");
+    connectButton->setText(" " + tr("&Disconnect") + " ");
     connectButton->setIcon(QPixmap(":/images/disconnect.png"));
-    stateLabel->setText(tr("Подключение..."));
+    stateLabel->setText(tr("Connection")+"...");
 }                            
 
 //---------------------------------------------------------
 
 void QueleaClientUI::enableConnected()
 {
-    stateLabel->setText("<FONT COLOR=GREEN>" + tr("В сети") + "</FONT>");
+    stateLabel->setText("<FONT COLOR=GREEN>" + tr("Online") + "</FONT>");
     calculateLength();
     connect(messageInput, SIGNAL(textChanged()),
             this, SLOT(calculateLength()));
@@ -552,15 +552,15 @@ void QueleaClientUI::setCurrentTab(const QString& senderName)
 void QueleaClientUI::showAboutBox()
 {
     QMessageBox aboutBox;
-    aboutBox.setWindowTitle(tr("О программе - Quelea"));
+    aboutBox.setWindowTitle(tr("About")+" - Quelea");
     aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
     aboutBox.setText("<strong>"+tr("Quelea 1.0 beta 2")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.0<br>Распространяется по лицензии "
-                                         "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
-                                         "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
-                                         "<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")
+    aboutBox.setInformativeText("<p>" + tr("Used")+" "+"Qt 4.7.0 <br>"+tr("Distributed under license")
+                                         +" <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
+                                "<p><strong>"+tr("Developers")+":</strong><br>"+tr("Alexey Aksenov")+" (aksenoff.a@gmail.com)"
+                                "<br>"+tr("Roman Suhov")+" (romsuhov@gmail.com)<br>"+tr("Alexey Topchiy")+" (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("© Разработчики Quelea, 2011"));
+                                + tr("©")+" "+tr("Developers of")+" Quelea, 2011");
     aboutBox.exec();
 }
 

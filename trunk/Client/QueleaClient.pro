@@ -23,3 +23,5 @@ RESOURCES += \
     resources.qrc
 include(singleapplication/config.pri)
 include(singleapplication/singleapplication.pri)
+
+TRANSLATIONS += translations/QueleaClient_ru.ts

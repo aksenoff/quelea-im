@@ -15,3 +15,5 @@ RC_FILE = resource.rc
 
 RESOURCES += \
     resources.qrc
+
+TRANSLATIONS += translations/QueleaServer_ru.ts

@@ -9,8 +9,8 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     serverLog = new QTextEdit;
     serverLog->setReadOnly(true);
     startStopButton = new QPushButton;
-    startStopButton->setText(tr("Пуск"));
-    aboutButton = new QPushButton(tr("О программе..."));
+    startStopButton->setText(tr("Start"));
+    aboutButton = new QPushButton(tr("About"));
     mainLayout = new QVBoxLayout;
     mainLayout->addWidget(serverLog);
     buttonsLayout = new QHBoxLayout;
@@ -71,7 +71,7 @@ void QueleaServerUI::stopServer()
             this, SLOT(startServer()));
     delete server;
     server = 0;
-    startStopButton->setText(tr("Пуск"));
+    startStopButton->setText(tr("Start"));
     ipBox->setEnabled(populateIpBox()); // true if non-localhost interfaces present
 }
 
@@ -87,7 +87,7 @@ void QueleaServerUI::startServer()
                    this, SLOT(startServer()));
         connect(startStopButton, SIGNAL(clicked()),
                 this, SLOT(stopServer()));
-        startStopButton->setText(tr("Стоп"));
+        startStopButton->setText(tr("Stop"));
         ipBox->setEnabled(false);
     }
     else
@@ -109,15 +109,15 @@ void QueleaServerUI::log(const QString &event) const
 void QueleaServerUI::showAboutBox()
 {
     QMessageBox aboutBox;
-    aboutBox.setWindowTitle(tr("О программе - Quelea Server"));
+    aboutBox.setWindowTitle(tr("About")+" - Quelea");
     aboutBox.setIconPixmap(QPixmap(":/icon.png"));
-    aboutBox.setText("<strong>"+tr("Quelea Server 1.0 beta 2")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Используется Qt 4.7.0<br>Распространяется по лицензии "
-                                         "<a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
-                                         "<p><strong>Разработчики:</strong><br>Алексей Аксёнов (aksenoff.a@gmail.com)"
-                                         "<br>Роман Сухов (romsuhov@gmail.com)<br>Алексей Топчий (alextopchiy@gmail.com)</p>")
+    aboutBox.setText("<strong>"+tr("Quelea Sever 1.0 beta 2")+"</strong>");
+    aboutBox.setInformativeText("<p>" + tr("Used")+" "+"Qt 4.7.0 <br>"+tr("Distributed under license")
+                                         +" <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
+                                "<p><strong>"+tr("Developers")+":</strong><br>"+tr("Alexey Aksenov")+" (aksenoff.a@gmail.com)"
+                                "<br>"+tr("Roman Suhov")+" (romsuhov@gmail.com)<br>"+tr("Alexey Topchiy")+" (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("© Разработчики Quelea, 2011"));
+                                + tr("©")+" "+tr("Developers of")+" Quelea, 2011");
     aboutBox.exec();
 }
 
