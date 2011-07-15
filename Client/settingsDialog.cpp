@@ -9,18 +9,18 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     autoConnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
 
-    QLabel* clientNameLabel = new QLabel(tr("&Имя:"));
-    QLabel* serverAddressLabel = new QLabel(tr("&Сервер:"));
-    QLabel* autoConnectLabel = new QLabel(tr("&Подключаться при запуске"));
-    QLabel* enableSoundLabel = new QLabel(tr("&Включить звуки"));
+    QLabel* clientNameLabel = new QLabel(tr("&Name")+":");
+    QLabel* serverAddressLabel = new QLabel(tr("&Server")+":");
+    QLabel* autoConnectLabel = new QLabel(tr("&Connect at startup"));
+    QLabel* enableSoundLabel = new QLabel(tr("&Enable sound"));
 
     clientNameLabel->setBuddy(clientNameEdit);
     serverAddressLabel ->setBuddy(serverAddressEdit);
     autoConnectLabel->setBuddy(autoConnectCheckBox);
     enableSoundLabel->setBuddy(enableSoundCheckBox);
 
-    okButton = new QPushButton(tr("&OK"));
-    cancelButton = new QPushButton(tr("&Отмена"));
+    okButton = new QPushButton(tr("&Ok"));
+    cancelButton = new QPushButton(tr("&Cancel"));
 
     okButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     cancelButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -52,7 +52,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
     clientNameEdit->setFocus();
-    setWindowTitle(tr("Настройки - Quelea"));
+    setWindowTitle(tr("Settings")+" - Quelea");
 
     // Reading settings to populate the dialog
     QFile file(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea/settings.dat");

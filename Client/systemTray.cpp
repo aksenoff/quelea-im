@@ -10,19 +10,19 @@ SystemTray::SystemTray(QueleaClientUI* userInterface)
     connect(ui, SIGNAL(newMessage(const QString&)),
             this, SLOT(slotNewMessage(const QString&)));
 
-    actShowHide = new QAction(tr("Скрыть"), this);
+    actShowHide = new QAction(tr("Hide"), this);
     connect(actShowHide, SIGNAL(triggered()),
             this, SLOT(slotShowHide()));
 
-    actChangeStatus = new QAction(tr("Подключиться"), this);
+    actChangeStatus = new QAction(tr("Connect"), this);
     connect(actChangeStatus,SIGNAL(triggered()),
             this, SIGNAL(changeStateByTray()));
 
-    actSettings = new QAction(QPixmap(":/images/settings.png"),tr("Настройки..."), this);
+    actSettings = new QAction(QPixmap(":/images/settings.png"),tr("Setting") + "...", this);
     connect(actSettings, SIGNAL(triggered()),
             ui, SLOT(openSettingDialog()));
 
-    actQuit = new QAction(tr("Выход"), this);
+    actQuit = new QAction(tr("Quit"), this);
     connect(actQuit, SIGNAL(triggered()),
             qApp, SLOT(quit()));
 
@@ -86,13 +86,13 @@ void SystemTray::slotShowHide()
 
     if (ui->isVisible())
     {
-        actShowHide->setText(tr("Скрыть"));
+        actShowHide->setText(tr("Hide"));
         ui->activateWindow();
         if (newMessageExists)
             visibleAtNewMessage();
     }
     else
-        actShowHide->setText(tr("Показать"));
+        actShowHide->setText(tr("Show"));
 }
 
 //---------------------------------------------------------
@@ -100,9 +100,9 @@ void SystemTray::slotShowHide()
 void SystemTray::slotShowMessage(const QString& senderName)
 {
     if (senderName=="all")
-        trayIcon->showMessage(tr("Сообщение в чате"),tr("Сообщение в чате для вас"),QSystemTrayIcon::NoIcon,3000);
+        trayIcon->showMessage(tr("Message from chat"),tr("Message from chat for you"),QSystemTrayIcon::NoIcon,3000);
     else
-        trayIcon->showMessage(tr("Новое сообщение"),tr("Отправитель: ")+senderName,QSystemTrayIcon::NoIcon,3000);
+        trayIcon->showMessage(tr("New message"),tr("Sender")+ ": " +senderName,QSystemTrayIcon::NoIcon,3000);
 }
 
 //---------------------------------------------------------
@@ -152,7 +152,7 @@ void SystemTray::visibleAtNewMessage()
 void SystemTray::enableDisconnected()
 {
     slotChangeIcon("offline");
-    actChangeStatus->setText(tr("Подключиться"));
+    actChangeStatus->setText(tr("Connect"));
     actChangeStatus->setIcon(QPixmap(":/images/connect.png"));
 }
 
@@ -160,7 +160,7 @@ void SystemTray::enableDisconnected()
 
 void SystemTray::enableConnection()
 {
-    actChangeStatus->setText(tr("Отключиться"));
+    actChangeStatus->setText(tr("Disconnect"));
     actChangeStatus->setIcon(QPixmap(":/images/disconnect.png"));
 }
 
