@@ -54,6 +54,7 @@ bool QueleaServerUI::populateIpBox()
     else // populating combobox to let user decide
     {
         ipBox->clear();
+        ipStringList << QHostAddress(QHostAddress::LocalHost).toString();
         ipBox->addItems(ipStringList);
         if(!currentIp.isEmpty())
             ipBox->setCurrentIndex(ipStringList.indexOf(currentIp));
