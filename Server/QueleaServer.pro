@@ -9,7 +9,8 @@ HEADERS = QueleaServer.h \
     QueleaServerUI.h \
     client.h \
     ../codes.h \
-    ../message.h
+    ../message.h \
+    versionInfo.h
 win32:TARGET = ../QueleaServer
 RC_FILE = resource.rc
 

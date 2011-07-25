@@ -1,26 +1,27 @@
 #include "QueleaClientUI.h"
 #include "settingsDialog.h"
+#include "versionInfo.h"
 #include "../codes.h"
 
 QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     : QWidget(pwgt)
 {
-    stateLabel = new QLabel("<FONT COLOR=RED>"+tr("Offline")+"</FONT>");
+    stateLabel = new QLabel("<FONT COLOR=RED>" + tr("Offline") + "</FONT>");
     stateLabel->setFixedWidth(100);
-    yourCompanionsLabel = new QLabel(tr("Contact list")+":");
-    QLabel* statusInscriptionLabel = new QLabel(tr("State")+":");
+    yourCompanionsLabel = new QLabel(tr("Your companions") + ":");
+    QLabel* statusInscriptionLabel = new QLabel(tr("Status") + ":");
 
     messageInput = new QTextEdit(this);
-    messageInput->document()->setDefaultFont(QFont("Arial",11));
+    messageInput->document()->setDefaultFont(QFont("Arial", 11));
     connect(messageInput, SIGNAL(textChanged()),
             this, SLOT(enableSendButton()));
 
     chatLog = new QTextEdit;
     chatLog->setReadOnly(true);
-    chatLog->document()->setDefaultFont((QFont("Arial",11)));
+    chatLog->document()->setDefaultFont((QFont("Arial", 11)));
 
     contactsList = new QListWidget;
-    contactsList->setFont((QFont("Arial",10)));
+    contactsList->setFont((QFont("Arial", 10)));
     contactsList->setMinimumWidth(150);
     contactsList->setFocusProxy(messageInput);
     contactsList->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
@@ -33,24 +34,24 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     currentLengthLabel->setFixedWidth(200);
     currentLengthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    sendButton = new QPushButton(QPixmap(":/images/send.png"),tr("&Send"));
+    sendButton = new QPushButton(QPixmap(":/images/send.png"), tr("&Send"));
     sendButton->setEnabled(false);
     sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
-    connectButton = new QPushButton(QPixmap(":/images/connect.png"),tr("&Connect"));
+    connectButton = new QPushButton(QPixmap(":/images/connect.png"), tr("&Connect"));
     connectButton->setFixedSize(110, 24);
     connectButton->setEnabled(false); // we don't know if connection settings are present
     connect(connectButton, SIGNAL(clicked()),
             this, SIGNAL(connectButtonClicked()));
 
-    aboutButton = new QPushButton(QPixmap(":/images/about.png"),tr("&About"));
+    aboutButton = new QPushButton(QPixmap(":/images/about.png"), tr("&About"));
     aboutButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(aboutButton,SIGNAL(clicked()),
             this, SLOT(showAboutBox()));
 
-    settingsButton = new QPushButton(QPixmap(":/images/settings.png"),tr("&Settings"));
+    settingsButton = new QPushButton(QPixmap(":/images/settings.png"), tr("&Settings"));
     settingsButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(settingsButton, SIGNAL(clicked()),
             this, SLOT(openSettingDialog()));
@@ -58,13 +59,13 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
     tabWidget->addTab(chatLog, tr("Public chat"));
-    tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide,0);
+    tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide, 0);
     connect(tabWidget, SIGNAL(currentChanged(int)),
             this, SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),
             this, SLOT(closeTab(int)));
 
-    QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return ), this);
+    QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return), this);
     connect(sendShortcut, SIGNAL(activated()),
             sendButton, SLOT(click()));
     QSpacerItem* spacer1 = new QSpacerItem(100, 0, QSizePolicy::MinimumExpanding);
@@ -122,18 +123,19 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
 
 
-    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea/settings.dat";
+    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + "/Quelea/settings.dat";
     const QString globalSettings = "settings.dat";
 
     //Creating "data" directory if this does not exist to QDesktopServices::DataLocation will be right on Linux
-    QDir localDataDir(QDesktopServices::storageLocation(QDesktopServices::HomeLocation)+"/.local/share");
-    if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath()+"/data//" && !localDataDir.exists("data"))
+    QDir localDataDir(QDesktopServices::storageLocation(QDesktopServices::HomeLocation) + "/.local/share");
+    if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
     if (QFile::exists(localSettings))
         readSettings(localSettings);
     else
-        if (QFile::exists(globalSettings)){
+        if (QFile::exists(globalSettings))
+        {
             readSettings(globalSettings);
             writeSettings(false);
         }
@@ -157,7 +159,8 @@ void QueleaClientUI::enableSendButton()
 {
     bool currentContactExist = false;
     for (int i = 1; i < contactsList->count(); i++)
-        if (contactsList->item(i)->text() == tabWidget->tabText(tabWidget->currentIndex()) || tabWidget->currentIndex() == 0){
+        if (contactsList->item(i)->text() == tabWidget->tabText(tabWidget->currentIndex()) || tabWidget->currentIndex() == 0)
+        {
             currentContactExist = true;
             break;
         }
@@ -357,7 +360,7 @@ void QueleaClientUI::sendButtonFunction()
         QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
         QString messageText(messageInput->toPlainText());
         client->sendPrivateMessage(receiverName, messageText);
-        privateChatLog->append("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>" + " "
+        privateChatLog->append("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                + "<FONT COLOR=GREEN>" + myName + "</FONT>: " + messageText);
         messageInput->clear();
         enableSendButton();
@@ -394,7 +397,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             contacts.removeOne(myName);
             contacts.removeOne("");
             if (contacts.count() != 0)
-                contactsList->addItem(">" + tr("Send to all"));
+                contactsList->addItem(">" + tr("Send to everybody"));
             contacts.sort();
             contactsList->addItems(contacts);
             contactsList->setCurrentRow(0);
@@ -410,12 +413,13 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                      if(!matchFound)
                          tabFound = true;
             }
-            if (tabFound == true){
+            if (tabFound == true)
+            {
                 QWidget* widget = tabWidget->widget(i-1);
                 QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                 privateChatLog->setReadOnly(true);
-                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString() + "]"+" "
-                                       +tabWidget->tabText(i-1)+" "+tr("is offline")+"</FONT>");
+                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString(Qt::SystemLocaleLongDate) + "]"+" "
+                                       + tabWidget->tabText(i-1) + " " + tr("is offline")+"</FONT>");   // FIX: this does not need to be resent every time contacts list is changed!
             }
 
             enableSendButton();
@@ -434,7 +438,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             if (senderName == myName)
                 fromWhoColor = "DARKVIOLET";
             if (receiverName == "all")
-                chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>"+ " "
+                chatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>"+ " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + actualMessage.replace("\n", "<br>"));
             else
@@ -446,7 +450,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     emit newMessage("all");
                     playSound("chat");
                 }
-                chatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                chatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + "<FONT COLOR=" + toWhoColor + ">[" + receiverName + "]</FONT> "
                                 + actualMessage.replace("\n", "<br>"));
@@ -468,7 +472,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     QWidget* widget = tabWidget->widget(i);
                     QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                     privateChatLog->setReadOnly(true);
-                    privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                    privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                            + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                            + actualMessage.replace("\n", "<br>"));
                     break;
@@ -479,7 +483,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 privateChatLog->setReadOnly(true);
                 privateChatLog->document()->setDefaultFont(QFont("Arial",11));
                 tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
-                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString() + "]</FONT>" + " "
+                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                        + actualMessage.replace("\n", "<br>"));
             }
@@ -506,7 +510,7 @@ void QueleaClientUI::enableDisconnected()
     contactsList->clear();
     enableSendButton();
     if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
-        connectButton->setEnabled(false);
+        connectButton->setEnabled(false); // TODO: explain why connectButton is disabled each time it is
     disconnect(messageInput, SIGNAL(textChanged()),
                this, SLOT(calculateLength()));
 }
@@ -517,7 +521,7 @@ void QueleaClientUI::enableConnection()
 {
     connectButton->setText(" " + tr("&Disconnect") + " ");
     connectButton->setIcon(QPixmap(":/images/disconnect.png"));
-    stateLabel->setText(tr("Connection")+"...");
+    stateLabel->setText(tr("Connecting") + "...");
 }                            
 
 //---------------------------------------------------------
@@ -554,13 +558,13 @@ void QueleaClientUI::showAboutBox()
     QMessageBox aboutBox;
     aboutBox.setWindowTitle(tr("About")+" - Quelea");
     aboutBox.setIconPixmap(QPixmap(":/images/icon.png"));
-    aboutBox.setText("<strong>"+tr("Quelea 1.0 beta 2")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Used")+" "+"Qt 4.7.0 <br>"+tr("Distributed under license")
-                                         +" <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
-                                "<p><strong>"+tr("Developers")+":</strong><br>"+tr("Alexey Aksenov")+" (aksenoff.a@gmail.com)"
-                                "<br>"+tr("Roman Suhov")+" (romsuhov@gmail.com)<br>"+tr("Alexey Topchiy")+" (alextopchiy@gmail.com)</p>"
+    aboutBox.setText("<strong>Quelea " + APPLICATION_VERSION + "</strong>");
+    aboutBox.setInformativeText("<p>" + tr("Compiled with") + " " + "Qt " + LIB_QT_VERSION + " " + tr("on") + " " + BUILD_DATE +
+                                "<br>" + tr("Distributed under") + " <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
+                                "<p><strong>" + tr("Developers") + ":</strong><br>" + tr("Alexey Aksenov") + " (aksenoff.a@gmail.com)"
+                                "<br>" + tr("Roman Suhov") + " (romsuhov@gmail.com)<br>" + tr("Alexey Topchiy") + " (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("©")+" "+tr("Developers of")+" Quelea, 2011");
+                                + tr("©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
     aboutBox.exec();
 }
 

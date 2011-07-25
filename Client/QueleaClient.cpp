@@ -31,7 +31,7 @@ void QueleaClient::slotReadServer()
     {
     case CONNECTED:
         {
-        ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Connected")+ "." + "</FONT>");
+        ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Connected") + "</FONT>");
             // if we're connected, send an authorization request
             Message auth_req(AUTH_REQUEST, clientName);
             auth_req.send(serverSocket);
@@ -41,7 +41,7 @@ void QueleaClient::slotReadServer()
         {
             if(incomingMessage.getText()=="auth_ok")
             {
-                ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Authorized") + "." + "</FONT>");
+                ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Authorized") + "</FONT>");
                 // if we're authorized, request a list of other clients connected to the server
                 Message contacts_req(CONTACTS_REQUEST);
                 contacts_req.send(serverSocket);
@@ -49,8 +49,8 @@ void QueleaClient::slotReadServer()
             }
             if(incomingMessage.getText()=="auth_error")
             {
-                ui->log("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>"
-                        + " <FONT COLOR=RED>" + tr("Error: such name is already use") + "." + "</FONT>");
+                ui->log("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]</FONT>"
+                        + " <FONT COLOR=RED>" + tr("Error: Such name is already in use") + "." + "</FONT>");
                 emit authErrorSignal();
             }
             break;
@@ -65,7 +65,7 @@ void QueleaClient::slotReadServer()
 
 void QueleaClient::slotError(QAbstractSocket::SocketError err)
 {
-    QString error = "<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString() + "]</FONT>"
+    QString error = "<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]</FONT>"
                     + " <FONT COLOR=RED>" + tr("Error") + ": " +
                     (err == QAbstractSocket::HostNotFoundError ?
                      tr("The host was not found") :
@@ -74,8 +74,7 @@ void QueleaClient::slotError(QAbstractSocket::SocketError err)
                      err == QAbstractSocket::ConnectionRefusedError ?
                      tr("The connection was refused") :
                      QString(serverSocket->errorString())
-                    ) + "." + "</FONT>";
-
+                    ) + "</FONT>";
     emit socketError();
     // send an error message to chat
     ui->log(error);
@@ -105,7 +104,7 @@ void QueleaClient::sendChatMessage(const QString& receiverName, const QString& a
 
 void QueleaClient::disconnectFromServer()
 {
-    ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString() + "] " + tr("Disconnected") + "." + "</FONT>");
+    ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Disconnected") + "." + "</FONT>");
     serverSocket->close();
     serverSocket->abort();
 }

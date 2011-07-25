@@ -15,10 +15,10 @@ SystemTray::SystemTray(QueleaClientUI* userInterface)
             this, SLOT(slotShowHide()));
 
     actChangeStatus = new QAction(tr("Connect"), this);
-    connect(actChangeStatus,SIGNAL(triggered()),
+    connect(actChangeStatus, SIGNAL(triggered()),
             this, SIGNAL(changeStateByTray()));
 
-    actSettings = new QAction(QPixmap(":/images/settings.png"),tr("Setting") + "...", this);
+    actSettings = new QAction(QPixmap(":/images/settings.png"), tr("Settings") + "...", this);
     connect(actSettings, SIGNAL(triggered()),
             ui, SLOT(openSettingDialog()));
 
@@ -100,9 +100,9 @@ void SystemTray::slotShowHide()
 void SystemTray::slotShowMessage(const QString& senderName)
 {
     if (senderName=="all")
-        trayIcon->showMessage(tr("Message from chat"),tr("Message from chat for you"),QSystemTrayIcon::NoIcon,3000);
+        trayIcon->showMessage(tr("Message from chat") ,tr("Message from chat for you"), QSystemTrayIcon::NoIcon, 3000);
     else
-        trayIcon->showMessage(tr("New message"),tr("Sender")+ ": " +senderName,QSystemTrayIcon::NoIcon,3000);
+        trayIcon->showMessage(tr("New message"), tr("Sender") + ": " + senderName, QSystemTrayIcon::NoIcon, 3000);
 }
 
 //---------------------------------------------------------
@@ -110,13 +110,13 @@ void SystemTray::slotShowMessage(const QString& senderName)
 void SystemTray::slotChangeIcon(const QString& status)
 {
     QString pixmapName;
-    if (status=="offline")
-        pixmapName =":/images/icon-offline.png";
+    if (status == "offline")
+        pixmapName = ":/images/icon-offline.png";
 
-    else if(status=="message")
-        pixmapName=":/images/message.png";
+    else if(status == "message")
+        pixmapName = ":/images/message.png";
     else
-        pixmapName =":/images/icon.png";
+        pixmapName = ":/images/icon.png";
 
     trayIcon->setIcon(QPixmap(pixmapName));
 }
