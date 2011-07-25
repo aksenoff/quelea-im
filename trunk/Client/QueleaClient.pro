@@ -15,7 +15,8 @@ HEADERS = QueleaClient.h \
     ../codes.h \
     ../message.h \
     QueleaClientUI.h \
-    connectionStateMachine.h
+    connectionStateMachine.h \
+    versionInfo.h
 win32:TARGET = ../QueleaClient
 RC_FILE = resource.rc
 

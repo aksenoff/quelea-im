@@ -1,6 +1,7 @@
 #include <QtNetwork>
 #include <QtGui>
 #include "QueleaServerUI.h"
+#include "versionInfo.h"
 #include "../codes.h"
 
 QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
@@ -10,7 +11,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     serverLog->setReadOnly(true);
     startStopButton = new QPushButton;
     startStopButton->setText(tr("Start"));
-    aboutButton = new QPushButton(tr("About"));
+    aboutButton = new QPushButton(tr("About..."));
     mainLayout = new QVBoxLayout;
     mainLayout->addWidget(serverLog);
     buttonsLayout = new QHBoxLayout;
@@ -102,7 +103,7 @@ void QueleaServerUI::startServer()
 
 void QueleaServerUI::log(const QString &event) const
 {
-    serverLog->append(event);
+    serverLog->append("[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]" + " " + event);
 }
 
 //---------------------------------------------------------
@@ -110,15 +111,15 @@ void QueleaServerUI::log(const QString &event) const
 void QueleaServerUI::showAboutBox()
 {
     QMessageBox aboutBox;
-    aboutBox.setWindowTitle(tr("About")+" - Quelea");
+    aboutBox.setWindowTitle(tr("About") + " - Quelea");
     aboutBox.setIconPixmap(QPixmap(":/icon.png"));
-    aboutBox.setText("<strong>"+tr("Quelea Sever 1.0 beta 2")+"</strong>");
-    aboutBox.setInformativeText("<p>" + tr("Used")+" "+"Qt 4.7.0 <br>"+tr("Distributed under license")
-                                         +" <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
-                                "<p><strong>"+tr("Developers")+":</strong><br>"+tr("Alexey Aksenov")+" (aksenoff.a@gmail.com)"
-                                "<br>"+tr("Roman Suhov")+" (romsuhov@gmail.com)<br>"+tr("Alexey Topchiy")+" (alextopchiy@gmail.com)</p>"
+    aboutBox.setText("<strong>Quelea Server " + APPLICATION_VERSION + "</strong>");
+    aboutBox.setInformativeText("<p>" + tr("Compiled with") + " " + "Qt " + LIB_QT_VERSION + " " + tr("on") + " " + BUILD_DATE +
+                                "<br>" + tr("Distributed under") + " <a href=http://www.gnu.org/licenses/gpl/html>GNU GPLv3<a></p>"
+                                "<p><strong>" + tr("Developers") + ":</strong><br>" + tr("Alexey Aksenov") + " (aksenoff.a@gmail.com)"
+                                "<br>" + tr("Roman Suhov") + " (romsuhov@gmail.com)<br>" + tr("Alexey Topchiy") + " (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("©")+" "+tr("Developers of")+" Quelea, 2011");
+                                + tr("©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
     aboutBox.exec();
 }
 

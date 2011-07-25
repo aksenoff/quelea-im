@@ -8,12 +8,11 @@ QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface)
     // starting server
     if (!listen(static_cast<QHostAddress>(ipAddress), port))
     {
-        QMessageBox::critical(0, tr("Server error"), tr("Can't start server") +": " + errorString());
+        QMessageBox::critical(0, tr("Server error"), tr("Unable to start server") +": " + errorString());
         close();
         return;
     }
-    ui->log("<b>[" + QDateTime::currentDateTime().toString() + "]" + " "
-            + tr("Server started on") + " " + ipAddress + ":" + QString::number(port) + "</b>");
+    ui->log("<b>" + tr("Server started on") + " " + ipAddress + ":" + QString::number(port) + "</b>");
     connect(this, SIGNAL(newConnection()),
             this, SLOT(slotNewConnection()));
 }
@@ -65,8 +64,7 @@ void QueleaServer::slotReadClient()
                 clients.push_back(newClient);
                 connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
                         this, SLOT(slotByeClient(QTcpSocket*)));
-                ui->log("[" + QDateTime::currentDateTime().toString() + "]" + " "
-                        + tr("Client") + incomingMessage->getText() + tr("connected"));
+                ui->log(tr("Client") + " " + incomingMessage->getText() + " " + tr("connected"));
                 // sending authorization confirmation
                 Message auth_ok(AUTH_RESPONSE, "auth_ok");
                 auth_ok.send(newClient->getSocket());
@@ -131,8 +129,7 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     QVector<Client*>::iterator disconnectedClient;
     // searching for client whose socket has disconnected
     for(disconnectedClient = clients.begin(); (*disconnectedClient)->getSocket() != disconnectedClientSocket; ++disconnectedClient);
-    ui->log("[" + QDateTime::currentDateTime().toString() + "]" + " "
-            + tr("Client") + " " +  (*disconnectedClient)->getName() + " " + tr("disconnected"));
+    ui->log(tr("Client") + " " +  (*disconnectedClient)->getName() + " " + tr("disconnected"));
     delete (*disconnectedClient);
     // removing client from vector
     clients.erase(disconnectedClient);
@@ -149,5 +146,5 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
 
 QueleaServer::~QueleaServer()
 {
-    ui->log("<b>[" + QDateTime::currentDateTime().toString() + "]" + " " + tr("Server stopped")+ "." + "</b>");
+    ui->log("<b>" + tr("Server stopped") + "</b>");
 }
