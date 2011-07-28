@@ -113,8 +113,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     setLayout(mainLayout);
 
     resize(560, 370);
-    setWindowTitle(tr("Quelea"));
-    setWindowIcon(QIcon::QIcon ("resource.rc"));
+    setWindowTitle("Quelea");
+    setWindowIcon(QIcon::QIcon("resource.rc"));
     messageInput->setFocus();
     client = 0;
     connectionState = 0;

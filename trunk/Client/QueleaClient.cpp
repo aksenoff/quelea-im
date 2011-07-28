@@ -104,7 +104,7 @@ void QueleaClient::sendChatMessage(const QString& receiverName, const QString& a
 
 void QueleaClient::disconnectFromServer()
 {
-    ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Disconnected") + "." + "</FONT>");
+    ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Disconnected") + "</FONT>");
     serverSocket->close();
     serverSocket->abort();
 }
