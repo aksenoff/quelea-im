@@ -3,6 +3,7 @@
 #include "QueleaServerUI.h"
 #include "versionInfo.h"
 #include "../codes.h"
+#include "settingsDialog.h"
 
 QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     : QWidget(pwgt), currentIp("")
@@ -12,6 +13,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     startStopButton = new QPushButton;
     startStopButton->setText(tr("Start"));
     aboutButton = new QPushButton(tr("About..."));
+    settingsButton = new QPushButton(tr("Settings"));
     mainLayout = new QVBoxLayout;
     mainLayout->addWidget(serverLog);
     buttonsLayout = new QHBoxLayout;
@@ -19,16 +21,20 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     buttonsLayout->addWidget(startStopButton);
     buttonsLayout->addWidget(ipBox);
     buttonsLayout->addWidget(aboutButton);
+    buttonsLayout->addWidget(settingsButton);
     mainLayout->addLayout(buttonsLayout);
     setLayout(mainLayout);
     connect(startStopButton, SIGNAL(clicked()),
             this, SLOT(startServer()));
     connect(aboutButton, SIGNAL(clicked()),
             this, SLOT(showAboutBox()));
+    connect(settingsButton, SIGNAL(clicked()),
+                this, SLOT(openSettingDialog()));
 
     setWindowTitle(tr("Quelea Server"));
     setWindowIcon(QIcon::QIcon("resource.rc"));
     resize(450, 300);
+    db = new Database;
     populateIpBox();
     startServer();
 }
@@ -106,6 +112,14 @@ void QueleaServerUI::log(const QString &event) const
     serverLog->append("[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]" + " " + event);
 }
 
+//---------------------------------------------------------
+void QueleaServerUI::openSettingDialog()
+{
+
+    SettingsDialog* settingsDialog = new SettingsDialog(db);
+    settingsDialog->exec();
+    delete settingsDialog;
+}
 //---------------------------------------------------------
 
 void QueleaServerUI::showAboutBox()
