@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "QueleaServer.h"
+#include "database.h"
 
 class QueleaServer;
 
@@ -16,13 +17,16 @@ private:
     QHBoxLayout* buttonsLayout;
     QPushButton* startStopButton;
     QPushButton* aboutButton;
+    QPushButton* settingsButton;
     bool populateIpBox();
     QString currentIp;
+    Database* db;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
     void log(const QString&) const;
     ~QueleaServerUI();
 private slots:
+    void openSettingDialog();
     void showAboutBox();
     void startServer();
     void stopServer();
