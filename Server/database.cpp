@@ -39,7 +39,18 @@ void Database::closeDB()
 
 //-------------------------------------------------------------------------------
 
-int Database::createDB(QString fileName)
+bool Database::createDB(QString fileName)
 {
     closeDB();
+    db->setDatabaseName(fileName);
+    if (db->open()){
+        QSqlQuery query(*db);
+        query.exec("CREATE TABLE quelea(property VARCHAR, value VARCHAR);");
+        query.exec("INSERT INTO quelea VALUES('DBtype', 'qdb');");
+        query.exec("INSERT INTO quelea VALUES('DBversion', '"+QDB_VERSION+"');");
+        query.exec("CREATE TABLE clients(name VARCHAR, password VARCHAR);");
+        return true;
+    }
+    else
+        return false;
 }

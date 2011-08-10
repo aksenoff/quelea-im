@@ -16,6 +16,7 @@ private:
     QLineEdit* dbPathEdit;
     QPushButton* dbLoadButton;
     QPushButton* dbCreateButton;
+    QPushButton* dbEditButton;
     QGroupBox* ldapGroupBox;
     QPushButton* okButton;
     QPushButton* cancelButton;

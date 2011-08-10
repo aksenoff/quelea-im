@@ -12,7 +12,7 @@ public:
     Database();
     void closeDB();
     int openDB(QString fileName);
-    int createDB(QString fileName);
+    bool createDB(QString fileName);
 };
 
 #endif // DATABASE_H
