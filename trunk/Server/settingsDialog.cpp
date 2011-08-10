@@ -14,11 +14,14 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     dbTooltip = new QLabel(tr("Load DB file or create new one"));
     dbState = new QLabel(tr("File is not selected"));
     dbPathEdit = new QLineEdit;
+    dbPathEdit->setReadOnly(true);
     dbLoadButton = new QPushButton(tr("Load")+"...");
     dbCreateButton = new QPushButton(tr("Create")+"...");
+    dbEditButton = new QPushButton(tr("Edit")+"...");
 
     dbLoadButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     dbCreateButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    dbEditButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     connect(dbLoadButton, SIGNAL(clicked()),
             this, SLOT(loadDB()));
     connect(dbCreateButton, SIGNAL(clicked()),
@@ -28,6 +31,7 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     dbButtonLayout->addSpacing(200);
     dbButtonLayout->addWidget(dbLoadButton);
     dbButtonLayout->addWidget(dbCreateButton);
+    dbButtonLayout->addWidget(dbEditButton);
 
     QVBoxLayout* dbLayout = new QVBoxLayout(dbGroupBox);
     dbLayout->addWidget(dbTooltip);
@@ -77,6 +81,7 @@ void SettingsDialog::loadDB()
             switch (db->openDB(fileName)) {
                 case DB_OPEN_OK :
                 dbState->setText("<FONT COLOR=GREEN>"+tr("Database opened")+"</FONT>");
+                dbPathEdit->setText(fileName);
                 break;
 
                 case DB_OPEN_ERROR :
@@ -99,4 +104,10 @@ void SettingsDialog::createDB()
                                                     tr("Create new database"),
                                                     QDesktopServices::storageLocation(QDesktopServices::HomeLocation),
                                                     tr("Quelea Database Files (*.qdb)"));
+    if(db->createDB(fileName)) {
+        dbState->setText("<FONT COLOR=GREEN>"+tr("Database created and opened")+"</FONT>");
+        dbPathEdit->setText(fileName);
+    }
+    else
+        dbState->setText("<FONT COLOR=RED>"+tr("Database creation error")+"</FONT>");
 }
