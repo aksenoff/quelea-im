@@ -5,6 +5,7 @@
 Database::Database()
 {
     db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+    opened = false;
 }
 
 int Database::openDB(QString filename)
@@ -18,8 +19,10 @@ int Database::openDB(QString filename)
         if (query.value(0).toString() == "qdb"){
             query.exec("SELECT value FROM quelea WHERE property = 'DBversion';");
             query.next();
-            if (query.value(0).toString() == QDB_VERSION)
+            if (query.value(0).toString() == QDB_VERSION){
+                opened = true;
                 return DB_OPEN_OK;
+            }
             else
                 return DB_VERSION_ERROR;
         }
@@ -49,8 +52,51 @@ bool Database::createDB(QString fileName)
         query.exec("INSERT INTO quelea VALUES('DBtype', 'qdb');");
         query.exec("INSERT INTO quelea VALUES('DBversion', '"+QDB_VERSION+"');");
         query.exec("CREATE TABLE clients(name VARCHAR, password VARCHAR);");
+        opened = true;
         return true;
     }
     else
         return false;
+}
+
+//-------------------------------------------------------------------------------
+
+
+QString Database::hash(QString password)
+{
+    QByteArray array;
+    array.insert(0,password);
+    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5));
+}
+
+//-------------------------------------------------------------------------------
+
+bool Database::addClient(QString username, QString password)
+{
+    QSqlQuery query(*db);
+    return query.exec("INSERT INTO clients VALUES('"+username+"','"+hash(password)+"');");
+}
+
+//-------------------------------------------------------------------------------
+
+bool Database::isOpened()
+{
+    return opened;
+}
+
+bool Database::authorize(QString name, QString password)
+{
+    QSqlQuery query(*db);
+    query.exec("SELECT password FROM clients WHERE name = '"+name+"'");
+    query.next();
+    if (query.value(0).toString() == password)
+        return true;
+    else
+        return false;
+
+}
+//-------------------------------------------------------------------------------
+Database::~Database()
+{
+    closeDB();
 }

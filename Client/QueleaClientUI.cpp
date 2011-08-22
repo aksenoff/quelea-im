@@ -259,11 +259,20 @@ void QueleaClientUI::openSettingDialog()
         autoConnect = settingsDialog->autoConnect();
         myName = settingsDialog->clientName();
         serverAddress = settingsDialog->serverAddress();
+        authType = settingsDialog->authType();
+
         if(!(myName.isEmpty() || serverAddress.isEmpty())) // we have connection settings
         {
             if(client) // if client is present, update its settings
             {
-                client->changeSettings(myName, serverAddress);
+                if (authType == GUEST_AUTH)
+                    client->changeSettings(authType, myName, serverAddress);
+                if (authType == DB_AUTH) {
+                    dbName = new QString(settingsDialog->dbName());
+                    dbPassword = new QString(settingsDialog->dbPassword());
+                    client->changeSettings(authType, *dbName, *dbPassword, serverAddress);
+                }
+
                 connectButton->setEnabled(true);        // allowing user
                 tray->setConnectionActionEnabled(true); // to connect
             }
@@ -395,6 +404,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             QStringList contacts = incomingMessage.getText().split(QChar::Null);
             contactsList->clear();
             contacts.removeOne(myName);
+            contacts.removeOne(*dbName);
             contacts.removeOne("");
             if (contacts.count() != 0)
                 contactsList->addItem(">" + tr("Send to everybody"));

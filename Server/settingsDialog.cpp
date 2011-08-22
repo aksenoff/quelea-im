@@ -26,6 +26,8 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
             this, SLOT(loadDB()));
     connect(dbCreateButton, SIGNAL(clicked()),
             this, SLOT(createDB()));
+    connect(dbEditButton, SIGNAL(clicked()),
+            this, SLOT(openDBEditor()));
 
     QHBoxLayout* dbButtonLayout = new QHBoxLayout;
     dbButtonLayout->addSpacing(200);
@@ -88,7 +90,7 @@ void SettingsDialog::loadDB()
                 dbState->setText("<FONT COLOR=RED>"+tr("Database open error: file error")+"</FONT>");
                 break;
 
-                case DB_VERSION_ERROR:
+                case DB_VERSION_ERROR :
                 dbState->setText("<FONT COLOR=RED>"+tr("Database open error: uncompatible DB version")+"</FONT>");
                 break;
         }
@@ -111,3 +113,18 @@ void SettingsDialog::createDB()
     else
         dbState->setText("<FONT COLOR=RED>"+tr("Database creation error")+"</FONT>");
 }
+
+// ----------------------------------------------------------------------
+void SettingsDialog::openDBEditor()
+{
+    dbEdit = new DBEditor(db);
+    dbEdit->exec();
+    delete dbEdit;
+
+}
+// ----------------------------------------------------------------------
+bool SettingsDialog::useDB() const
+{
+    return dbGroupBox->isChecked();
+}
+// ----------------------------------------------------------------------

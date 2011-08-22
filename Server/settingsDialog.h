@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "database.h"
+#include "dbeditor.h"
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -20,15 +21,14 @@ private:
     QGroupBox* ldapGroupBox;
     QPushButton* okButton;
     QPushButton* cancelButton;
+    DBEditor* dbEdit;
 public:
     SettingsDialog(Database*, QWidget* pwgt = 0);
-    QString clientName() const;
-    QString serverAddress() const;
-    bool autoConnect() const;
-    bool enableSound() const;
+    bool useDB() const;
 private slots:
     void loadDB();
     void createDB();
+    void openDBEditor();
 };
 
 #endif

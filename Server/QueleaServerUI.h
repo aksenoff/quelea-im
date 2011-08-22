@@ -19,6 +19,7 @@ private:
     QPushButton* aboutButton;
     QPushButton* settingsButton;
     bool populateIpBox();
+    bool useDB;
     QString currentIp;
     Database* db;
 public:

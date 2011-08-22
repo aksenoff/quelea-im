@@ -5,7 +5,8 @@ SOURCES = main.cpp \
     client.cpp \
     ../message.cpp \
     database.cpp \
-    settingsDialog.cpp
+    settingsDialog.cpp \
+    dbeditor.cpp
 QT += network
 QT += sql
 HEADERS = QueleaServer.h \
@@ -15,7 +16,8 @@ HEADERS = QueleaServer.h \
     ../message.h \
     versionInfo.h \
     database.h \
-    settingsDialog.h
+    settingsDialog.h \
+    dbeditor.h
 win32:TARGET = ../QueleaServer
 RC_FILE = resource.rc
 

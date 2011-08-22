@@ -3,21 +3,41 @@
 
 SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
      : QDialog(pwgt, Qt::WindowTitleHint | Qt::MSWindowsFixedSizeDialogHint)
-{
+{  
+    guestRadio = new QRadioButton(tr("Use guest authorization"));
     clientNameEdit = new QLineEdit;
+    clientNameEdit->setEnabled(false);
     serverAddressEdit  = new QLineEdit;
     autoConnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
+
+    dbRadio = new QRadioButton(tr("Use database authorization"));
+    dbGroupBox = new QGroupBox;
+    dbGroupBox->setEnabled(false);
+    dbNameEdit = new QLineEdit(dbGroupBox);
+    dbPasswordEdit = new QLineEdit(dbGroupBox);
+    dbPasswordEdit->setEchoMode(QLineEdit::Password);
 
     QLabel* clientNameLabel = new QLabel(tr("&Name")+":");
     QLabel* serverAddressLabel = new QLabel(tr("&Server")+":");
     QLabel* autoConnectLabel = new QLabel(tr("&Connect at startup"));
     QLabel* enableSoundLabel = new QLabel(tr("&Enable sound"));
 
+    QLabel* dbNameLabel = new QLabel(tr("&Username"), dbGroupBox);
+    QLabel* dbPasswordLabel = new QLabel(tr("&Password"), dbGroupBox);
+
+    dbNameLabel->setBuddy(dbNameEdit);
+    dbPasswordLabel->setBuddy(dbPasswordEdit);
+
     clientNameLabel->setBuddy(clientNameEdit);
-    serverAddressLabel ->setBuddy(serverAddressEdit);
+    serverAddressLabel->setBuddy(serverAddressEdit);
     autoConnectLabel->setBuddy(autoConnectCheckBox);
     enableSoundLabel->setBuddy(enableSoundCheckBox);
+
+    connect(guestRadio, SIGNAL(toggled(bool)),
+            clientNameEdit, SLOT(setEnabled(bool)));
+    connect(dbRadio, SIGNAL(toggled(bool)),
+            dbGroupBox, SLOT(setEnabled(bool)));
 
     okButton = new QPushButton(tr("&Ok"));
     cancelButton = new QPushButton(tr("&Cancel"));
@@ -31,6 +51,16 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
             this, SLOT(reject()));
 
     // Layout setup
+    QVBoxLayout* rightDBLayout = new QVBoxLayout;
+    QVBoxLayout* leftDBLayout = new QVBoxLayout;
+    QHBoxLayout* dbLayout = new QHBoxLayout(dbGroupBox);
+    leftDBLayout->addWidget(dbNameLabel);
+    leftDBLayout->addWidget(dbPasswordLabel);
+    rightDBLayout->addWidget(dbNameEdit);
+    rightDBLayout->addWidget(dbPasswordEdit);
+    dbLayout->addLayout(leftDBLayout);
+    dbLayout->addLayout(rightDBLayout);
+
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* topLayout = new QHBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
@@ -48,7 +78,10 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     buttonLayout->addWidget(cancelButton);
     topLayout->addLayout(leftLayout);
     topLayout->addLayout(rightLayout);
+    mainLayout->addWidget(guestRadio);
     mainLayout->addLayout(topLayout);
+    mainLayout->addWidget(dbRadio);
+    mainLayout->addWidget(dbGroupBox);
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
     clientNameEdit->setFocus();
@@ -95,4 +128,37 @@ bool SettingsDialog::autoConnect() const
 bool SettingsDialog::enableSound() const
 {
     return enableSoundCheckBox->isChecked();
+}
+
+// ----------------------------------------------------------------------
+
+int SettingsDialog::authType()
+{
+    if (guestRadio->isChecked())
+        return GUEST_AUTH;
+    if (dbRadio->isChecked())
+        return DB_AUTH;
+}
+
+// ----------------------------------------------------------------------
+
+QString SettingsDialog::dbName() const
+{
+    return dbNameEdit->text();
+}
+
+// ----------------------------------------------------------------------
+
+QString SettingsDialog::dbPassword()
+{
+    return hash(dbPasswordEdit->text());
+}
+
+// ----------------------------------------------------------------------
+
+QString SettingsDialog::hash(QString password)
+{
+    QByteArray array;
+    array.insert(0,password);
+    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5));
 }
