@@ -2,8 +2,8 @@
 #include <QMessageBox>
 #include "../codes.h"
 
-QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface)
-    : ipAddress(ip), port(49212), ui(userInterface)
+QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface, Database* DB)
+    : ipAddress(ip), port(49212), ui(userInterface), db(DB)
 {
     // starting server
     if (!listen(static_cast<QHostAddress>(ipAddress), port))
@@ -42,32 +42,22 @@ void QueleaServer::slotReadClient()
     {
     case AUTH_REQUEST:
         {
-            Client* newClient = new Client(incomingMessage->getText(), clientSocket);
-            bool contCollState = false;
-            // finding out if chosen name is already used by another client
-            for(int i = 0; i < clients.size(); ++i)
-                if(clients[i]->getName() == incomingMessage->getText())
-                {
-                    contCollState = true;
-                    break;
-                }
-            // if yes then sending an error message
-            if (contCollState == true || incomingMessage->getText() == "all")
-            {
-                Message auth_error(AUTH_RESPONSE, "auth_error");
-                auth_error.send(newClient->getSocket());
-                delete newClient;
+            QStringList authMessageItems(incomingMessage->getText().split(QChar::Null));
+            int authType = QString(authMessageItems[0]).toInt();
+            Client* newClient = new Client(authMessageItems[1], clientSocket);
+
+            if (authType == GUEST_AUTH ) {
+                if (nameCollision(authMessageItems[1]))
+                    authError(newClient);
+                else
+                    authOk(newClient);
             }
-            else
-            {
-                // adding new client to vector
-                clients.push_back(newClient);
-                connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
-                        this, SLOT(slotByeClient(QTcpSocket*)));
-                ui->log(tr("Client") + " " + incomingMessage->getText() + " " + tr("connected"));
-                // sending authorization confirmation
-                Message auth_ok(AUTH_RESPONSE, "auth_ok");
-                auth_ok.send(newClient->getSocket());
+
+            if (authType == DB_AUTH) {
+                if(db->authorize(authMessageItems[1], authMessageItems[2]))
+                    authOk(newClient);
+                else
+                    authError(newClient);
             }
             break;
         }
@@ -140,6 +130,47 @@ void QueleaServer::slotByeClient(QTcpSocket* disconnectedClientSocket)
     Message contacts_list(CONTACTS_RESPONSE, contacts_string);
     for (int i = 0; i < clients.size(); ++i)
         contacts_list.send(clients[i]->getSocket());
+}
+
+//-------------------------------------------------------------------------
+
+bool QueleaServer::nameCollision(QString& name)
+{
+    bool contCollState = false;
+    // finding out if chosen name is already used by another client
+    for(int i = 0; i < clients.size(); ++i)
+        if(clients[i]->getName() == name)
+        {
+            contCollState = true;
+            break;
+        }
+    if (contCollState == true || name == "all")
+        return true;
+    else
+        return false;
+}
+
+//-------------------------------------------------------------------------
+
+void QueleaServer::authOk(Client* newClient)
+{
+    // adding new client to vector
+   clients.push_back(newClient);
+   connect(newClient, SIGNAL(goodbye(QTcpSocket*)),
+           this, SLOT(slotByeClient(QTcpSocket*)));
+   ui->log(tr("Client") + " " + newClient->getName() + " " + tr("connected"));
+   // sending authorization confirmation
+   Message auth_ok(AUTH_RESPONSE, "auth_ok");
+   auth_ok.send(newClient->getSocket());
+}
+
+//-------------------------------------------------------------------------
+
+void QueleaServer::authError(Client* newClient)
+{
+    Message auth_error(AUTH_RESPONSE, "auth_error");
+    auth_error.send(newClient->getSocket());
+    delete newClient;
 }
 
 //-------------------------------------------------------------------------

@@ -15,6 +15,7 @@ class ConnectionStateMachine;
 class QueleaClientUI : public QWidget {
 Q_OBJECT
 private:
+    enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
     QueleaClient* client;
     SystemTray* tray;
     ConnectionStateMachine* connectionState;
@@ -31,8 +32,11 @@ private:
     ClientTab* tabWidget;
     QString myName;
     QString serverAddress;
+    QString* dbName;
+    QString* dbPassword;
     bool enableSound;
     bool autoConnect;
+    int authType;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
     ~QueleaClientUI();

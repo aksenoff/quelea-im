@@ -31,9 +31,14 @@ void QueleaClient::slotReadServer()
     {
     case CONNECTED:
         {
-        ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Connected") + "</FONT>");
+             ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Connected") + "</FONT>");
             // if we're connected, send an authorization request
-            Message auth_req(AUTH_REQUEST, clientName);
+            QString authMessage;
+            if (authType == GUEST_AUTH)
+                 authMessage = QString::number(authType) + QChar::Null + clientName;
+            if (authType == DB_AUTH)
+                 authMessage = QString::number(authType) + QChar::Null + *dbName + QChar::Null + *dbPassword;
+            Message auth_req(AUTH_REQUEST, authMessage);
             auth_req.send(serverSocket);
             break;
         }
@@ -114,8 +119,17 @@ void QueleaClient::disconnectFromServer()
 // this function is called anytime we change connection settings AFTER constructing the client
 // i.e. starting the program. Client must be disconnected and connected again for the changes
 // to take place
-void QueleaClient::changeSettings(const QString& cn, const QString& sa)
+void QueleaClient::changeSettings(const int& at, const QString& cn, const QString& sa)
 {
+    authType = at;
     clientName = cn;
+    serverAddress = sa;
+}
+// ----------------------------------------------------------------------
+void QueleaClient::changeSettings(const int& at, const QString& un, const QString& pw, const QString& sa)
+{
+    authType = at;
+    dbName = new QString(un);
+    dbPassword = new QString(pw);
     serverAddress = sa;
 }

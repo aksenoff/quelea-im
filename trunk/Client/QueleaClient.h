@@ -11,13 +11,18 @@ class QueleaClientUI;
 class QueleaClient : public QTcpSocket {
 Q_OBJECT
 private:
+    enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
     QTcpSocket* serverSocket;
     QString serverAddress;
     QString clientName;
+    QString* dbName;
+    QString* dbPassword;
     QueleaClientUI* ui;
+    int authType;
 public:
     QueleaClient(QueleaClientUI*, const QString&, const QString&);
-    void changeSettings(const QString&, const QString&);
+    void changeSettings(const int&, const QString&, const QString&);
+    void changeSettings(const int&, const QString&, const QString&, const QString&);
 private slots:
     void slotReadServer();
     void slotError(QAbstractSocket::SocketError);

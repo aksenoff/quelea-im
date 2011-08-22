@@ -88,7 +88,7 @@ void QueleaServerUI::stopServer()
 void QueleaServerUI::startServer()
 {
     currentIp = ipBox->currentText();
-    server = new QueleaServer(currentIp, this);
+    server = new QueleaServer(currentIp, this, db);
     if(server->isListening())
     {
         disconnect(startStopButton, SIGNAL(clicked()),
@@ -117,7 +117,9 @@ void QueleaServerUI::openSettingDialog()
 {
 
     SettingsDialog* settingsDialog = new SettingsDialog(db);
-    settingsDialog->exec();
+    if (settingsDialog->exec() == QDialog::Accepted){
+        useDB = settingsDialog->useDB();
+    }
     delete settingsDialog;
 }
 //---------------------------------------------------------
@@ -142,4 +144,5 @@ void QueleaServerUI::showAboutBox()
 QueleaServerUI::~QueleaServerUI()
 {
     if(server) delete server;
+    if(db) delete db;
 }
