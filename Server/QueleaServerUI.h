@@ -18,8 +18,8 @@ private:
     QPushButton* startStopButton;
     QPushButton* aboutButton;
     QPushButton* settingsButton;
-    bool populateIpBox();
     bool useDB;
+    QString dbFileName;
     QString currentIp;
     Database* db;
 public:
@@ -31,6 +31,9 @@ private slots:
     void showAboutBox();
     void startServer();
     void stopServer();
+    void writeSettings(bool writeGlobal);
+    void readSettings(QString settingsPath);
+    bool populateIpBox();
 };
 
 #endif

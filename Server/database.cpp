@@ -38,6 +38,7 @@ int Database::openDB(QString filename)
 void Database::closeDB()
 {
     db->close();
+    opened = false;
 }
 
 //-------------------------------------------------------------------------------

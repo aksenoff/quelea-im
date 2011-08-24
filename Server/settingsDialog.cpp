@@ -9,7 +9,10 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     QWidget* authWidget = new QWidget;
     dbGroupBox = new QGroupBox(tr("Use database"),authWidget);
     dbGroupBox->setCheckable(true);
+    dbGroupBox->setChecked(false);
     dbGroupBox->resize(411,150);
+    connect(dbGroupBox, SIGNAL(toggled(bool)),
+            this, SLOT(dbGroupBoxToggled(bool)));
 
     dbTooltip = new QLabel(tr("Load DB file or create new one"));
     dbState = new QLabel(tr("File is not selected"));
@@ -67,7 +70,26 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
     resize(451,338);
-    setWindowTitle(tr("Settings")+" - Quelea");
+    setWindowTitle(tr("Settings")+" - Quelea Server");
+
+
+    // Reading settings to populate the dialog
+    QFile file(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea Server/settings.dat");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(&file);
+        if (stream.readLine() == "1")
+            dbGroupBox->setChecked(true);
+        dbPathEdit->setText(stream.readLine());
+        file.close();
+     }
+
+    if (db->isOpened())
+        dbState->setText("<FONT COLOR=GREEN>"+tr("Database opened")+"</FONT>");
+    else
+        if (!dbPathEdit->text().isEmpty())
+            dbState->setText(tr("Database is not used"));
+
 }
 
 // ----------------------------------------------------------------------
@@ -78,8 +100,27 @@ void SettingsDialog::loadDB()
                                                     tr("Open database"),
                                                     QDesktopServices::storageLocation(QDesktopServices::HomeLocation),
                                                     tr("Quelea Database Files (*.qdb)"));
-    if (!fileName.isEmpty())
         if (!fileName.isEmpty())
+            switch (db->openDB(fileName)) {
+                case DB_OPEN_OK :
+                dbState->setText("<FONT COLOR=GREEN>"+tr("Database opened")+"</FONT>");
+                dbPathEdit->setText(fileName);
+                break;
+
+                case DB_OPEN_ERROR :
+                dbState->setText("<FONT COLOR=RED>"+tr("Database open error: file error")+"</FONT>");
+                break;
+
+                case DB_VERSION_ERROR :
+                dbState->setText("<FONT COLOR=RED>"+tr("Database open error: uncompatible DB version")+"</FONT>");
+                break;
+        }
+
+
+}
+
+void SettingsDialog::loadDB(QString fileName)
+{
             switch (db->openDB(fileName)) {
                 case DB_OPEN_OK :
                 dbState->setText("<FONT COLOR=GREEN>"+tr("Database opened")+"</FONT>");
@@ -123,8 +164,29 @@ void SettingsDialog::openDBEditor()
 
 }
 // ----------------------------------------------------------------------
+
+void SettingsDialog::dbGroupBoxToggled(bool enabled)
+{
+    if(enabled) {
+        if(!dbPathEdit->text().isEmpty() && !db->isOpened())
+            loadDB(dbPathEdit->text());
+        if (db->isOpened())
+            dbState->setText("<FONT COLOR=GREEN>"+tr("Database opened")+"</FONT>");
+    }
+    else
+        dbState->setText(tr("Database is not used"));
+
+}
+
+// ----------------------------------------------------------------------
+
 bool SettingsDialog::useDB() const
 {
     return dbGroupBox->isChecked();
+}
+// ----------------------------------------------------------------------
+QString SettingsDialog::dbFileName() const
+{
+    return dbPathEdit->text();
 }
 // ----------------------------------------------------------------------
