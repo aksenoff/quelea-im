@@ -34,7 +34,33 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     setWindowTitle(tr("Quelea Server"));
     setWindowIcon(QIcon::QIcon("resource.rc"));
     resize(450, 300);
+    useDB = false;
     db = new Database;
+
+    //Settings reading
+    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + "/Quelea Server/settings.dat";
+    const QString globalSettings = "settings.dat";
+
+    //Creating "data" directory if this does not exist to QDesktopServices::DataLocation will be right on Linux
+    QDir localDataDir(QDesktopServices::storageLocation(QDesktopServices::HomeLocation) + "/.local/share");
+    if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
+        localDataDir.mkdir("data");
+
+    if (QFile::exists(localSettings))
+        readSettings(localSettings);
+    else
+        if (QFile::exists(globalSettings))
+        {
+            readSettings(globalSettings);
+            writeSettings(false);
+        }
+        else
+            openSettingDialog();
+
+
+    if (useDB)
+        db->openDB(dbFileName);
+
     populateIpBox();
     startServer();
 }
@@ -113,12 +139,57 @@ void QueleaServerUI::log(const QString &event) const
 }
 
 //---------------------------------------------------------
+
+void QueleaServerUI::readSettings(QString settingsPath)
+{
+    QFile file(settingsPath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(&file);
+        useDB = stream.readLine().toInt();
+        dbFileName = stream.readLine();
+        file.close();
+
+    }
+}
+
+void QueleaServerUI::writeSettings(bool writeGlobal)
+{
+    if (writeGlobal)
+    {
+        QFile globalFile("settings.dat");
+        if (globalFile.open(QIODevice::WriteOnly))
+        {
+            QTextStream stream(&globalFile);
+            stream << useDB << '\n'
+                   << dbFileName << flush;
+            globalFile.close();
+        }
+    }
+
+    QDir localDir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+    if (!localDir.exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea"))
+        localDir.mkdir("Quelea Server");
+
+    QFile localFile(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea Server/settings.dat");
+    if (localFile.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&localFile);
+        stream << useDB << '\n'
+               << dbFileName << flush;
+        localFile.close();
+    }
+}
+//----------------------------------------------------------
 void QueleaServerUI::openSettingDialog()
 {
-
     SettingsDialog* settingsDialog = new SettingsDialog(db);
     if (settingsDialog->exec() == QDialog::Accepted){
         useDB = settingsDialog->useDB();
+        dbFileName = settingsDialog->dbFileName();
+        if(!useDB && db->isOpened())
+            db->closeDB();
+        writeSettings(true);
     }
     delete settingsDialog;
 }

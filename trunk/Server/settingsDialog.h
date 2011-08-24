@@ -25,10 +25,13 @@ private:
 public:
     SettingsDialog(Database*, QWidget* pwgt = 0);
     bool useDB() const;
+    QString dbFileName() const;
 private slots:
     void loadDB();
+    void loadDB(QString fileName);
     void createDB();
     void openDBEditor();
+    void dbGroupBoxToggled(bool enabled);
 };
 
 #endif
