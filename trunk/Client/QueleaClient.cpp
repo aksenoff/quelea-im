@@ -5,8 +5,8 @@
 #include "../codes.h"
 #include "../message.h"
 
-QueleaClient::QueleaClient(QueleaClientUI* UI, const QString& cn, const QString& sa)
-    : serverAddress(sa), clientName(cn), ui(UI)
+QueleaClient::QueleaClient(QueleaClientUI* UI)
+    : ui(UI)
 {
     serverSocket = new QTcpSocket(this);
     connect(serverSocket, SIGNAL(readyRead()),

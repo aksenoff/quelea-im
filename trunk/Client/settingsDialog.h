@@ -18,6 +18,7 @@ private:
     QPushButton* okButton;
     QPushButton* cancelButton;
     QString hash(QString password);
+    QString oldHashedPass;
     enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
 public:
     SettingsDialog(QWidget* pwgt = 0);

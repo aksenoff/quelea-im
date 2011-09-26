@@ -5,6 +5,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
      : QDialog(pwgt, Qt::WindowTitleHint | Qt::MSWindowsFixedSizeDialogHint)
 {  
     guestRadio = new QRadioButton(tr("Use guest authorization"));
+    guestRadio->setChecked(true);
     clientNameEdit = new QLineEdit;
     clientNameEdit->setEnabled(false);
     serverAddressEdit  = new QLineEdit;
@@ -93,6 +94,14 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     {
         QTextStream stream(&file);
         clientNameEdit->setText(stream.readLine());
+        int at = stream.readLine().toInt();
+        if (at == GUEST_AUTH)
+            guestRadio->setChecked(true);
+        if (at == DB_AUTH)
+            dbRadio->setChecked(true);
+        dbNameEdit->setText(stream.readLine());
+        dbPasswordEdit->setText(stream.readLine());
+        oldHashedPass = dbPasswordEdit->text();
         serverAddressEdit->setText(stream.readLine());
         if (stream.readLine() == "1")
             autoConnectCheckBox->setChecked(true);
@@ -151,7 +160,10 @@ QString SettingsDialog::dbName() const
 
 QString SettingsDialog::dbPassword()
 {
-    return hash(dbPasswordEdit->text());
+    if (dbPasswordEdit->text() == oldHashedPass) //we will fix it later
+       return oldHashedPass;
+    else
+       return hash(dbPasswordEdit->text());
 }
 
 // ----------------------------------------------------------------------
@@ -160,5 +172,5 @@ QString SettingsDialog::hash(QString password)
 {
     QByteArray array;
     array.insert(0,password);
-    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5));
+    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5).toBase64());
 }
