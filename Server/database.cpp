@@ -67,7 +67,7 @@ QString Database::hash(QString password)
 {
     QByteArray array;
     array.insert(0,password);
-    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5));
+    return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5).toBase64());
 }
 
 //-------------------------------------------------------------------------------

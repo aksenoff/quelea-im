@@ -20,7 +20,7 @@ private:
     QueleaClientUI* ui;
     int authType;
 public:
-    QueleaClient(QueleaClientUI*, const QString&, const QString&);
+    QueleaClient(QueleaClientUI*);
     void changeSettings(const int&, const QString&, const QString&);
     void changeSettings(const int&, const QString&, const QString&, const QString&);
 private slots:

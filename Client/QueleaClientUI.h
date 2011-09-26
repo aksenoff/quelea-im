@@ -32,8 +32,8 @@ private:
     ClientTab* tabWidget;
     QString myName;
     QString serverAddress;
-    QString* dbName;
-    QString* dbPassword;
+    QString dbName;
+    QString dbPassword;
     bool enableSound;
     bool autoConnect;
     int authType;
@@ -54,6 +54,7 @@ private slots:
     void playSound(const QString&) const;
     void showAboutBox();
     void messageReceived(const QString&);
+    void setClientSettings();
 public slots:
     void openSettingDialog();
     void enableDisconnected();

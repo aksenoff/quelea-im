@@ -131,6 +131,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
+    //Settings:
     if (QFile::exists(localSettings))
         readSettings(localSettings);
     else
@@ -142,15 +143,12 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
         else
             openSettingDialog();
 
-    if(!(myName.isEmpty() || serverAddress.isEmpty())) // connection settings are present, whew
-    {
-        client = new QueleaClient(this, myName, serverAddress); // creating client and state machine
-        connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
-        tray->setConnectionActionEnabled(true); // allowing user
-        connectButton->setEnabled(true);        // to connect
-    }
-    else // setting provided by the file are unsuffucient
-        openSettingDialog(); //!!
+    client = new QueleaClient(this); // creating client and state machine
+    setClientSettings();
+    connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
+    tray->setConnectionActionEnabled(true); // allowing user
+    connectButton->setEnabled(true);        // to connect
+
 }
 
 //---------------------------------------------------------
@@ -205,6 +203,9 @@ void QueleaClientUI::readSettings(QString settingsPath)
     {
         QTextStream stream(&file);
         myName = stream.readLine();
+        authType = stream.readLine().toInt();
+        dbName = stream.readLine();
+        dbPassword = stream.readLine();
         serverAddress = stream.readLine();
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
@@ -223,6 +224,9 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
         {
             QTextStream stream(&globalFile);
             stream << myName << '\n'
+                   << authType << '\n'
+                   << dbName << '\n'
+                   << dbPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
                    << enableSound << flush;
@@ -239,6 +243,9 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
     {
         QTextStream stream(&localFile);
         stream << myName << '\n'
+               << authType << '\n'
+               << dbName << '\n'
+               << dbPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
                << enableSound << flush;
@@ -260,19 +267,14 @@ void QueleaClientUI::openSettingDialog()
         myName = settingsDialog->clientName();
         serverAddress = settingsDialog->serverAddress();
         authType = settingsDialog->authType();
+        dbName = settingsDialog->dbName();
+        dbPassword = settingsDialog->dbPassword();
 
-        if(!(myName.isEmpty() || serverAddress.isEmpty())) // we have connection settings
+        if((!myName.isEmpty() && !serverAddress.isEmpty()) || (!dbName.isEmpty() && !dbPassword.isEmpty() && !serverAddress.isEmpty())) // we have connection settings
         {
             if(client) // if client is present, update its settings
             {
-                if (authType == GUEST_AUTH)
-                    client->changeSettings(authType, myName, serverAddress);
-                if (authType == DB_AUTH) {
-                    dbName = new QString(settingsDialog->dbName());
-                    dbPassword = new QString(settingsDialog->dbPassword());
-                    client->changeSettings(authType, *dbName, *dbPassword, serverAddress);
-                }
-
+                setClientSettings();
                 connectButton->setEnabled(true);        // allowing user
                 tray->setConnectionActionEnabled(true); // to connect
             }
@@ -404,7 +406,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             QStringList contacts = incomingMessage.getText().split(QChar::Null);
             contactsList->clear();
             contacts.removeOne(myName);
-            contacts.removeOne(*dbName);
+            contacts.removeOne(dbName);
             contacts.removeOne("");
             if (contacts.count() != 0)
                 contactsList->addItem(">" + tr("Send to everybody"));
@@ -519,8 +521,6 @@ void QueleaClientUI::enableDisconnected()
     stateLabel->setText("<FONT COLOR=RED>" + tr("Offline") + "</FONT>");
     contactsList->clear();
     enableSendButton();
-    if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
-        connectButton->setEnabled(false); // TODO: explain why connectButton is disabled each time it is
     disconnect(messageInput, SIGNAL(textChanged()),
                this, SLOT(calculateLength()));
 }
@@ -596,6 +596,14 @@ void QueleaClientUI::slotShow()
         QApplication::alert(this);
 }
 
+//---------------------------------------------------------
+void QueleaClientUI::setClientSettings()
+{
+    if (authType == GUEST_AUTH)
+        client->changeSettings(authType, myName, serverAddress);
+    if (authType == DB_AUTH)
+        client->changeSettings(authType, dbName, dbPassword, serverAddress);
+}
 //---------------------------------------------------------
 
 QueleaClientUI::~QueleaClientUI()
