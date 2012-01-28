@@ -19,6 +19,15 @@ private:
     QPushButton* dbCreateButton;
     QPushButton* dbEditButton;
     QGroupBox* ldapGroupBox;
+    QRadioButton* adRadio;
+    QRadioButton* otherRadio;
+    QLabel* ldapState;
+    QLineEdit* ldapServerEdit;
+    QLineEdit* ldapPortEdit;
+    QLineEdit* ldapDomainEdit;
+    QLineEdit* ldapAdminDnEdit;
+    QLineEdit* ldapAdminPwdEdit;
+    QPushButton* ldapConnectButton;
     QPushButton* okButton;
     QPushButton* cancelButton;
     DBEditor* dbEdit;
@@ -32,6 +41,7 @@ private slots:
     void createDB();
     void openDBEditor();
     void dbGroupBoxToggled(bool enabled);
+    void ldapTypeToggled(bool ad);
 };
 
 #endif
