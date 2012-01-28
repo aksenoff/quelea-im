@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "QueleaServer.h"
 #include "database.h"
+#include "ldapauth.h"
 
 class QueleaServer;
 
@@ -22,6 +23,7 @@ private:
     QString dbFileName;
     QString currentIp;
     Database* db;
+    LdapAuth* ldath;
 public:
     QueleaServerUI(QWidget* pwgt = 0);
     void log(const QString&) const;

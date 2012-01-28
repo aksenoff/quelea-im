@@ -7,7 +7,7 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
 {
     tabWidget = new QTabWidget;
     QWidget* authWidget = new QWidget;
-    dbGroupBox = new QGroupBox(tr("Use database"),authWidget);
+    dbGroupBox = new QGroupBox(tr("Use database"));
     dbGroupBox->setCheckable(true);
     dbGroupBox->setChecked(false);
     dbGroupBox->resize(411,150);
@@ -39,14 +39,67 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     dbButtonLayout->addWidget(dbEditButton);
 
     QVBoxLayout* dbLayout = new QVBoxLayout(dbGroupBox);
-    dbLayout->addWidget(dbTooltip);
     dbLayout->addWidget(dbPathEdit);
     dbLayout->addWidget(dbState);
     dbLayout->addWidget(dbTooltip);
-    dbLayout->addWidget(dbTooltip);
     dbLayout->addLayout(dbButtonLayout);
 
-    ldapGroupBox = new QGroupBox;
+    ldapGroupBox = new QGroupBox(tr("Use LDAP"));
+    ldapGroupBox->setCheckable(true);
+    ldapGroupBox->setChecked(false);
+
+    adRadio = new QRadioButton(tr("Active Directory"));
+    adRadio->setChecked(true);
+    otherRadio = new QRadioButton(tr("Other LDAP server"));
+    ldapServerEdit = new QLineEdit;
+    ldapPortEdit = new QLineEdit;
+    ldapPortEdit->setText("389");
+    ldapDomainEdit = new QLineEdit;
+    ldapAdminDnEdit = new QLineEdit;
+    ldapAdminPwdEdit = new QLineEdit;
+    ldapAdminPwdEdit ->setEchoMode(QLineEdit::Password);
+    ldapState = new QLabel(tr("No connection"));
+
+    QLabel* ldapServerLabel = new QLabel(tr("LDAP server"));
+    QLabel* ldapPortLabel = new QLabel(tr("port"));
+    QLabel* ldapDomainLabel = new QLabel(tr("domain"));
+    QLabel* ldapAdminDnLabel = new QLabel(tr("admin DN"));
+    QLabel* ldapAdminPwdLabel = new QLabel(tr("admin password"));
+
+    ldapConnectButton = new QPushButton(tr("Test connection"));
+    ldapConnectButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
+    connect(adRadio, SIGNAL(toggled(bool)),
+            this, SLOT(ldapTypeToggled(bool)));
+    ldapTypeToggled(true);
+
+    QVBoxLayout* ldapLeftLayout = new QVBoxLayout;
+    ldapLeftLayout->addWidget(adRadio);
+    ldapLeftLayout->addWidget(ldapServerLabel);
+    ldapLeftLayout->addWidget(ldapServerEdit);
+    ldapLeftLayout->addWidget(ldapDomainLabel);
+    ldapLeftLayout->addWidget(ldapDomainEdit);
+    ldapLeftLayout->addWidget(ldapConnectButton);
+    ldapLeftLayout->addWidget(ldapState);
+
+    QVBoxLayout* ldapRightLayout = new QVBoxLayout;
+    ldapRightLayout->addWidget(otherRadio);
+    ldapRightLayout->addWidget(ldapPortLabel);
+    ldapRightLayout->addWidget(ldapPortEdit);
+    ldapRightLayout->addWidget(ldapAdminDnLabel);
+    ldapRightLayout->addWidget(ldapAdminDnEdit);
+    ldapRightLayout->addWidget(ldapAdminPwdLabel);
+    ldapRightLayout->addWidget(ldapAdminPwdEdit);
+
+    QHBoxLayout* ldapLayout = new QHBoxLayout(ldapGroupBox);
+    ldapLayout->addLayout(ldapLeftLayout);
+    ldapLayout->addLayout(ldapRightLayout);
+
+
+    QVBoxLayout* authLayout = new QVBoxLayout;
+    authLayout->addWidget(dbGroupBox);
+    authLayout->addWidget(ldapGroupBox);
+    authWidget->setLayout(authLayout);
 
     tabWidget->addTab(authWidget,tr("Authorization"));
 
@@ -178,6 +231,21 @@ void SettingsDialog::dbGroupBoxToggled(bool enabled)
 
 }
 
+// ----------------------------------------------------------------------
+void SettingsDialog::ldapTypeToggled(bool ad)
+{
+    if(ad){
+        ldapPortEdit->setEnabled(false);
+        ldapAdminDnEdit->setEnabled(false);
+        ldapAdminPwdEdit->setEnabled(false);
+    }
+    else{
+        ldapPortEdit->setEnabled(true);
+        ldapAdminDnEdit->setEnabled(true);
+        ldapAdminPwdEdit->setEnabled(true);
+    }
+
+}
 // ----------------------------------------------------------------------
 
 bool SettingsDialog::useDB() const

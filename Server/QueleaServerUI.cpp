@@ -32,7 +32,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
                 this, SLOT(openSettingDialog()));
 
     setWindowTitle(tr("Quelea Server"));
-    setWindowIcon(QIcon::QIcon("resource.rc"));
+    setWindowIcon(QIcon("resource.rc"));//!
     resize(450, 300);
     useDB = false;
     db = new Database;
@@ -62,6 +62,11 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
         db->openDB(dbFileName);
 
     populateIpBox();
+    //ldath = new LdapAuth("192.168.1.12","quelea.local");
+    ldath = new LdapAuth("192.168.1.6",389,"dc=debian,dc=local","cn=admin,dc=debian,dc=local","vesna");
+    if(ldath->authorize("romsuhov","123"))
+        qDebug()<<"True!";
+    delete ldath;
     startServer();
 }
 
