@@ -1,6 +1,7 @@
 #include <QtGui>
 #include "settingsDialog.h"
 #include "database.h"
+#include "ldapauth.h"
 
 SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     : QDialog(pwgt), db(DB)
@@ -66,8 +67,11 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     QLabel* ldapAdminDnLabel = new QLabel(tr("admin DN"));
     QLabel* ldapAdminPwdLabel = new QLabel(tr("admin password"));
 
-    ldapConnectButton = new QPushButton(tr("Test connection"));
-    ldapConnectButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    ldapTestButton = new QPushButton(tr("Test connection"));
+    ldapTestButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
+    connect(ldapTestButton,SIGNAL(clicked()),
+            this, SLOT(ldapTest()));
 
     connect(adRadio, SIGNAL(toggled(bool)),
             this, SLOT(ldapTypeToggled(bool)));
@@ -79,7 +83,7 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     ldapLeftLayout->addWidget(ldapServerEdit);
     ldapLeftLayout->addWidget(ldapDomainLabel);
     ldapLeftLayout->addWidget(ldapDomainEdit);
-    ldapLeftLayout->addWidget(ldapConnectButton);
+    ldapLeftLayout->addWidget(ldapTestButton);
     ldapLeftLayout->addWidget(ldapState);
 
     QVBoxLayout* ldapRightLayout = new QVBoxLayout;
@@ -134,6 +138,18 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
         if (stream.readLine() == "1")
             dbGroupBox->setChecked(true);
         dbPathEdit->setText(stream.readLine());
+
+        if (stream.readLine() == "1")
+             ldapGroupBox->setChecked(true);
+        if (stream.readLine() == "1")
+            adRadio->setChecked(true);
+        else
+            otherRadio->setChecked(true);
+        ldapServerEdit->setText(stream.readLine());
+        ldapPortEdit->setText(stream.readLine());
+        ldapDomainEdit->setText(stream.readLine());
+        ldapAdminDnEdit->setText(stream.readLine());
+        ldapAdminPwdEdit->setText(stream.readLine());
         file.close();
      }
 
@@ -142,6 +158,9 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
     else
         if (!dbPathEdit->text().isEmpty())
             dbState->setText(tr("Database is not used"));
+
+    if (adRadio->isChecked())
+        ldapPortEdit->setText("389");
 
 }
 
@@ -258,3 +277,44 @@ QString SettingsDialog::dbFileName() const
     return dbPathEdit->text();
 }
 // ----------------------------------------------------------------------
+bool SettingsDialog::useLDAP()
+{
+    return ldapGroupBox->isChecked();
+}
+// ----------------------------------------------------------------------
+bool SettingsDialog::useLdapAd()
+{
+    return adRadio->isChecked();
+}
+// ----------------------------------------------------------------------
+void SettingsDialog::getLdapAdSettings(QString& h, QString& d)
+{
+    h = ldapServerEdit->text();
+    d = ldapDomainEdit->text();
+}
+// ----------------------------------------------------------------------
+void SettingsDialog::getLdapNoAdSettings(QString &h, int &p, QString &d, QString &admin, QString &pwd)
+{
+    h = ldapServerEdit->text();
+    p = ldapPortEdit->text().toInt();
+    d = ldapDomainEdit->text();
+    admin = ldapAdminDnEdit->text();
+    pwd = ldapAdminPwdEdit->text();
+}
+//-----------------------------------------------------------------------
+void SettingsDialog::ldapTest()
+{
+    if (adRadio->isChecked()){
+        if(LdapAuth::testConnection(ldapServerEdit->text()))
+           ldapState->setText("<FONT COLOR=GREEN>"+tr("LDAP connection is OK")+"</FONT>");
+        else
+           ldapState->setText("<FONT COLOR=RED>"+tr("LDAP connection error")+"</FONT>");
+    }
+    else {
+        if(LdapAuth::testConnection(ldapServerEdit->text(),ldapPortEdit->text().toInt(),
+                                    ldapAdminDnEdit->text(),ldapAdminPwdEdit->text()))
+            ldapState->setText("<FONT COLOR=GREEN>"+tr("LDAP connection is OK")+"</FONT>");
+        else
+            ldapState->setText("<FONT COLOR=RED>"+tr("LDAP connection error")+"</FONT>");
+    }
+}

@@ -8,12 +8,69 @@ LdapAuth::LdapAuth(QString host, QString domain):host(host),domain(domain)
     port = 389;
 }
 
+//-------------------------------------------------------------------------------
+
 LdapAuth::LdapAuth(QString h, int p, QString d,QString admin, QString pwd):
     host(h),port(p), domain(d),adminDN(admin),adminPWD(pwd)
 {
     ad = false;
 }
 
+//-------------------------------------------------------------------------------
+
+void LdapAuth::setSettings(QString h, QString d)
+{
+    ad = true;
+    host = h;
+    domain = d;
+}
+
+//-------------------------------------------------------------------------------
+
+void LdapAuth::setSettings(QString h, int p, QString d, QString admin, QString pwd)
+{
+    ad = false;
+    host = h;
+    port = p;
+    domain = d;
+    adminDN = admin;
+    adminPWD = pwd;
+
+}
+//-------------------------------------------------------------------------------
+int LdapAuth::testConnection(QString h)
+{
+    LDAP *ld;
+    QString uri = "ldap://"+h+":"+QString::number(389);
+    QByteArray ba1 = uri.toAscii();
+    if (ldap_initialize(&ld,ba1.data())== LDAP_SUCCESS)
+        return 1;
+    else
+        return 0;
+ }
+
+//-------------------------------------------------------------------------------
+
+int LdapAuth::testConnection(QString h, int p, QString admin, QString pwd)
+{
+    LDAP *ld;
+    int desired_version = LDAP_VERSION3;
+    QString uri = "ldap://"+h+":"+QString::number(p);
+    QByteArray ba1 = uri.toAscii();
+    if (ldap_initialize(&ld,ba1.data())!= LDAP_SUCCESS)
+        return 0;
+    ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &desired_version);
+
+    struct berval cred;
+    QByteArray adn = admin.toAscii();
+    cred.bv_val =  pwd.toAscii().data();
+    cred.bv_len = pwd.length();
+    if(ldap_sasl_bind_s(ld,adn.data(),NULL,&cred,NULL,NULL,NULL)== LDAP_SUCCESS)
+        return 1;
+    else
+        return 0;
+}
+//-------------------------------------------------------------------------------
 bool LdapAuth::authorize(QString uid, QString password)
 {
     LDAP *ld;
@@ -56,3 +113,4 @@ bool LdapAuth::authorize(QString uid, QString password)
         return false;
     }
 }
+//-------------------------------------------------------------------------------

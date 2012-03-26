@@ -9,6 +9,7 @@
 #include "database.h"
 
 class QueleaServerUI;
+class Database;
 
 class QueleaServer : public QTcpServer {
 Q_OBJECT

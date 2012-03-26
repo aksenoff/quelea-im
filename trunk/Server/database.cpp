@@ -2,7 +2,7 @@
 #include "QueleaServerUI.h"
 #include "versionInfo.h"
 
-Database::Database()
+Database::Database(QueleaServerUI* userInterface):ui(userInterface)
 {
     db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
     opened = false;
@@ -21,6 +21,7 @@ int Database::openDB(QString filename)
             query.next();
             if (query.value(0).toString() == QDB_VERSION){
                 opened = true;
+                ui->log("Database opened");
                 return DB_OPEN_OK;
             }
             else

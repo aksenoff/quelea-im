@@ -20,7 +20,14 @@ private:
     QPushButton* aboutButton;
     QPushButton* settingsButton;
     bool useDB;
+    bool useLDAP;
+    bool useAdLdap;
     QString dbFileName;
+    QString ldapHost;
+    int ldapPort;
+    QString ldapDomain;
+    QString ldapAdmin;
+    QString ldapAdminPw;
     QString currentIp;
     Database* db;
     LdapAuth* ldath;
