@@ -27,7 +27,7 @@ private:
     QLineEdit* ldapDomainEdit;
     QLineEdit* ldapAdminDnEdit;
     QLineEdit* ldapAdminPwdEdit;
-    QPushButton* ldapConnectButton;
+    QPushButton* ldapTestButton;
     QPushButton* okButton;
     QPushButton* cancelButton;
     DBEditor* dbEdit;
@@ -35,6 +35,10 @@ public:
     SettingsDialog(Database*, QWidget* pwgt = 0);
     bool useDB() const;
     QString dbFileName() const;
+    bool useLDAP();
+    bool useLdapAd();
+    void getLdapAdSettings(QString& h, QString& d);
+    void getLdapNoAdSettings(QString& h, int& p, QString& d, QString& admin, QString& pwd);
 private slots:
     void loadDB();
     void loadDB(QString fileName);
@@ -42,6 +46,7 @@ private slots:
     void openDBEditor();
     void dbGroupBoxToggled(bool enabled);
     void ldapTypeToggled(bool ad);
+    void ldapTest();
 };
 
 #endif

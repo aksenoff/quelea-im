@@ -35,7 +35,9 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     setWindowIcon(QIcon("resource.rc"));//!
     resize(450, 300);
     useDB = false;
-    db = new Database;
+    useLDAP = false;
+    ldath = NULL;
+    db = new Database(this);
 
     //Settings reading
     const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + "/Quelea Server/settings.dat";
@@ -60,13 +62,23 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
 
     if (useDB)
         db->openDB(dbFileName);
+    if (useLDAP){
+        if (useAdLdap)
+            ldath = new LdapAuth(ldapHost,ldapDomain);
+        else
+            ldath = new LdapAuth(ldapHost,ldapPort,ldapDomain,ldapAdmin,ldapAdminPw);
+    }
+
+       // сделать создание при настройке!
+
+
 
     populateIpBox();
     //ldath = new LdapAuth("192.168.1.12","quelea.local");
-    ldath = new LdapAuth("192.168.1.6",389,"dc=debian,dc=local","cn=admin,dc=debian,dc=local","vesna");
-    if(ldath->authorize("romsuhov","123"))
-        qDebug()<<"True!";
-    delete ldath;
+    //ldath = new LdapAuth("192.168.1.6",389,"dc=debian,dc=local","cn=admin,dc=debian,dc=local","vesna");
+   // if(ldath->authorize("romsuhov","123"))
+  //      qDebug()<<"True!";
+   // delete ldath;
     startServer();
 }
 
@@ -153,8 +165,14 @@ void QueleaServerUI::readSettings(QString settingsPath)
         QTextStream stream(&file);
         useDB = stream.readLine().toInt();
         dbFileName = stream.readLine();
+        useLDAP = stream.readLine().toInt();
+        useAdLdap = stream.readLine().toInt();
+        ldapHost = stream.readLine();
+        ldapPort = stream.readLine().toInt();
+        ldapDomain = stream.readLine();
+        ldapAdmin = stream.readLine();
+        ldapAdminPw = stream.readLine();
         file.close();
-
     }
 }
 
@@ -167,7 +185,15 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
         {
             QTextStream stream(&globalFile);
             stream << useDB << '\n'
-                   << dbFileName << flush;
+                   << dbFileName << '\n'
+                   << useLDAP << '\n'
+                   << useAdLdap << '\n'
+                   << ldapHost << '\n'
+                   << ldapPort << '\n'
+                   << ldapDomain << '\n'
+                   << ldapAdmin << '\n'
+                   << ldapAdminPw
+                   << flush;
             globalFile.close();
         }
     }
@@ -181,7 +207,15 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
     {
         QTextStream stream(&localFile);
         stream << useDB << '\n'
-               << dbFileName << flush;
+               << dbFileName << '\n'
+               << useLDAP << '\n'
+               << useAdLdap << '\n'
+               << ldapHost << '\n'
+               << ldapPort << '\n'
+               << ldapDomain << '\n'
+               << ldapAdmin << '\n'
+               << ldapAdminPw
+               << flush;
         localFile.close();
     }
 }
@@ -190,10 +224,29 @@ void QueleaServerUI::openSettingDialog()
 {
     SettingsDialog* settingsDialog = new SettingsDialog(db);
     if (settingsDialog->exec() == QDialog::Accepted){
+        //Database settings
         useDB = settingsDialog->useDB();
         dbFileName = settingsDialog->dbFileName();
         if(!useDB && db->isOpened())
             db->closeDB();
+         //LDAP settings
+        useLDAP = settingsDialog->useLDAP();
+        useAdLdap = settingsDialog->useLdapAd();
+        if (useAdLdap){
+            settingsDialog->getLdapAdSettings(ldapHost,ldapDomain);
+            if (!ldath)
+                ldath = new LdapAuth(ldapHost,ldapDomain);
+            else
+                ldath->setSettings(ldapHost,ldapDomain);
+        }
+        else {
+            settingsDialog->getLdapNoAdSettings(ldapHost,ldapPort,ldapDomain,ldapAdmin,ldapAdminPw);
+            if (!ldath)
+               ldath = new LdapAuth(ldapHost,ldapPort,ldapDomain,ldapAdmin,ldapAdminPw);
+            else
+                ldath->setSettings(ldapHost,ldapPort,ldapDomain,ldapAdmin,ldapAdminPw);
+        }
+
         writeSettings(true);
     }
     delete settingsDialog;
