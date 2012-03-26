@@ -13,6 +13,10 @@ private:
     QRadioButton* guestRadio;
     QLineEdit* clientNameEdit;
     QLineEdit* serverAddressEdit;
+    QRadioButton* ldapRadio;
+    QGroupBox* ldapGroupBox;
+    QLineEdit* ldapNameEdit;
+    QLineEdit* ldapPasswordEdit;
     QCheckBox* autoConnectCheckBox;
     QCheckBox* enableSoundCheckBox;
     QPushButton* okButton;
@@ -26,6 +30,8 @@ public:
     QString serverAddress() const;
     QString dbName() const;
     QString dbPassword();
+    QString ldapName() const;
+    QString ldapPassword();
     bool autoConnect() const;
     bool enableSound() const;
     int authType();

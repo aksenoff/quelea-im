@@ -206,6 +206,8 @@ void QueleaClientUI::readSettings(QString settingsPath)
         authType = stream.readLine().toInt();
         dbName = stream.readLine();
         dbPassword = stream.readLine();
+        ldapName = stream.readLine();
+        ldapPassword = stream.readLine();
         serverAddress = stream.readLine();
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
@@ -227,6 +229,8 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                    << authType << '\n'
                    << dbName << '\n'
                    << dbPassword << '\n'
+                   << ldapName << '\n'
+                   << ldapPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
                    << enableSound << flush;
@@ -246,6 +250,8 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                << authType << '\n'
                << dbName << '\n'
                << dbPassword << '\n'
+               << ldapName << '\n'
+               << ldapPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
                << enableSound << flush;
@@ -269,6 +275,8 @@ void QueleaClientUI::openSettingDialog()
         authType = settingsDialog->authType();
         dbName = settingsDialog->dbName();
         dbPassword = settingsDialog->dbPassword();
+        ldapName = settingsDialog->ldapName();
+        ldapPassword = settingsDialog->ldapPassword();
 
         if((!myName.isEmpty() && !serverAddress.isEmpty()) || (!dbName.isEmpty() && !dbPassword.isEmpty() && !serverAddress.isEmpty())) // we have connection settings
         {

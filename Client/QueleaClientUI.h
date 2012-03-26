@@ -34,6 +34,8 @@ private:
     QString serverAddress;
     QString dbName;
     QString dbPassword;
+    QString ldapName;
+    QString ldapPassword;
     bool enableSound;
     bool autoConnect;
     int authType;
