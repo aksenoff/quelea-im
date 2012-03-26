@@ -19,6 +19,13 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     dbPasswordEdit = new QLineEdit(dbGroupBox);
     dbPasswordEdit->setEchoMode(QLineEdit::Password);
 
+    ldapRadio = new QRadioButton(tr("Use LDAP authorization"));
+    ldapGroupBox = new QGroupBox;
+    ldapGroupBox->setEnabled(false);
+    ldapNameEdit = new QLineEdit(ldapGroupBox);
+    ldapPasswordEdit = new QLineEdit(ldapGroupBox);
+    ldapPasswordEdit->setEchoMode(QLineEdit::Password);
+
     QLabel* clientNameLabel = new QLabel(tr("&Name")+":");
     QLabel* serverAddressLabel = new QLabel(tr("&Server")+":");
     QLabel* autoConnectLabel = new QLabel(tr("&Connect at startup"));
@@ -27,8 +34,14 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     QLabel* dbNameLabel = new QLabel(tr("&Username"), dbGroupBox);
     QLabel* dbPasswordLabel = new QLabel(tr("&Password"), dbGroupBox);
 
+    QLabel* ldapNameLabel = new QLabel(tr("&Username"), ldapGroupBox);
+    QLabel* ldapPasswordLabel = new QLabel(tr("&Password"), ldapGroupBox);
+
     dbNameLabel->setBuddy(dbNameEdit);
     dbPasswordLabel->setBuddy(dbPasswordEdit);
+
+    ldapNameLabel->setBuddy(ldapNameEdit);
+    ldapPasswordLabel->setBuddy(ldapPasswordEdit);
 
     clientNameLabel->setBuddy(clientNameEdit);
     serverAddressLabel->setBuddy(serverAddressEdit);
@@ -39,6 +52,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
             clientNameEdit, SLOT(setEnabled(bool)));
     connect(dbRadio, SIGNAL(toggled(bool)),
             dbGroupBox, SLOT(setEnabled(bool)));
+    connect(ldapRadio, SIGNAL(toggled(bool)),
+            ldapGroupBox, SLOT(setEnabled(bool)));
 
     okButton = new QPushButton(tr("&Ok"));
     cancelButton = new QPushButton(tr("&Cancel"));
@@ -62,6 +77,16 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     dbLayout->addLayout(leftDBLayout);
     dbLayout->addLayout(rightDBLayout);
 
+    QVBoxLayout* rightLDAPLayout = new QVBoxLayout;
+    QVBoxLayout* leftLDAPLayout = new QVBoxLayout;
+    QHBoxLayout* LDAPLayout = new QHBoxLayout(ldapGroupBox);
+    leftLDAPLayout->addWidget(ldapNameLabel);
+    leftLDAPLayout->addWidget(ldapPasswordLabel);
+    rightLDAPLayout->addWidget(ldapNameEdit);
+    rightLDAPLayout->addWidget(ldapPasswordEdit);
+    LDAPLayout->addLayout(leftLDAPLayout);
+    LDAPLayout->addLayout(rightLDAPLayout);
+
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* topLayout = new QHBoxLayout;
     QVBoxLayout* rightLayout = new QVBoxLayout;
@@ -83,6 +108,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     mainLayout->addLayout(topLayout);
     mainLayout->addWidget(dbRadio);
     mainLayout->addWidget(dbGroupBox);
+    mainLayout->addWidget(ldapRadio);
+    mainLayout->addWidget(ldapGroupBox);
     mainLayout->addLayout(buttonLayout);
     setLayout(mainLayout);
     clientNameEdit->setFocus();
@@ -102,6 +129,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
         dbNameEdit->setText(stream.readLine());
         dbPasswordEdit->setText(stream.readLine());
         oldHashedPass = dbPasswordEdit->text();
+        ldapNameEdit->setText(stream.readLine());
+        ldapPasswordEdit->setText(stream.readLine());
         serverAddressEdit->setText(stream.readLine());
         if (stream.readLine() == "1")
             autoConnectCheckBox->setChecked(true);
@@ -147,6 +176,8 @@ int SettingsDialog::authType()
         return GUEST_AUTH;
     if (dbRadio->isChecked())
         return DB_AUTH;
+    if (ldapRadio->isChecked())
+        return LDAP_AUTH;
 }
 
 // ----------------------------------------------------------------------
@@ -154,6 +185,20 @@ int SettingsDialog::authType()
 QString SettingsDialog::dbName() const
 {
     return dbNameEdit->text();
+}
+
+// ----------------------------------------------------------------------
+
+QString SettingsDialog::ldapName() const
+{
+    return ldapNameEdit->text();
+}
+
+// ----------------------------------------------------------------------
+
+QString SettingsDialog::ldapPassword()
+{
+    return ldapPasswordEdit->text();
 }
 
 // ----------------------------------------------------------------------
