@@ -2,8 +2,8 @@
 #include <QMessageBox>
 #include "../codes.h"
 
-QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface, Database* DB)
-    : ipAddress(ip), port(49212), ui(userInterface), db(DB)
+QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface, Database* DB, LdapAuth* LA)
+    : ipAddress(ip), port(49212), ui(userInterface), db(DB), ldath(LA)
 {
     // starting server
     if (!listen(static_cast<QHostAddress>(ipAddress), port))
@@ -55,6 +55,13 @@ void QueleaServer::slotReadClient()
 
             if (authType == DB_AUTH) {
                 if(db->authorize(authMessageItems[1], authMessageItems[2]))
+                    authOk(newClient);
+                else
+                    authError(newClient);
+            }
+
+            if (authType == LDAP_AUTH) {
+                if(ldath->authorize(authMessageItems[1], authMessageItems[2]))
                     authOk(newClient);
                 else
                     authError(newClient);

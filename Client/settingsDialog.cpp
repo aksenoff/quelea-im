@@ -126,6 +126,8 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
             guestRadio->setChecked(true);
         if (at == DB_AUTH)
             dbRadio->setChecked(true);
+        if (at == LDAP_AUTH)
+            ldapRadio->setChecked(true);
         dbNameEdit->setText(stream.readLine());
         dbPasswordEdit->setText(stream.readLine());
         oldHashedPass = dbPasswordEdit->text();

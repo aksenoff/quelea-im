@@ -131,7 +131,7 @@ void QueleaServerUI::stopServer()
 void QueleaServerUI::startServer()
 {
     currentIp = ipBox->currentText();
-    server = new QueleaServer(currentIp, this, db);
+    server = new QueleaServer(currentIp, this, db, ldath);
     if(server->isListening())
     {
         disconnect(startStopButton, SIGNAL(clicked()),
