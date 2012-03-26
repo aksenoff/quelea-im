@@ -37,7 +37,9 @@ void QueleaClient::slotReadServer()
             if (authType == GUEST_AUTH)
                  authMessage = QString::number(authType) + QChar::Null + clientName;
             if (authType == DB_AUTH)
-                 authMessage = QString::number(authType) + QChar::Null + *dbName + QChar::Null + *dbPassword;
+                 authMessage = QString::number(authType) + QChar::Null + *uName + QChar::Null + *uPassword;
+            if (authType == LDAP_AUTH)
+                 authMessage = QString::number(authType) + QChar::Null + *uName + QChar::Null + *uPassword;
             Message auth_req(AUTH_REQUEST, authMessage);
             auth_req.send(serverSocket);
             break;
@@ -129,7 +131,7 @@ void QueleaClient::changeSettings(const int& at, const QString& cn, const QStrin
 void QueleaClient::changeSettings(const int& at, const QString& un, const QString& pw, const QString& sa)
 {
     authType = at;
-    dbName = new QString(un);
-    dbPassword = new QString(pw);
+    uName = new QString(un);
+    uPassword = new QString(pw);
     serverAddress = sa;
 }

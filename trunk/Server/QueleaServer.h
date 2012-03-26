@@ -7,6 +7,7 @@
 #include "QueleaServerUI.h"
 #include "client.h"
 #include "database.h"
+#include "ldapauth.h"
 
 class QueleaServerUI;
 class Database;
@@ -20,8 +21,9 @@ private:
     QVector<Client*> clients;
     QueleaServerUI* ui;
     Database* db;
+    LdapAuth* ldath;
 public:
-    QueleaServer(const QString&, QueleaServerUI*, Database*);
+    QueleaServer(const QString&, QueleaServerUI*, Database*, LdapAuth*);
     ~QueleaServer();
 private slots:
     bool nameCollision(QString&);

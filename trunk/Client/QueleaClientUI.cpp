@@ -278,7 +278,9 @@ void QueleaClientUI::openSettingDialog()
         ldapName = settingsDialog->ldapName();
         ldapPassword = settingsDialog->ldapPassword();
 
-        if((!myName.isEmpty() && !serverAddress.isEmpty()) || (!dbName.isEmpty() && !dbPassword.isEmpty() && !serverAddress.isEmpty())) // we have connection settings
+        if((!myName.isEmpty() && !serverAddress.isEmpty()) ||
+                (!dbName.isEmpty() && !dbPassword.isEmpty() && !serverAddress.isEmpty()) ||
+                (!ldapName.isEmpty() && !ldapPassword.isEmpty() && !serverAddress.isEmpty())) // we have connection settings
         {
             if(client) // if client is present, update its settings
             {
@@ -286,6 +288,13 @@ void QueleaClientUI::openSettingDialog()
                 connectButton->setEnabled(true);        // allowing user
                 tray->setConnectionActionEnabled(true); // to connect
             }
+            else{
+                client = new QueleaClient(this);
+                setClientSettings();
+                connectButton->setEnabled(true);        // allowing user
+                tray->setConnectionActionEnabled(true); // to connect
+            }
+
         }
         else  // the fields were left blank
             if(connectionState) // if client and state machine exist (i.e. user deleted connection settings)
@@ -611,6 +620,9 @@ void QueleaClientUI::setClientSettings()
         client->changeSettings(authType, myName, serverAddress);
     if (authType == DB_AUTH)
         client->changeSettings(authType, dbName, dbPassword, serverAddress);
+    if (authType == LDAP_AUTH)
+        client->changeSettings(authType, ldapName, ldapPassword, serverAddress);
+
 }
 //---------------------------------------------------------
 

@@ -15,8 +15,8 @@ private:
     QTcpSocket* serverSocket;
     QString serverAddress;
     QString clientName;
-    QString* dbName;
-    QString* dbPassword;
+    QString* uName;
+    QString* uPassword;
     QueleaClientUI* ui;
     int authType;
 public:
