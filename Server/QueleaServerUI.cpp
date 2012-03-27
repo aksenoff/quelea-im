@@ -274,4 +274,5 @@ QueleaServerUI::~QueleaServerUI()
 {
     if(server) delete server;
     if(db) delete db;
+    if(ldath) delete ldath;
 }

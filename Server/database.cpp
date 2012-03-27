@@ -73,10 +73,17 @@ QString Database::hash(QString password)
 
 //-------------------------------------------------------------------------------
 
-bool Database::addClient(QString username, QString password)
+int Database::addClient(QString username, QString password)
 {
     QSqlQuery query(*db);
-    return query.exec("INSERT INTO clients VALUES('"+username+"','"+hash(password)+"');");
+    query.exec("SELECT COUNT(*) FROM clients WHERE name = '"+username+"'");
+    query.next();
+    if(query.value(0).toInt()!=0)
+        return -1; //Name is already exist
+    if (query.exec("INSERT INTO clients VALUES('"+username+"','"+hash(password)+"');"))
+        return 1; //Ok
+    else
+        return 0;
 }
 
 //-------------------------------------------------------------------------------

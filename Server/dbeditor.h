@@ -17,6 +17,8 @@ private:
     QDialog* addClientDialog;
 private slots:
     void createClientDialog();
+    void deleteClientDialog();
+    void changePassword(QModelIndex index);
 };
 
 #endif // DBEDITOR_H
