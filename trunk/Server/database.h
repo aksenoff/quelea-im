@@ -9,15 +9,15 @@ class Database {
 private:
     QSqlDatabase* db;
     enum {DB_OPEN_OK, DB_OPEN_ERROR, DB_VERSION_ERROR};
-    QString hash(QString password);
     bool opened;
     QueleaServerUI* ui;
 public:
     Database(QueleaServerUI*);
+    QString hash(QString password);
     void closeDB();
     int openDB(QString fileName);
     bool createDB(QString fileName);
-    bool addClient(QString username, QString password);
+    int addClient(QString username, QString password);
     bool isOpened();
     bool authorize(QString name, QString password);
     ~Database();
