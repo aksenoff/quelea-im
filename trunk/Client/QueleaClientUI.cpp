@@ -40,6 +40,12 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
+    sendFileButton = new QPushButton(tr("Send &file"));
+    //sendButton->setEnabled(false);
+    sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(sendFileButton, SIGNAL(clicked()),
+            this, SLOT(sendFile()));
+
     connectButton = new QPushButton(QPixmap(":/images/connect.png"), tr("&Connect"));
     connectButton->setFixedSize(110, 24);
     connectButton->setEnabled(false); // we don't know if connection settings are present
@@ -101,6 +107,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     leftLayout->addWidget(messageInput, 1);
     sendLayout->addSpacerItem(spacer1);
     sendLayout->addWidget(currentLengthLabel);
+    sendLayout->addWidget(sendFileButton);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
     rightLayout->addSpacerItem(spacer3);
@@ -623,6 +630,14 @@ void QueleaClientUI::setClientSettings()
     if (authType == LDAP_AUTH)
         client->changeSettings(authType, ldapName, ldapPassword, serverAddress);
 
+}
+//---------------------------------------------------------
+void QueleaClientUI::sendFile()
+{
+   QString fn =  QFileDialog::getOpenFileName(this,
+                                 tr("Select file for sending"),
+                                 QDesktopServices::storageLocation(QDesktopServices::HomeLocation));
+   client->sendFile(fn);
 }
 //---------------------------------------------------------
 

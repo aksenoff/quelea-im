@@ -31,6 +31,8 @@ public slots:
     void sendChatMessage(const QString&, const QString&) const;
     void connectToServer();
     void disconnectFromServer();
+    void sendFile(QString filename);
+    void receiveFile(){}
 signals:
     void socketError();
     void authOkSignal();

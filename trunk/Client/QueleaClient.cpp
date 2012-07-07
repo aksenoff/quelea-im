@@ -135,3 +135,8 @@ void QueleaClient::changeSettings(const int& at, const QString& un, const QStrin
     uPassword = new QString(pw);
     serverAddress = sa;
 }
+// ----------------------------------------------------------------------
+void QueleaClient::sendFile(QString filename)
+{
+
+}

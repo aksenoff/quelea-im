@@ -7,7 +7,7 @@ SettingsDialog::SettingsDialog(QWidget* pwgt/*= 0*/)
     guestRadio = new QRadioButton(tr("Use guest authorization"));
     guestRadio->setChecked(true);
     clientNameEdit = new QLineEdit;
-    clientNameEdit->setEnabled(false);
+    clientNameEdit->setEnabled(true);
     serverAddressEdit  = new QLineEdit;
     autoConnectCheckBox = new QCheckBox;
     enableSoundCheckBox = new QCheckBox;
