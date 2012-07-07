@@ -27,6 +27,7 @@ private:
     QListWidget* contactsList;
     QPushButton* connectButton;
     QPushButton* sendButton;
+    QPushButton* sendFileButton;
     QPushButton* settingsButton;
     QPushButton* aboutButton;
     ClientTab* tabWidget;
@@ -57,6 +58,7 @@ private slots:
     void showAboutBox();
     void messageReceived(const QString&);
     void setClientSettings();
+    void sendFile();
 public slots:
     void openSettingDialog();
     void enableDisconnected();
