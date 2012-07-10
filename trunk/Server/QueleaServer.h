@@ -33,7 +33,7 @@ public slots:
     void slotNewConnection();
     void slotReadClient();
     void slotByeClient(QTcpSocket*);
-    void sendFile();
+    void sendFile(){}
 };
 
 #endif
