@@ -525,7 +525,44 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             }
             messageReceived(senderName);
             break;
-        }        
+        }
+     case FILE_REQUEST_TO_CLIENT:
+    {
+        bool tabState = false;
+        QStringList incomingMessageTextItems = incomingMessage.getText().split(QChar::Null);
+        QString senderName(incomingMessageTextItems[0]);
+        QString filename(incomingMessageTextItems[1]);
+        QString filesize(incomingMessageTextItems[2]);
+        for (int i = 0; i <= tabWidget->count(); i++)
+            if (senderName == tabWidget->tabText(i))
+            {
+                tabState = true;
+                if (tabWidget->currentIndex() != i)
+                    tabWidget->getTabBar()->setTabTextColor(i, "Blue");
+                QWidget* widget = tabWidget->widget(i);
+                QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
+                privateChatLog->setReadOnly(true);
+                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                                       + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
+                                       + filename + " "+ filesize + " bytes");
+                showFileButtons(privateChatLog);
+                break;
+            }
+        if (tabState == false)
+        {
+            QTextEdit* privateChatLog = new QTextEdit;
+            privateChatLog->setReadOnly(true);
+            privateChatLog->document()->setDefaultFont(QFont("Arial",11));
+            tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
+            privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                                   + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
+                                   + filename + " "+ filesize + " bytes");
+            showFileButtons(privateChatLog);
+        }
+        messageReceived(senderName);
+        break;
+    }
+
     }
 }
 
@@ -637,10 +674,21 @@ void QueleaClientUI::sendFile()
    QString fn =  QFileDialog::getOpenFileName(this,
                                  tr("Select file for sending"),
                                  QDesktopServices::storageLocation(QDesktopServices::HomeLocation));
-   client->sendFile(fn);
+   QString receiverName = tabWidget->tabText(tabWidget->currentIndex());
+   client->sendFileRequest(receiverName, fn);
 }
 //---------------------------------------------------------
-
+void QueleaClientUI::showFileButtons(QTextEdit* textedit)
+{
+    QHBoxLayout* incomFileLayot = new QHBoxLayout(textedit);
+    fileAcceptButton = new QPushButton("Accept");//don't forget delete it
+    fileAcceptButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    fileRejectButton = new QPushButton("Reject");
+    fileRejectButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    incomFileLayot->addWidget(fileAcceptButton);
+    incomFileLayot->addWidget(fileRejectButton);
+}
+//---------------------------------------------------------
 QueleaClientUI::~QueleaClientUI()
 {
     delete tray;

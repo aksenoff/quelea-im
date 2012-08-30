@@ -114,7 +114,22 @@ void QueleaServer::slotReadClient()
                 outcomingMessage.send(clients[i]->getSocket());
             break;
         }
+    case FILE_REQUEST_TO_SERVER:
+        {
+            QVector<Client*>::iterator senderClient, receiverClient;
+            // searching vector for client who sent message via socket
+            for(senderClient = clients.begin(); (*senderClient)->getSocket() != clientSocket; ++senderClient);
+            // list: [0] - receiver name [1] - actual message
+            QStringList incomingMessageTextItems(incomingMessage->getText().split(QChar::Null));
+            QString receiverClientName(incomingMessageTextItems[0]);
+            QString filename(incomingMessageTextItems[1]);
+            QString filesize(incomingMessageTextItems[2]);
 
+            QString outcomingMessageText((*senderClient)->getName() + QChar::Null + filename + QChar::Null + filesize);
+            Message outcomingMessage(FILE_REQUEST_TO_CLIENT, outcomingMessageText);
+            for(receiverClient = clients.begin(); (*receiverClient)->getName() != receiverClientName; ++receiverClient);
+            outcomingMessage.send((*receiverClient)->getSocket());
+        }
     }
     delete incomingMessage;
 }

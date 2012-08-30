@@ -30,6 +30,8 @@ private:
     QPushButton* sendFileButton;
     QPushButton* settingsButton;
     QPushButton* aboutButton;
+    QPushButton* fileAcceptButton;
+    QPushButton* fileRejectButton;
     ClientTab* tabWidget;
     QString myName;
     QString serverAddress;
@@ -59,6 +61,7 @@ private slots:
     void messageReceived(const QString&);
     void setClientSettings();
     void sendFile();
+    void showFileButtons(QTextEdit* textedit);
 public slots:
     void openSettingDialog();
     void enableDisconnected();

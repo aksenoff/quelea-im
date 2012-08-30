@@ -14,6 +14,7 @@ public:
     Message(unsigned char, QString="");
     Message(QTcpSocket*);
     void send(QTcpSocket*) const;
+    void sendFile(QTcpSocket*) const;
 };
 
 #endif

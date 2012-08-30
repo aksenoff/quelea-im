@@ -136,7 +136,32 @@ void QueleaClient::changeSettings(const int& at, const QString& un, const QStrin
     serverAddress = sa;
 }
 // ----------------------------------------------------------------------
+void QueleaClient::sendFileRequest(const QString& receiverName, const QString& filename)
+{
+    QFile inputFile(filename);
+    inputFile.open(QIODevice::ReadOnly);
+    QString messageText = receiverName + QChar::Null
+                          + filename.right(filename.size() - filename.lastIndexOf("/") -1)+ QChar::Null
+                          + QString::number(inputFile.size());
+    Message outcomingMessage(FILE_REQUEST_TO_SERVER, messageText);
+    outcomingMessage.send(serverSocket);
+    inputFile.close();
+}
+//-----------------------------------------------------------------------
 void QueleaClient::sendFile(QString filename)
 {
+    QFile inputFile(filename);
+    inputFile.open(QIODevice::ReadOnly);
+    QByteArray block;
+    QByteArray ba=inputFile.readAll();
+    block.append(ba);
+    inputFile.close();
 
+    QByteArray arrBlock;
+    QDataStream out(&arrBlock, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_6);
+    out << quint64(0) << ba;
+    out.device()->seek(0);
+    out << quint64(arrBlock.size() - sizeof(quint64));
+    serverSocket->write(arrBlock);
 }

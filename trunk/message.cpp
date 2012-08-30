@@ -35,3 +35,8 @@ void Message::send(QTcpSocket* socket) const
     out << quint64(arrBlock.size() - sizeof(quint64));
     socket->write(arrBlock);
 }
+
+void Message::sendFile(QTcpSocket* socket) const
+{
+
+}
