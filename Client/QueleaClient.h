@@ -32,6 +32,7 @@ public slots:
     void connectToServer();
     void disconnectFromServer();
     void sendFile(QString filename);
+    void sendFileRequest(const QString&, const QString&);
     void receiveFile(){}
 signals:
     void socketError();
