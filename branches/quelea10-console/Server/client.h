@@ -1,10 +1,9 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <QtGui>
 #include <QtNetwork>
 
-class Client: public QWidget {
+class Client : public QObject {
 Q_OBJECT
 private:
     QString name;

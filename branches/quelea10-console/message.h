@@ -1,7 +1,6 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include <QWidget>
 #include <QtNetwork>
 
 class Message
