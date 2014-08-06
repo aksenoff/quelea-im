@@ -4,20 +4,20 @@
 
 #include "../message.h"
 #include <QtNetwork>
-#include "QueleaServerUI.h"
+#include "QueleaServerControl.h"
 #include "client.h"
 
-class QueleaServerUI;
+class QueleaServerControl;
 
 class QueleaServer : public QTcpServer {
 Q_OBJECT
 private:
-    QString ipAddress;
+    QHostAddress ipAddress;
     quint16 port;
     QVector<Client*> clients;
-    QueleaServerUI* ui;
+    QueleaServerControl* control;
 public:
-    QueleaServer(const QString&, QueleaServerUI*);
+    QueleaServer(const QHostAddress&, QueleaServerControl*);
     ~QueleaServer();
 public slots:
     void slotNewConnection();
