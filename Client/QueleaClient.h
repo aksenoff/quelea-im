@@ -11,18 +11,13 @@ class QueleaClientUI;
 class QueleaClient : public QTcpSocket {
 Q_OBJECT
 private:
-    enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
     QTcpSocket* serverSocket;
     QString serverAddress;
     QString clientName;
-    QString* uName;
-    QString* uPassword;
     QueleaClientUI* ui;
-    int authType;
 public:
-    QueleaClient(QueleaClientUI*);
-    void changeSettings(const int&, const QString&, const QString&);
-    void changeSettings(const int&, const QString&, const QString&, const QString&);
+    QueleaClient(QueleaClientUI*, const QString&, const QString&);
+    void changeSettings(const QString&, const QString&);
 private slots:
     void slotReadServer();
     void slotError(QAbstractSocket::SocketError);
@@ -31,9 +26,6 @@ public slots:
     void sendChatMessage(const QString&, const QString&) const;
     void connectToServer();
     void disconnectFromServer();
-    void sendFile(QString filename);
-    void sendFileRequest(const QString&, const QString&);
-    void receiveFile(){}
 signals:
     void socketError();
     void authOkSignal();

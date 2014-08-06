@@ -15,7 +15,6 @@ class ConnectionStateMachine;
 class QueleaClientUI : public QWidget {
 Q_OBJECT
 private:
-    enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
     QueleaClient* client;
     SystemTray* tray;
     ConnectionStateMachine* connectionState;
@@ -27,21 +26,13 @@ private:
     QListWidget* contactsList;
     QPushButton* connectButton;
     QPushButton* sendButton;
-    QPushButton* sendFileButton;
     QPushButton* settingsButton;
     QPushButton* aboutButton;
-    QPushButton* fileAcceptButton;
-    QPushButton* fileRejectButton;
     ClientTab* tabWidget;
     QString myName;
     QString serverAddress;
-    QString dbName;
-    QString dbPassword;
-    QString ldapName;
-    QString ldapPassword;
     bool enableSound;
     bool autoConnect;
-    int authType;
 public:
     QueleaClientUI(QWidget* pwgt = 0);
     ~QueleaClientUI();
@@ -59,9 +50,6 @@ private slots:
     void playSound(const QString&) const;
     void showAboutBox();
     void messageReceived(const QString&);
-    void setClientSettings();
-    void sendFile();
-    void showFileButtons(QTextEdit* textedit);
 public slots:
     void openSettingDialog();
     void enableDisconnected();

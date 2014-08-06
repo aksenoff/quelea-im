@@ -40,12 +40,6 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(sendButton, SIGNAL(clicked()),
             this, SLOT(sendButtonFunction()));
 
-    sendFileButton = new QPushButton(tr("Send &file"));
-    //sendButton->setEnabled(false);
-    sendButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(sendFileButton, SIGNAL(clicked()),
-            this, SLOT(sendFile()));
-
     connectButton = new QPushButton(QPixmap(":/images/connect.png"), tr("&Connect"));
     connectButton->setFixedSize(110, 24);
     connectButton->setEnabled(false); // we don't know if connection settings are present
@@ -107,7 +101,6 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     leftLayout->addWidget(messageInput, 1);
     sendLayout->addSpacerItem(spacer1);
     sendLayout->addWidget(currentLengthLabel);
-    sendLayout->addWidget(sendFileButton);
     sendLayout->addWidget(sendButton);
     leftLayout->addLayout(sendLayout);
     rightLayout->addSpacerItem(spacer3);
@@ -120,8 +113,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     setLayout(mainLayout);
 
     resize(560, 370);
-    setWindowTitle("Quelea");
-    setWindowIcon(QIcon("resource.rc"));
+    setWindowTitle(tr("Quelea"));
+    setWindowIcon(QIcon::QIcon ("resource.rc"));
     messageInput->setFocus();
     client = 0;
     connectionState = 0;
@@ -138,7 +131,6 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
-    //Settings:
     if (QFile::exists(localSettings))
         readSettings(localSettings);
     else
@@ -150,12 +142,15 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
         else
             openSettingDialog();
 
-    client = new QueleaClient(this); // creating client and state machine
-    setClientSettings();
-    connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
-    tray->setConnectionActionEnabled(true); // allowing user
-    connectButton->setEnabled(true);        // to connect
-
+    if(!(myName.isEmpty() || serverAddress.isEmpty())) // connection settings are present, whew
+    {
+        client = new QueleaClient(this, myName, serverAddress); // creating client and state machine
+        connectionState = new ConnectionStateMachine(this, client, tray, autoConnect);
+        tray->setConnectionActionEnabled(true); // allowing user
+        connectButton->setEnabled(true);        // to connect
+    }
+    else // setting provided by the file are unsuffucient
+        openSettingDialog(); //!!
 }
 
 //---------------------------------------------------------
@@ -210,11 +205,6 @@ void QueleaClientUI::readSettings(QString settingsPath)
     {
         QTextStream stream(&file);
         myName = stream.readLine();
-        authType = stream.readLine().toInt();
-        dbName = stream.readLine();
-        dbPassword = stream.readLine();
-        ldapName = stream.readLine();
-        ldapPassword = stream.readLine();
         serverAddress = stream.readLine();
         autoConnect = stream.readLine().toInt();
         enableSound = stream.readLine().toInt();
@@ -233,11 +223,6 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
         {
             QTextStream stream(&globalFile);
             stream << myName << '\n'
-                   << authType << '\n'
-                   << dbName << '\n'
-                   << dbPassword << '\n'
-                   << ldapName << '\n'
-                   << ldapPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
                    << enableSound << flush;
@@ -254,11 +239,6 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
     {
         QTextStream stream(&localFile);
         stream << myName << '\n'
-               << authType << '\n'
-               << dbName << '\n'
-               << dbPassword << '\n'
-               << ldapName << '\n'
-               << ldapPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
                << enableSound << flush;
@@ -279,29 +259,14 @@ void QueleaClientUI::openSettingDialog()
         autoConnect = settingsDialog->autoConnect();
         myName = settingsDialog->clientName();
         serverAddress = settingsDialog->serverAddress();
-        authType = settingsDialog->authType();
-        dbName = settingsDialog->dbName();
-        dbPassword = settingsDialog->dbPassword();
-        ldapName = settingsDialog->ldapName();
-        ldapPassword = settingsDialog->ldapPassword();
-
-        if((!myName.isEmpty() && !serverAddress.isEmpty()) ||
-                (!dbName.isEmpty() && !dbPassword.isEmpty() && !serverAddress.isEmpty()) ||
-                (!ldapName.isEmpty() && !ldapPassword.isEmpty() && !serverAddress.isEmpty())) // we have connection settings
+        if(!(myName.isEmpty() || serverAddress.isEmpty())) // we have connection settings
         {
             if(client) // if client is present, update its settings
             {
-                setClientSettings();
+                client->changeSettings(myName, serverAddress);
                 connectButton->setEnabled(true);        // allowing user
                 tray->setConnectionActionEnabled(true); // to connect
             }
-            else{
-                client = new QueleaClient(this);
-                setClientSettings();
-                connectButton->setEnabled(true);        // allowing user
-                tray->setConnectionActionEnabled(true); // to connect
-            }
-
         }
         else  // the fields were left blank
             if(connectionState) // if client and state machine exist (i.e. user deleted connection settings)
@@ -430,7 +395,6 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             QStringList contacts = incomingMessage.getText().split(QChar::Null);
             contactsList->clear();
             contacts.removeOne(myName);
-            contacts.removeOne(dbName);
             contacts.removeOne("");
             if (contacts.count() != 0)
                 contactsList->addItem(">" + tr("Send to everybody"));
@@ -525,44 +489,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             }
             messageReceived(senderName);
             break;
-        }
-     case FILE_REQUEST_TO_CLIENT:
-    {
-        bool tabState = false;
-        QStringList incomingMessageTextItems = incomingMessage.getText().split(QChar::Null);
-        QString senderName(incomingMessageTextItems[0]);
-        QString filename(incomingMessageTextItems[1]);
-        QString filesize(incomingMessageTextItems[2]);
-        for (int i = 0; i <= tabWidget->count(); i++)
-            if (senderName == tabWidget->tabText(i))
-            {
-                tabState = true;
-                if (tabWidget->currentIndex() != i)
-                    tabWidget->getTabBar()->setTabTextColor(i, "Blue");
-                QWidget* widget = tabWidget->widget(i);
-                QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
-                privateChatLog->setReadOnly(true);
-                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
-                                       + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
-                                       + filename + " "+ filesize + " bytes");
-                showFileButtons(privateChatLog);
-                break;
-            }
-        if (tabState == false)
-        {
-            QTextEdit* privateChatLog = new QTextEdit;
-            privateChatLog->setReadOnly(true);
-            privateChatLog->document()->setDefaultFont(QFont("Arial",11));
-            tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
-            privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
-                                   + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
-                                   + filename + " "+ filesize + " bytes");
-            showFileButtons(privateChatLog);
-        }
-        messageReceived(senderName);
-        break;
-    }
-
+        }        
     }
 }
 
@@ -582,6 +509,8 @@ void QueleaClientUI::enableDisconnected()
     stateLabel->setText("<FONT COLOR=RED>" + tr("Offline") + "</FONT>");
     contactsList->clear();
     enableSendButton();
+    if(myName.isEmpty() || serverAddress.isEmpty()) // settings disappeared?
+        connectButton->setEnabled(false); // TODO: explain why connectButton is disabled each time it is
     disconnect(messageInput, SIGNAL(textChanged()),
                this, SLOT(calculateLength()));
 }
@@ -658,37 +587,7 @@ void QueleaClientUI::slotShow()
 }
 
 //---------------------------------------------------------
-void QueleaClientUI::setClientSettings()
-{
-    if (authType == GUEST_AUTH)
-        client->changeSettings(authType, myName, serverAddress);
-    if (authType == DB_AUTH)
-        client->changeSettings(authType, dbName, dbPassword, serverAddress);
-    if (authType == LDAP_AUTH)
-        client->changeSettings(authType, ldapName, ldapPassword, serverAddress);
 
-}
-//---------------------------------------------------------
-void QueleaClientUI::sendFile()
-{
-   QString fn =  QFileDialog::getOpenFileName(this,
-                                 tr("Select file for sending"),
-                                 QDesktopServices::storageLocation(QDesktopServices::HomeLocation));
-   QString receiverName = tabWidget->tabText(tabWidget->currentIndex());
-   client->sendFileRequest(receiverName, fn);
-}
-//---------------------------------------------------------
-void QueleaClientUI::showFileButtons(QTextEdit* textedit)
-{
-    QHBoxLayout* incomFileLayot = new QHBoxLayout(textedit);
-    fileAcceptButton = new QPushButton("Accept");//don't forget delete it
-    fileAcceptButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    fileRejectButton = new QPushButton("Reject");
-    fileRejectButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    incomFileLayot->addWidget(fileAcceptButton);
-    incomFileLayot->addWidget(fileRejectButton);
-}
-//---------------------------------------------------------
 QueleaClientUI::~QueleaClientUI()
 {
     delete tray;
