@@ -34,7 +34,7 @@ void QueleaServerControl::startServer()
 void QueleaServerControl::log(const QString &event) const
 {
     QTextStream logStream(stdout);
-    logStream << "[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]" + " " + event;
+    logStream << "[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]" + " " + event + "\n";
 }
 
 //-----------------------------------------------------------------------
