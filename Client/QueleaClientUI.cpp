@@ -485,6 +485,17 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 privateChatLog->setReadOnly(true);
                 privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString(Qt::SystemLocaleLongDate) + "]"+" "
                                        + tabWidget->tabText(i-1) + " " + tr("is offline")+"</FONT>");   // FIX: this does not need to be resent every time contacts list is changed!
+
+                //---------------------------------------
+
+                LogFile.open(QIODevice::Append | QIODevice::Text);
+                QTextStream stream(&LogFile);
+                stream<<"<FONT COLOR=GRAY>[" << time.toString(Qt::SystemLocaleLongDate) << "]"<<" "
+                        << tabWidget->tabText(i-1) << " " << tr("is offline")<<"</FONT>";
+                stream<<endl;
+                LogFile.close();
+
+                //---------------------------------------
             }
 
             enableSendButton();
@@ -503,9 +514,24 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             if (senderName == myName)
                 fromWhoColor = "DARKVIOLET";
             if (receiverName == "all")
+            {
                 chatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>"+ " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + actualMessage.replace("\n", "<br>"));
+
+            //---------------------------------------
+
+            LogFile.open(QIODevice::Append | QIODevice::Text);
+            QTextStream stream(&LogFile);
+            stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>"<< " "
+                    << "<FONT COLOR=" << fromWhoColor << ">" << senderName << "</FONT>" << ": "
+                    << actualMessage.replace("\n", "<br>");
+            stream<<endl;
+            LogFile.close();
+
+            //---------------------------------------
+
+}
             else
             {
                 QString toWhoColor = "ORANGERED";
@@ -519,6 +545,20 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + "<FONT COLOR=" + toWhoColor + ">[" + receiverName + "]</FONT> "
                                 + actualMessage.replace("\n", "<br>"));
+
+                //---------------------------------------
+
+                LogFile.open(QIODevice::Append | QIODevice::Text);
+                QTextStream stream(&LogFile);
+                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
+                        << "<FONT COLOR=" << fromWhoColor << ">" << senderName << "</FONT>" << ": "
+                        << "<FONT COLOR=" << toWhoColor << ">[" << receiverName << "]</FONT> "
+                        << actualMessage.replace("\n", "<br>");
+                stream<<endl;
+                LogFile.close();
+
+                //---------------------------------------
+
             }
             break;
         }
@@ -540,6 +580,20 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                            + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                            + actualMessage.replace("\n", "<br>"));
+
+                    //---------------------------------------
+
+                    LogFile.open(QIODevice::Append | QIODevice::Text);
+                    QTextStream stream(&LogFile);
+                    stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
+                            << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+                            << actualMessage.replace("\n", "<br>");
+                    stream<<endl;
+                    LogFile.close();
+
+                    //---------------------------------------
+
+
                     break;
                 }
             if (tabState == false)
@@ -551,6 +605,18 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                        + actualMessage.replace("\n", "<br>"));
+
+                //---------------------------------------
+
+                LogFile.open(QIODevice::Append | QIODevice::Text);
+                QTextStream stream(&LogFile);
+                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
+                        << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+                        << actualMessage.replace("\n", "<br>");
+                stream<<endl;
+                LogFile.close();
+
+                //---------------------------------------
             }
             messageReceived(senderName);
             break;
@@ -574,6 +640,20 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                        + filename + " "+ filesize + " bytes");
+
+                //---------------------------------------
+
+                LogFile.open(QIODevice::Append | QIODevice::Text);
+                QTextStream stream(&LogFile);
+                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
+                        << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+                        << filename << " "+ filesize << " bytes";
+                stream<<endl;
+                LogFile.close();
+
+                //---------------------------------------
+
+
                 showFileButtons(privateChatLog);
                 break;
             }
@@ -586,6 +666,20 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
                                    + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                    + filename + " "+ filesize + " bytes");
+
+
+            //---------------------------------------
+
+            LogFile.open(QIODevice::Append | QIODevice::Text);
+            QTextStream stream(&LogFile);
+            stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
+                     << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+                     << filename << " "<< filesize << " bytes";
+            stream<<endl;
+            LogFile.close();
+
+            //---------------------------------------
+
             showFileButtons(privateChatLog);
         }
         messageReceived(senderName);
