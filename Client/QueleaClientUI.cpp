@@ -156,6 +156,35 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tray->setConnectionActionEnabled(true); // allowing user
     connectButton->setEnabled(true);        // to connect
 
+
+    //---------------------------------------------------------
+
+    CurrentDate = QDate::currentDate();
+    CurrentTime = QTime::currentTime();
+
+    LogFile.setFileName("Quelea_Log_File.txt");
+
+    QTextStream stream(&LogFile);
+
+    if (!LogFile.exists()) // if no such file
+     {
+        LogFile.open(QIODevice::WriteOnly);
+        QString str = "Quelea-im history";
+        stream<<str;
+        stream<<endl;
+        LogFile.close();
+     }
+
+    // open the file to append
+    // and write the date and time of start of the program
+
+    LogFile.open(QIODevice::Append | QIODevice::Text);
+    stream<<endl<<"----------------------------"<<endl<<"Starting ";
+    stream<<CurrentDate.toString(Qt::ISODate)<<" "<<CurrentTime.toString(Qt::ISODate)<<endl<<endl;
+    LogFile.close();
+
+    //---------------------------------------------------------
+
 }
 
 //---------------------------------------------------------
@@ -567,12 +596,24 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 }
 
 //---------------------------------------------------------
+//---------------- Writing messages in the log ------------
+//---------------------------------------------------------
 
 void QueleaClientUI::log(const QString& event)
 {
     chatLog->append(event);
+
+    //---------------------
+
+    LogFile.open(QIODevice::Append | QIODevice::Text);
+    QTextStream stream(&LogFile);
+    stream<<event<<endl;
+    LogFile.close();
+
+    //---------------------
 }
 
+//---------------------------------------------------------
 //---------------------------------------------------------
 
 void QueleaClientUI::enableDisconnected()
@@ -635,6 +676,7 @@ void QueleaClientUI::showAboutBox()
                                 "<p><strong>" + tr("Developers") + ":</strong><br>" + tr("Alexey Aksenov") + " (aksenoff.a@gmail.com)"
                                 "<br>" + tr("Roman Suhov") + " (romsuhov@gmail.com)<br>" + tr("Alexey Topchiy") + " (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
+                                + "<p><a href=https://github.com/aksenoff/quelea-im>https://github.com/aksenoff/quelea-im<a></p>"
                                 + tr("©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
     aboutBox.exec();
 }

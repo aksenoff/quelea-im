@@ -42,6 +42,15 @@ private:
     bool enableSound;
     bool autoConnect;
     int authType;
+
+    // Domerk - my supplements:
+
+    QDate CurrentDate;
+    QTime CurrentTime;
+    QFile LogFile;
+
+    // ------------------------
+
 public:
     QueleaClientUI(QWidget* pwgt = 0);
     ~QueleaClientUI();
