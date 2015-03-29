@@ -490,8 +490,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
                 LogFile.open(QIODevice::Append | QIODevice::Text);
                 QTextStream stream(&LogFile);
-                stream<<"<FONT COLOR=GRAY>[" << time.toString(Qt::SystemLocaleLongDate) << "]"<<" "
-                        << tabWidget->tabText(i-1) << " " << tr("is offline")<<"</FONT>";
+                stream<<"["<< time.toString(Qt::SystemLocaleLongDate)<<"] "
+                        << tabWidget->tabText(i-1) << " " << tr("is offline");
                 stream<<endl;
                 LogFile.close();
 
@@ -523,9 +523,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
             LogFile.open(QIODevice::Append | QIODevice::Text);
             QTextStream stream(&LogFile);
-            stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>"<< " "
-                    << "<FONT COLOR=" << fromWhoColor << ">" << senderName << "</FONT>" << ": "
-                    << actualMessage.replace("\n", "<br>");
+            stream<< "["<<time.toString(Qt::SystemLocaleLongDate) <<"] "<< senderName << ": "<< actualMessage.replace("\n","<br>");
             stream<<endl;
             LogFile.close();
 
@@ -550,9 +548,9 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
                 LogFile.open(QIODevice::Append | QIODevice::Text);
                 QTextStream stream(&LogFile);
-                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
-                        << "<FONT COLOR=" << fromWhoColor << ">" << senderName << "</FONT>" << ": "
-                        << "<FONT COLOR=" << toWhoColor << ">[" << receiverName << "]</FONT> "
+                stream << "[" << time.toString(Qt::SystemLocaleLongDate) << "] "
+                        << senderName << ": "
+                        << "[" << receiverName << "] "
                         << actualMessage.replace("\n", "<br>");
                 stream<<endl;
                 LogFile.close();
@@ -585,9 +583,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
                     LogFile.open(QIODevice::Append | QIODevice::Text);
                     QTextStream stream(&LogFile);
-                    stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
-                            << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
-                            << actualMessage.replace("\n", "<br>");
+                    stream<< "[" << time.toString(Qt::SystemLocaleLongDate) << "] " << senderName << ": "<< actualMessage.replace("\n,", "<br>");
                     stream<<endl;
                     LogFile.close();
 
@@ -610,9 +606,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
                 LogFile.open(QIODevice::Append | QIODevice::Text);
                 QTextStream stream(&LogFile);
-                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
-                        << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
-                        << actualMessage.replace("\n", "<br>");
+                stream<< "[" << time.toString(Qt::SystemLocaleLongDate)<< "] "<< senderName << ": "<< actualMessage.replace("\n","<br>");
                 stream<<endl;
                 LogFile.close();
 
@@ -645,8 +639,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
                 LogFile.open(QIODevice::Append | QIODevice::Text);
                 QTextStream stream(&LogFile);
-                stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
-                        << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+                stream<< "[" << time.toString(Qt::SystemLocaleLongDate) << "] "
+                        << senderName << ": "
                         << filename << " "+ filesize << " bytes";
                 stream<<endl;
                 LogFile.close();
@@ -672,8 +666,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
 
             LogFile.open(QIODevice::Append | QIODevice::Text);
             QTextStream stream(&LogFile);
-            stream<<"<FONT COLOR=BLUE>[" << time.toString(Qt::SystemLocaleLongDate) << "]</FONT>" << " "
-                     << "<FONT COLOR=DARKVIOLET>" << senderName << "</FONT>: "
+            stream<< "["<<time.toString(Qt::SystemLocaleLongDate) << "] "
+                     << senderName << ": "
                      << filename << " "<< filesize << " bytes";
             stream<<endl;
             LogFile.close();
