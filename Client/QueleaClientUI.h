@@ -43,7 +43,7 @@ private:
     bool autoConnect;
     int authType;
 
-    // Domerk - my supplements:
+    // ------------------------
 
     QDate CurrentDate;
     QTime CurrentTime;

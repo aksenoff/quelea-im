@@ -683,10 +683,6 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
     }
 }
 
-//---------------------------------------------------------
-//---------------- Writing messages in the log ------------
-//---------------------------------------------------------
-
 void QueleaClientUI::log(const QString& event)
 {
     chatLog->append(event);
