@@ -2,10 +2,12 @@ install:
   - sudo apt-get update
   - sudo apt-get install qt5-default qttools5-dev-tools
 
-before_script: cd Server
-
 script:
+  - cd Server
   - qmake -project
   - qmake QueleaServer.pro
   - make
-  
+  - cd ../Client
+  - qmake -project
+  - qmake QueleaClient.pro
+  - make
