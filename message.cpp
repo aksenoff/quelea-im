@@ -29,14 +29,14 @@ void Message::send(QTcpSocket* socket) const
 {
     QByteArray arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_6);
+    out.setVersion(QDataStream::Qt_5_12);
     out << quint64(0) << code << text;
     out.device()->seek(0);
-    out << quint64(arrBlock.size() - sizeof(quint64));
+    out << quint64(static_cast<uint>(arrBlock.size()) - sizeof(quint64));
     socket->write(arrBlock);
 }
 
-void Message::sendFile(QTcpSocket* socket) const
-{
+//void Message::sendFile(QTcpSocket* socket) const
+//{
 
-}
+//}

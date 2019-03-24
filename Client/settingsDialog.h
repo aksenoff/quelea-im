@@ -25,7 +25,7 @@ private:
     QString oldHashedPass;
     enum {GUEST_AUTH, DB_AUTH, LDAP_AUTH};
 public:
-    SettingsDialog(QWidget* pwgt = 0);
+    SettingsDialog(QWidget* pwgt = nullptr);
     QString clientName() const;
     QString serverAddress() const;
     QString dbName() const;

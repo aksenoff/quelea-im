@@ -8,7 +8,7 @@ QueleaServer::QueleaServer(const QString& ip, QueleaServerUI* userInterface, Dat
     // starting server
     if (!listen(static_cast<QHostAddress>(ipAddress), port))
     {
-        QMessageBox::critical(0, tr("Server error"), tr("Unable to start server") +": " + errorString());
+        QMessageBox::critical(nullptr, tr("Server error"), tr("Unable to start server") +": " + errorString());
         close();
         return;
     }
@@ -36,7 +36,7 @@ void QueleaServer::slotNewConnection()
 
 void QueleaServer::slotReadClient()
 {
-    QTcpSocket* clientSocket = (QTcpSocket*)sender();
+    QTcpSocket* clientSocket = static_cast<QTcpSocket*>(sender());
     Message* incomingMessage = new Message(clientSocket);
     switch(*incomingMessage)
     {

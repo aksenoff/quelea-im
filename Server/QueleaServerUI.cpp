@@ -36,7 +36,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     resize(450, 300);
     useDB = false;
     useLDAP = false;
-    ldath = NULL;
+    ldath = nullptr;
     db = new Database(this);
 
     //Settings reading
@@ -121,7 +121,7 @@ void QueleaServerUI::stopServer()
     connect(startStopButton, SIGNAL(clicked()),
             this, SLOT(startServer()));
     delete server;
-    server = 0;
+    server = nullptr;
     startStopButton->setText(tr("Start"));
     ipBox->setEnabled(populateIpBox()); // true if non-localhost interfaces present
 }
@@ -144,7 +144,7 @@ void QueleaServerUI::startServer()
     else
     {
         delete server;
-        server = 0;
+        server = nullptr;
     }
 }
 
@@ -264,7 +264,7 @@ void QueleaServerUI::showAboutBox()
                                 "<p><strong>" + tr("Developers") + ":</strong><br>" + tr("Alexey Aksenov") + " (aksenoff.a@gmail.com)"
                                 "<br>" + tr("Roman Suhov") + " (romsuhov@gmail.com)<br>" + tr("Alexey Topchiy") + " (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("В©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
+                                + tr("©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
     aboutBox.exec();
 }
 

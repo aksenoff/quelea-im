@@ -65,7 +65,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tabWidget = new ClientTab();
     tabWidget->setTabsClosable(true);
     tabWidget->addTab(chatLog, tr("Public chat"));
-    tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide, 0);
+    tabWidget->getTabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
     connect(tabWidget, SIGNAL(currentChanged(int)),
             this, SLOT(tabChanged(int)));
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),
@@ -123,8 +123,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     setWindowTitle("Quelea");
     setWindowIcon(QIcon("resource.rc"));
     messageInput->setFocus();
-    client = 0;
-    connectionState = 0;
+    client = nullptr;
+    connectionState = nullptr;
 
     tray = new SystemTray(this);
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
@@ -446,8 +446,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                  for (int j = 1; j < contactsList->count() && !(matchFound); j++)
                      if (tabWidget->tabText(i) == contactsList->item(j)->text())
                          matchFound = true;
-                     if(!matchFound)
-                         tabFound = true;
+                 if(!matchFound)
+                     tabFound = true;
             }
             if (tabFound == true)
             {

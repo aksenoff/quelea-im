@@ -173,12 +173,12 @@ bool SettingsDialog::enableSound() const
 
 int SettingsDialog::authType()
 {
-    if (guestRadio->isChecked())
-        return GUEST_AUTH;
     if (dbRadio->isChecked())
         return DB_AUTH;
-    if (ldapRadio->isChecked())
+    else if (ldapRadio->isChecked())
         return LDAP_AUTH;
+    else // (guestRadio->isChecked())
+        return GUEST_AUTH;
 }
 
 // ----------------------------------------------------------------------

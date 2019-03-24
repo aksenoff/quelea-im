@@ -158,9 +158,9 @@ void QueleaClient::sendFile(QString filename)
 
     QByteArray arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_6);
+    out.setVersion(QDataStream::Qt_5_12);
     out << quint64(0) << ba;
     out.device()->seek(0);
-    out << quint64(arrBlock.size() - sizeof(quint64));
+    out << quint64(static_cast<uint>(arrBlock.size()) - sizeof(quint64));
     serverSocket->write(arrBlock);
 }

@@ -62,7 +62,7 @@ void SystemTray::setConnectionActionEnabled(bool enabled)
 
 //---------------------------------------------------------
 
-void SystemTray::closeEvent(QCloseEvent * pe)
+void SystemTray::closeEvent()
 {
     if(trayIcon->isVisible())
     {

@@ -1,5 +1,5 @@
 #include "ldapauth.h"
-#include <ldap.h>
+#include "ldap.h"
 #include <QDebug>
 
 LdapAuth::LdapAuth(QString host, QString domain):host(host),domain(domain)
@@ -64,8 +64,8 @@ int LdapAuth::testConnection(QString h, int p, QString admin, QString pwd)
     struct berval cred;
     QByteArray adn = admin.toLatin1();
     cred.bv_val =  pwd.toLatin1().data();
-    cred.bv_len = pwd.length();
-    if(ldap_sasl_bind_s(ld,adn.data(),NULL,&cred,NULL,NULL,NULL)== LDAP_SUCCESS)
+    cred.bv_len = static_cast<ber_len_t>(pwd.length());
+    if(ldap_sasl_bind_s(ld, adn.data(), nullptr, &cred, nullptr, nullptr, nullptr)== LDAP_SUCCESS)
         return 1;
     else
         return 0;
@@ -84,8 +84,8 @@ bool LdapAuth::authorize(QString uid, QString password)
         QByteArray ba2 = dn.toLatin1();
         struct berval cred;
         cred.bv_val =  password.toLatin1().data();
-        cred.bv_len = password.length();
-        if(ldap_sasl_bind_s(ld,ba2.data(),NULL,&cred,NULL,NULL,NULL) == LDAP_SUCCESS)
+        cred.bv_len = static_cast<ber_len_t>(password.length());
+        if(ldap_sasl_bind_s(ld, ba2.data(), nullptr, &cred, nullptr, nullptr, nullptr) == LDAP_SUCCESS)
             return true;
         return false;
     }
@@ -95,20 +95,20 @@ bool LdapAuth::authorize(QString uid, QString password)
         struct berval cred;
         QByteArray adn = adminDN.toLatin1();
         cred.bv_val =  adminPWD.toLatin1().data();
-        cred.bv_len = adminPWD.length();
-        ldap_sasl_bind_s(ld,adn.data(),NULL,&cred,NULL,NULL,NULL);
+        cred.bv_len = static_cast<ber_len_t>(adminPWD.length());
+        ldap_sasl_bind_s(ld,adn.data(), nullptr, &cred, nullptr, nullptr, nullptr);
 
         QByteArray base = domain.toLatin1();
         QString filter ="(uid="+uid+")";
         QByteArray fi = filter.toLatin1();
-        ldap_search_ext_s(ld, base.data(), LDAP_SCOPE_SUBTREE, fi.data(), NULL, 0, NULL,NULL,NULL,0,&msg);
+        ldap_search_ext_s(ld, base.data(), LDAP_SCOPE_SUBTREE, fi.data(), nullptr, 0, nullptr, nullptr, nullptr, 0, &msg);
         entry = ldap_first_entry(ld, msg);
-        if (entry==NULL)
+        if (entry == nullptr)
             return false;
         char* sdn  = ldap_get_dn(ld,entry);
         cred.bv_val = password.toLatin1().data();
-        cred.bv_len = password.length();
-        if(ldap_sasl_bind_s(ld,sdn,NULL,&cred,NULL,NULL,NULL) == LDAP_SUCCESS)
+        cred.bv_len = static_cast<ber_len_t>(password.length());
+        if(ldap_sasl_bind_s(ld, sdn, nullptr, &cred, nullptr, nullptr, nullptr) == LDAP_SUCCESS)
             return true;
         return false;
     }
