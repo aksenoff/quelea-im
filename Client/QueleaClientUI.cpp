@@ -129,14 +129,8 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tray = new SystemTray(this);
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
 
-
-    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Quelea/settings.dat";
+    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/settings.dat";
     const QString globalSettings = "settings.dat";
-
-    //Creating "data" directory if this does not exist to QStandardPaths::DataLocation will be right on Linux
-    QDir localDataDir(QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.local/share");
-    if (QStandardPaths::writableLocation(QStandardPaths::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
-        localDataDir.mkdir("data");
 
     //Settings:
     if (QFile::exists(localSettings))
@@ -245,11 +239,9 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
         }
     }
 
-    QDir localDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
-    if (!localDir.exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea"))
-        localDir.mkdir("Quelea");
+    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
 
-    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea/settings.dat");
+    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/settings.dat");
     if (localFile.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&localFile);
