@@ -1,9 +1,13 @@
-#include <QApplication>
+#include "application.h"
 #include "QueleaClientUI.h"
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
+    Application app(argc, argv);
+
+    if(!app.lock())
+        return 1;
+
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
     QTranslator translator;

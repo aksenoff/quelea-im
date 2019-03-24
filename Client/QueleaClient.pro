@@ -9,7 +9,8 @@ SOURCES = main.cpp \
     clientTab.cpp \
     ../message.cpp \
     QueleaClientUI.cpp \
-    connectionStateMachine.cpp
+    connectionStateMachine.cpp \
+    application.cpp
 HEADERS = QueleaClient.h \
     settingsDialog.h \
     systemTray.h \
@@ -18,7 +19,8 @@ HEADERS = QueleaClient.h \
     ../message.h \
     QueleaClientUI.h \
     connectionStateMachine.h \
-    versionInfo.h
+    versionInfo.h \
+    application.h
 win32:TARGET = ../QueleaClient
 RC_FILE = resource.rc
 
