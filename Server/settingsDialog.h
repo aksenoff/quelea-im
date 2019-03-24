@@ -1,7 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include "database.h"
 #include "dbeditor.h"
 

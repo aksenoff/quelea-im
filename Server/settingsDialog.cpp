@@ -131,7 +131,7 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
 
 
     // Reading settings to populate the dialog
-    QFile file(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea Server/settings.dat");
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea Server/settings.dat");
     if (file.open(QIODevice::ReadOnly))
     {
         QTextStream stream(&file);
@@ -170,7 +170,7 @@ void SettingsDialog::loadDB()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Open database"),
-                                                    QDesktopServices::storageLocation(QDesktopServices::HomeLocation),
+                                                    QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
                                                     tr("Quelea Database Files (*.qdb)"));
         if (!fileName.isEmpty())
             switch (db->openDB(fileName)) {
@@ -217,7 +217,7 @@ void SettingsDialog::createDB()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Create new database"),
-                                                    QDesktopServices::storageLocation(QDesktopServices::HomeLocation),
+                                                    QStandardPaths::writableLocation(QStandardPaths::HomeLocation),
                                                     tr("Quelea Database Files (*.qdb)"));
     if(db->createDB(fileName)) {
         dbState->setText("<FONT COLOR=GREEN>"+tr("Database created and opened")+"</FONT>");

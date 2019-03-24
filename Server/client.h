@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QtNetwork>
 
 class Client: public QWidget {

@@ -10,6 +10,7 @@ SOURCES = main.cpp \
     ldapauth.cpp
 QT += network
 QT += sql
+QT += widgets
 HEADERS = QueleaServer.h \
     QueleaServerUI.h \
     client.h \

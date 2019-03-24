@@ -42,7 +42,7 @@ int LdapAuth::testConnection(QString h)
 {
     LDAP *ld;
     QString uri = "ldap://"+h+":"+QString::number(389);
-    QByteArray ba1 = uri.toAscii();
+    QByteArray ba1 = uri.toLatin1();
     if (ldap_initialize(&ld,ba1.data())== LDAP_SUCCESS)
         return 1;
     else
@@ -56,14 +56,14 @@ int LdapAuth::testConnection(QString h, int p, QString admin, QString pwd)
     LDAP *ld;
     int desired_version = LDAP_VERSION3;
     QString uri = "ldap://"+h+":"+QString::number(p);
-    QByteArray ba1 = uri.toAscii();
+    QByteArray ba1 = uri.toLatin1();
     if (ldap_initialize(&ld,ba1.data())!= LDAP_SUCCESS)
         return 0;
     ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &desired_version);
 
     struct berval cred;
-    QByteArray adn = admin.toAscii();
-    cred.bv_val =  pwd.toAscii().data();
+    QByteArray adn = admin.toLatin1();
+    cred.bv_val =  pwd.toLatin1().data();
     cred.bv_len = pwd.length();
     if(ldap_sasl_bind_s(ld,adn.data(),NULL,&cred,NULL,NULL,NULL)== LDAP_SUCCESS)
         return 1;
@@ -76,14 +76,14 @@ bool LdapAuth::authorize(QString uid, QString password)
     LDAP *ld;
     int desired_version = LDAP_VERSION3;
     QString uri = "ldap://"+host+":"+QString::number(port);
-    QByteArray ba1 = uri.toAscii();
+    QByteArray ba1 = uri.toLatin1();
     ldap_initialize(&ld,ba1.data());
     ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &desired_version);
     if(ad){
         QString dn = uid+"@"+domain;
-        QByteArray ba2 = dn.toAscii();
+        QByteArray ba2 = dn.toLatin1();
         struct berval cred;
-        cred.bv_val =  password.toAscii().data();
+        cred.bv_val =  password.toLatin1().data();
         cred.bv_len = password.length();
         if(ldap_sasl_bind_s(ld,ba2.data(),NULL,&cred,NULL,NULL,NULL) == LDAP_SUCCESS)
             return true;
@@ -93,20 +93,20 @@ bool LdapAuth::authorize(QString uid, QString password)
         LDAPMessage* msg;
         LDAPMessage* entry;
         struct berval cred;
-        QByteArray adn = adminDN.toAscii();
-        cred.bv_val =  adminPWD.toAscii().data();
+        QByteArray adn = adminDN.toLatin1();
+        cred.bv_val =  adminPWD.toLatin1().data();
         cred.bv_len = adminPWD.length();
         ldap_sasl_bind_s(ld,adn.data(),NULL,&cred,NULL,NULL,NULL);
 
-        QByteArray base = domain.toAscii();
+        QByteArray base = domain.toLatin1();
         QString filter ="(uid="+uid+")";
-        QByteArray fi = filter.toAscii();
+        QByteArray fi = filter.toLatin1();
         ldap_search_ext_s(ld, base.data(), LDAP_SCOPE_SUBTREE, fi.data(), NULL, 0, NULL,NULL,NULL,0,&msg);
         entry = ldap_first_entry(ld, msg);
         if (entry==NULL)
             return false;
         char* sdn  = ldap_get_dn(ld,entry);
-        cred.bv_val = password.toAscii().data();
+        cred.bv_val = password.toLatin1().data();
         cred.bv_len = password.length();
         if(ldap_sasl_bind_s(ld,sdn,NULL,&cred,NULL,NULL,NULL) == LDAP_SUCCESS)
             return true;

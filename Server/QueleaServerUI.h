@@ -1,7 +1,7 @@
 #ifndef QUELEASERVERUI_H
 #define QUELEASERVERUI_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include "QueleaServer.h"
 #include "database.h"
 #include "ldapauth.h"

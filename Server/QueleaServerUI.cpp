@@ -40,12 +40,12 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     db = new Database(this);
 
     //Settings reading
-    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + "/Quelea Server/settings.dat";
+    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Quelea Server/settings.dat";
     const QString globalSettings = "settings.dat";
 
-    //Creating "data" directory if this does not exist to QDesktopServices::DataLocation will be right on Linux
-    QDir localDataDir(QDesktopServices::storageLocation(QDesktopServices::HomeLocation) + "/.local/share");
-    if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
+    //Creating "data" directory if this does not exist to QStandardPaths::DataLocation will be right on Linux
+    QDir localDataDir(QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.local/share");
+    if (QStandardPaths::writableLocation(QStandardPaths::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
     if (QFile::exists(localSettings))
@@ -69,7 +69,7 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
             ldath = new LdapAuth(ldapHost,ldapPort,ldapDomain,ldapAdmin,ldapAdminPw);
     }
 
-       // сделать создание при настройке!
+       // СЃРґРµР»Р°С‚СЊ СЃРѕР·РґР°РЅРёРµ РїСЂРё РЅР°СЃС‚СЂРѕР№РєРµ!
 
 
 
@@ -198,11 +198,11 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
         }
     }
 
-    QDir localDir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-    if (!localDir.exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea"))
+    QDir localDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+    if (!localDir.exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea"))
         localDir.mkdir("Quelea Server");
 
-    QFile localFile(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea Server/settings.dat");
+    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea Server/settings.dat");
     if (localFile.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&localFile);
@@ -264,7 +264,7 @@ void QueleaServerUI::showAboutBox()
                                 "<p><strong>" + tr("Developers") + ":</strong><br>" + tr("Alexey Aksenov") + " (aksenoff.a@gmail.com)"
                                 "<br>" + tr("Roman Suhov") + " (romsuhov@gmail.com)<br>" + tr("Alexey Topchiy") + " (alextopchiy@gmail.com)</p>"
                                 + "<p><a href=http://quelea-im.googlecode.com>http://quelea-im.googlecode.com<a></p>"
-                                + tr("В©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
+                                + tr("Р’В©") + " " + tr("Developers of") + " Quelea, " + COPYRIGHT_YEAR);
     aboutBox.exec();
 }
 

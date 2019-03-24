@@ -1,7 +1,7 @@
 #ifndef DBEDITOR_H
 #define DBEDITOR_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include "database.h"
 
 class DBEditor : public QDialog {
