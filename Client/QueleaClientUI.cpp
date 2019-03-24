@@ -130,12 +130,12 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
 
 
-    const QString localSettings = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + "/Quelea/settings.dat";
+    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Quelea/settings.dat";
     const QString globalSettings = "settings.dat";
 
-    //Creating "data" directory if this does not exist to QDesktopServices::DataLocation will be right on Linux
-    QDir localDataDir(QDesktopServices::storageLocation(QDesktopServices::HomeLocation) + "/.local/share");
-    if (QDesktopServices::storageLocation(QDesktopServices::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
+    //Creating "data" directory if this does not exist to QStandardPaths::DataLocation will be right on Linux
+    QDir localDataDir(QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.local/share");
+    if (QStandardPaths::writableLocation(QStandardPaths::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
     //Settings:
@@ -245,11 +245,11 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
         }
     }
 
-    QDir localDir(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-    if (!localDir.exists(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea"))
+    QDir localDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+    if (!localDir.exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea"))
         localDir.mkdir("Quelea");
 
-    QFile localFile(QDesktopServices::storageLocation(QDesktopServices::DataLocation)+"/Quelea/settings.dat");
+    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea/settings.dat");
     if (localFile.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&localFile);
@@ -414,7 +414,7 @@ void QueleaClientUI::messageReceived(const QString& receiver)
 
 void QueleaClientUI::playSound(const QString& reason) const
 {
-    if (QSound::isAvailable() && enableSound)
+    if (enableSound)
             QSound::play("sound/"+reason+".wav");
 }
 
@@ -673,7 +673,7 @@ void QueleaClientUI::sendFile()
 {
    QString fn =  QFileDialog::getOpenFileName(this,
                                  tr("Select file for sending"),
-                                 QDesktopServices::storageLocation(QDesktopServices::HomeLocation));
+                                 QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
    QString receiverName = tabWidget->tabText(tabWidget->currentIndex());
    client->sendFileRequest(receiverName, fn);
 }

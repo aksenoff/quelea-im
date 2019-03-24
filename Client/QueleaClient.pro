@@ -1,5 +1,7 @@
 TEMPLATE = app
 QT += network
+QT += widgets
+QT += multimedia
 SOURCES = main.cpp \
     QueleaClient.cpp \
     settingsDialog.cpp \

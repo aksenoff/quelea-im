@@ -1,5 +1,4 @@
 #include <QtNetwork>
-#include <QtGui>
 #include "QueleaClient.h"
 #include "settingsDialog.h"
 #include "../codes.h"

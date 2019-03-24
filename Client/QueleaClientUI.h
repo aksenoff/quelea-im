@@ -1,7 +1,8 @@
 #ifndef QUELEACLIENTUI_H
 #define QUELEACLIENTUI_H
 
-#include <QtGui>
+#include <QtWidgets>
+#include <QtMultimedia>
 #include "QueleaClient.h"
 #include "systemTray.h"
 #include "clientTab.h"
