@@ -1,7 +1,5 @@
 #include <QApplication>
 #include "QueleaClientUI.h"
-#include "singleapplication/src/singleapplication.h"
-#define DEBUG
 
 int main(int argc, char** argv)
 {
@@ -13,17 +11,6 @@ int main(int argc, char** argv)
     app.installTranslator(&translator);
 
     QueleaClientUI clientUI;
-
-    SingleApplication instance("Quelea", &app);
-
-    #ifndef DEBUG
-    if(instance.isRunning())
-        if(instance.sendMessage("!"))
-            return 0;
-    #endif
-
-    QObject::connect(&instance, SIGNAL(messageReceived(const QString&)),
-                     &clientUI, SLOT(slotShow()));
 
     clientUI.show();
     return app.exec();
