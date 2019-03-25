@@ -30,7 +30,7 @@ void QueleaClient::slotReadServer()
     {
     case CONNECTED:
         {
-             ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Connected") + "</FONT>");
+            ui->log("<FONT COLOR=GRAY>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "] " + tr("Connected") + "</FONT>");
             // if we're connected, send an authorization request
             QString authMessage;
             if (authType == GUEST_AUTH)
@@ -158,7 +158,7 @@ void QueleaClient::sendFile(QString filename)
 
     QByteArray arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_12);
+    out.setVersion(QDataStream::Qt_5_2);
     out << quint64(0) << ba;
     out.device()->seek(0);
     out << quint64(static_cast<uint>(arrBlock.size()) - sizeof(quint64));

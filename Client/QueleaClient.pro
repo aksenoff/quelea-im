@@ -26,5 +26,5 @@ RC_FILE = resource.rc
 
 RESOURCES += \
     resources.qrc
-
+CONFIG += c++11
 TRANSLATIONS += translations/QueleaClient_ru.ts
