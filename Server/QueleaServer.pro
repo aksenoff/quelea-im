@@ -27,5 +27,5 @@ RC_FILE = resource.rc
 INCLUDEPATH = include
 RESOURCES += \
     resources.qrc
-
+CONFIG += c++11
 TRANSLATIONS += translations/QueleaServer_ru.ts
