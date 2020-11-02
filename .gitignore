@@ -1,3 +1,7 @@
 build*/
 *.user*
 *.autosave
+*-pre1
+*.exe
+*.dat
+Quelea_Log_File.txt

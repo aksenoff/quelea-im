@@ -1,0 +1,15 @@
+Quelea-im history
+
+----------------------------
+Starting 2020-03-17 04:37:12
+
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:37:20] Disconnected</FONT>
+<FONT COLOR=BLUE>[17 марта 2020 г. 4:37:20]</FONT> <FONT COLOR=RED>Error: The connection was refused</FONT>
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:37:40] Disconnected</FONT>
+<FONT COLOR=BLUE>[17 марта 2020 г. 4:37:40]</FONT> <FONT COLOR=RED>Error: The connection was refused</FONT>
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:40:29] Disconnected</FONT>
+<FONT COLOR=BLUE>[17 марта 2020 г. 4:40:29]</FONT> <FONT COLOR=RED>Error: The connection was refused</FONT>
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:40:41] Connected</FONT>
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:40:41] Authorized</FONT>
+<FONT COLOR=GRAY>[17 марта 2020 г. 4:41:30] Disconnected</FONT>
+<FONT COLOR=BLUE>[17 марта 2020 г. 4:41:30]</FONT> <FONT COLOR=RED>Error: The remote host is closed</FONT>
