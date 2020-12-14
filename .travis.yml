@@ -13,3 +13,6 @@ script:
   - qmake -project
   - qmake QueleaClient.pro
   - make
+
+notifications:
+  email: false

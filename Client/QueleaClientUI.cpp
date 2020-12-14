@@ -234,7 +234,7 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                    << ldapPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
-                   << enableSound << Qt::flush;
+                   << enableSound << flush;
             globalFile.close();
         }
     }
@@ -253,7 +253,7 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                << ldapPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
-               << enableSound << Qt::flush;
+               << enableSound << flush;
         localFile.close();
     }
 }

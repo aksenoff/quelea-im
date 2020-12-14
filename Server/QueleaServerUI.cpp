@@ -193,7 +193,7 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
                    << ldapDomain << '\n'
                    << ldapAdmin << '\n'
                    << ldapAdminPw
-                   << Qt::flush;
+                   << flush;
             globalFile.close();
         }
     }
@@ -215,7 +215,7 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
                << ldapDomain << '\n'
                << ldapAdmin << '\n'
                << ldapAdminPw
-               << Qt::flush;
+               << flush;
         localFile.close();
     }
 }
