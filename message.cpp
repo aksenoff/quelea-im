@@ -17,7 +17,7 @@ Message::Message(unsigned char c, QString s)
 Message::Message(QTcpSocket* clientSocket)
 {
     QDataStream incomingStream(clientSocket);
-    incomingStream.setVersion(QDataStream::Qt_5_2);
+    incomingStream.setVersion(QDataStream::Qt_5_15);
     quint64 fullSize = 0;
     incomingStream >> fullSize;
     while(quint64(clientSocket->bytesAvailable()) < fullSize)
@@ -29,7 +29,7 @@ void Message::send(QTcpSocket* socket) const
 {
     QByteArray arrBlock;
     QDataStream out(&arrBlock, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_2);
+    out.setVersion(QDataStream::Qt_5_15);
     out << quint64(0) << code << text;
     out.device()->seek(0);
     out << quint64(static_cast<uint>(arrBlock.size()) - sizeof(quint64));
