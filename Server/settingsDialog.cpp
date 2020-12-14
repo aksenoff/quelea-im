@@ -131,7 +131,7 @@ SettingsDialog::SettingsDialog(Database* DB, QWidget* pwgt/*= 0*/)
 
 
     // Reading settings to populate the dialog
-    QFile file(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea Server/settings.dat");
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/Quelea Server/settings.dat");
     if (file.open(QIODevice::ReadOnly))
     {
         QTextStream stream(&file);

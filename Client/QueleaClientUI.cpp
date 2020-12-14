@@ -234,7 +234,7 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                    << ldapPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
-                   << enableSound << flush;
+                   << enableSound << Qt::flush;
             globalFile.close();
         }
     }
@@ -253,7 +253,7 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                << ldapPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
-               << enableSound << flush;
+               << enableSound << Qt::flush;
         localFile.close();
     }
 }
@@ -387,7 +387,7 @@ void QueleaClientUI::sendButtonFunction()
         QString receiverName(tabWidget->tabText(tabWidget->currentIndex()));
         QString messageText(messageInput->toPlainText());
         client->sendPrivateMessage(receiverName, messageText);
-        privateChatLog->append("<FONT COLOR=BLUE>[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+        privateChatLog->append("<FONT COLOR=BLUE>[" + QLocale().toString(QDateTime::currentDateTime()) + "]</FONT>" + " "
                                + "<FONT COLOR=GREEN>" + myName + "</FONT>: " + messageText);
         messageInput->clear();
         enableSendButton();
@@ -446,7 +446,8 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 QWidget* widget = tabWidget->widget(i-1);
                 QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                 privateChatLog->setReadOnly(true);
-                privateChatLog->append("<FONT COLOR=GRAY>[" + time.toString(Qt::SystemLocaleLongDate) + "]"+" "
+
+                privateChatLog->append("<FONT COLOR=GRAY>[" +  QLocale().toString(QDateTime::currentDateTime().time()) + "]"+" "
                                        + tabWidget->tabText(i-1) + " " + tr("is offline")+"</FONT>");   // FIX: this does not need to be resent every time contacts list is changed!
             }
 
@@ -466,7 +467,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             if (senderName == myName)
                 fromWhoColor = "DARKVIOLET";
             if (receiverName == "all")
-                chatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>"+ " "
+                chatLog->append("<FONT COLOR=BLUE>[" + QLocale().toString(QDateTime::currentDateTime().time()) + "]</FONT>"+ " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + actualMessage.replace("\n", "<br>"));
             else
@@ -500,7 +501,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     QWidget* widget = tabWidget->widget(i);
                     QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                     privateChatLog->setReadOnly(true);
-                    privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                    privateChatLog->append("<FONT COLOR=BLUE>[" +  QLocale().toString(QDateTime::currentDateTime().time()) + "]</FONT>" + " "
                                            + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                            + actualMessage.replace("\n", "<br>"));
                     break;
@@ -511,7 +512,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 privateChatLog->setReadOnly(true);
                 privateChatLog->document()->setDefaultFont(QFont("Arial",11));
                 tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
-                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                privateChatLog->append("<FONT COLOR=BLUE>[" + QLocale().toString(QDateTime::currentDateTime().time()) + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                        + actualMessage.replace("\n", "<br>"));
             }
@@ -534,7 +535,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                 QWidget* widget = tabWidget->widget(i);
                 QTextEdit* privateChatLog = static_cast<QTextEdit*>(widget);
                 privateChatLog->setReadOnly(true);
-                privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                privateChatLog->append("<FONT COLOR=BLUE>[" +  QLocale().toString(QDateTime::currentDateTime().time()) + "]</FONT>" + " "
                                        + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                        + filename + " "+ filesize + " bytes");
                 showFileButtons(privateChatLog);
@@ -546,7 +547,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
             privateChatLog->setReadOnly(true);
             privateChatLog->document()->setDefaultFont(QFont("Arial",11));
             tabWidget->getTabBar()->setTabTextColor(tabWidget->addTab(privateChatLog, senderName), "Blue");
-            privateChatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+            privateChatLog->append("<FONT COLOR=BLUE>[" +  QLocale().toString(QDateTime::currentDateTime().time()) + "]</FONT>" + " "
                                    + "<FONT COLOR=DARKVIOLET>" + senderName + "</FONT>: "
                                    + filename + " "+ filesize + " bytes");
             showFileButtons(privateChatLog);

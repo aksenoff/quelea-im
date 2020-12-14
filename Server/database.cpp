@@ -67,7 +67,7 @@ bool Database::createDB(QString fileName)
 QString Database::hash(QString password)
 {
     QByteArray array;
-    array.insert(0,password);
+    array.insert(0, password.toUtf8());
     return QString(QCryptographicHash::hash(array, QCryptographicHash::Md5).toBase64());
 }
 

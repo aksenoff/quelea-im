@@ -40,12 +40,12 @@ QueleaServerUI::QueleaServerUI(QWidget* pwgt /*=0*/)
     db = new Database(this);
 
     //Settings reading
-    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Quelea Server/settings.dat";
+    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Quelea Server/settings.dat";
     const QString globalSettings = "settings.dat";
 
     //Creating "data" directory if this does not exist to QStandardPaths::DataLocation will be right on Linux
     QDir localDataDir(QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.local/share");
-    if (QStandardPaths::writableLocation(QStandardPaths::DataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
+    if (QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) == localDataDir.absolutePath() + "/data//" && !localDataDir.exists("data"))
         localDataDir.mkdir("data");
 
     if (QFile::exists(localSettings))
@@ -152,7 +152,7 @@ void QueleaServerUI::startServer()
 
 void QueleaServerUI::log(const QString &event) const
 {
-    serverLog->append("[" + QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate) + "]" + " " + event);
+    serverLog->append("[" + QLocale().toString(QDateTime::currentDateTime()) + "]" + " " + event);
 }
 
 //---------------------------------------------------------
@@ -193,16 +193,16 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
                    << ldapDomain << '\n'
                    << ldapAdmin << '\n'
                    << ldapAdminPw
-                   << flush;
+                   << Qt::flush;
             globalFile.close();
         }
     }
 
-    QDir localDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
-    if (!localDir.exists(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea"))
+    QDir localDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    if (!localDir.exists(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/Quelea"))
         localDir.mkdir("Quelea Server");
 
-    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/Quelea Server/settings.dat");
+    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/Quelea Server/settings.dat");
     if (localFile.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&localFile);
@@ -215,7 +215,7 @@ void QueleaServerUI::writeSettings(bool writeGlobal)
                << ldapDomain << '\n'
                << ldapAdmin << '\n'
                << ldapAdminPw
-               << flush;
+               << Qt::flush;
         localFile.close();
     }
 }
