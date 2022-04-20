@@ -7,6 +7,7 @@
 QueleaClient::QueleaClient(QueleaClientUI* UI)
     : ui(UI)
 {
+    QNetworkProxyFactory::setUseSystemConfiguration(false);
     serverSocket = new QTcpSocket(this);
     connect(serverSocket, SIGNAL(readyRead()),
             this, SLOT(slotReadServer()));
