@@ -62,8 +62,9 @@ void SystemTray::setConnectionActionEnabled(bool enabled)
 
 //---------------------------------------------------------
 
-void SystemTray::closeEvent()
+void SystemTray::closeEvent(QCloseEvent *event)
 {
+    event->accept();
     if(trayIcon->isVisible())
     {
         ui->hide();

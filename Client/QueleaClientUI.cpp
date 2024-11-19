@@ -71,7 +71,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     connect(tabWidget, SIGNAL(tabCloseRequested(int)),
             this, SLOT(closeTab(int)));
 
-    QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_Return), this);
+    QShortcut* sendShortcut = new QShortcut(QKeySequence(Qt::CTRL|Qt::Key_Return), this);
     connect(sendShortcut, SIGNAL(activated()),
             sendButton, SLOT(click()));
     QSpacerItem* spacer1 = new QSpacerItem(100, 0, QSizePolicy::MinimumExpanding);
@@ -129,7 +129,7 @@ QueleaClientUI::QueleaClientUI(QWidget* pwgt)
     tray = new SystemTray(this);
     tray->setConnectionActionEnabled(false); // we don't know if connection settings are present
 
-    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/settings.dat";
+    const QString localSettings = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/settings.dat";
     const QString globalSettings = "settings.dat";
 
     //Settings:
@@ -234,14 +234,15 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                    << ldapPassword << '\n'
                    << serverAddress << '\n'
                    << autoConnect << '\n'
-                   << enableSound << flush;
+                   << enableSound;
+            stream.flush();
             globalFile.close();
         }
     }
 
-    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 
-    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::DataLocation)+"/settings.dat");
+    QFile localFile(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/settings.dat");
     if (localFile.open(QIODevice::WriteOnly))
     {
         QTextStream stream(&localFile);
@@ -253,7 +254,8 @@ void QueleaClientUI::writeSettings(bool writeGlobal)
                << ldapPassword << '\n'
                << serverAddress << '\n'
                << autoConnect << '\n'
-               << enableSound << flush;
+               << enableSound;
+        stream.flush();
         localFile.close();
     }
 }
@@ -406,8 +408,12 @@ void QueleaClientUI::messageReceived(const QString& receiver)
 
 void QueleaClientUI::playSound(const QString& reason) const
 {
+    QSoundEffect soundEffect;
     if (enableSound)
-            QSound::play("sound/"+reason+".wav");
+    {
+        soundEffect.setSource(QUrl::fromLocalFile("sound/" + reason + ".wav"));
+        soundEffect.play();
+    }
 }
 
 //---------------------------------------------------------
@@ -479,7 +485,7 @@ void QueleaClientUI::parseMessage(const Message& incomingMessage)
                     emit newMessage("all");
                     playSound("chat");
                 }
-                chatLog->append("<FONT COLOR=BLUE>[" + time.toString(Qt::SystemLocaleLongDate) + "]</FONT>" + " "
+                chatLog->append("<FONT COLOR=BLUE>[" + QLocale::system().toString(time, QLocale::LongFormat) + "]</FONT>" + " "
                                 + "<FONT COLOR=" + fromWhoColor + ">" + senderName + "</FONT>" + ": "
                                 + "<FONT COLOR=" + toWhoColor + ">[" + receiverName + "]</FONT> "
                                 + actualMessage.replace("\n", "<br>"));

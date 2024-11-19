@@ -3,11 +3,8 @@
 
 #include <QtWidgets>
 #include <QtMultimedia>
-#include "QueleaClient.h"
-#include "systemTray.h"
 #include "clientTab.h"
 #include "../message.h"
-#include "connectionStateMachine.h"
 
 class QueleaClient;
 class SystemTray;

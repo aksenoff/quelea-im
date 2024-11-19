@@ -26,7 +26,7 @@ public:
     void assignMachine(ConnectionStateMachine*);
     void setConnectionActionEnabled(bool);
 protected:
-    virtual void closeEvent();
+    virtual void closeEvent(QCloseEvent *event) override;
 private slots:
     void slotIconActivated(QSystemTrayIcon::ActivationReason);
     void slotShowMessage(const QString&);

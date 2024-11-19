@@ -11,7 +11,8 @@ int main(int argc, char** argv)
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
     QTranslator translator;
-    translator.load("translations/QueleaClient_" + QLocale::system().name());
+    if(!translator.load(QCoreApplication::applicationDirPath() + "/translations/QueleaClient_" + QLocale::system().name()))
+        qWarning() << "Translation file not found for locale:" << QLocale::system().name() << "in" << QCoreApplication::applicationDirPath() + "/translations/";
     app.installTranslator(&translator);
 
     QueleaClientUI clientUI;
