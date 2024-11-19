@@ -13,6 +13,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: install dependencies
       run: sudo apt update && sudo apt install qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-multimedia-dev
+    - name: which qmake
+      run: which qmake
     - name: build Server 
       run: cd Server && qmake -project && qmake QueleaServer.pro && make
     - name: build Client
