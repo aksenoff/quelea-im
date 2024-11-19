@@ -12,9 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: sudo apt update && sudo apt install qt6-base-dev qt6-tools-dev-tools qt6-multimedia-dev
-    - name: set Qt environment
-      run: echo "export PATH=/usr/lib/qt6/bin:$PATH" >> $GITHUB_ENV
+      run: sudo apt update && sudo apt install qt6-base-dev qt6-tools-dev qt6-tools-dev-tools qt6-multimedia-dev
     - name: build Server 
       run: cd Server && qmake -project && qmake QueleaServer.pro && make
     - name: build Client
