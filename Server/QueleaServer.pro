@@ -21,7 +21,7 @@ HEADERS = QueleaServer.h \
     settingsDialog.h \
     dbeditor.h \
     ldapauth.h
-LIBS += -L"$$_PRO_FILE_PWD_/libs/" -lldap
+LIBS += -L"$$_PRO_FILE_PWD_/libs/" -lldap -llber -lssl -lcrypto
 win32:TARGET = ../QueleaServer
 RC_FILE = resource.rc
 INCLUDEPATH = include
